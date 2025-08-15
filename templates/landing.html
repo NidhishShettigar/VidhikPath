@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}VidhikPath - Welcome{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <div class="hammer-animation" id="hammerAnimation">
+        <div class="hammer">
+            <div class="hammer-head"></div>
+            <div class="hammer-handle"></div>
+        </div>
+        <div class="gavel-base"></div>
+    </div>
+    
+    <div class="welcome-content" id="welcomeContent" style="display: none;">
+        <div class="logo-section">
+            <h1 class="app-title">VidhikPath</h1>
+            <p class="app-slogan">न्याय सबके लिए - Justice for All</p>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Hammer animation
+setTimeout(() => {
+    document.getElementById('hammerAnimation').style.display = 'none';
+    document.getElementById('welcomeContent').style.display = 'block';
+}, 3000);
+</script>
+{% endblock %}

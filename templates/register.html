@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - VidhikPath{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join VidhikPath community</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="auth-form" id="registerForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+                <small class="password-hint">Must contain at least 8 characters, one uppercase, one lowercase, and one number</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Account Type</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="user_type" value="user" checked onchange="toggleLawyerFields()">
+                        <span>User</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="user_type" value="lawyer" onchange="toggleLawyerFields()">
+                        <span>Lawyer</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="lawyerFields" style="display: none;">
+                <div class="form-group">
+                    <label for="lawyer_type">Lawyer Type</label>
+                    <select id="lawyer_type" name="lawyer_type">
+                        <option value="">Select Type</option>
+                        <option value="criminal">Criminal Lawyer</option>
+                        <option value="civil">Civil Lawyer</option>
+                        <option value="corporate">Corporate Lawyer</option>
+                        <option value="family">Family Lawyer</option>
+                        <option value="property">Property Lawyer</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="experience">Experience (Years)</label>
+                    <input type="number" id="experience" name="experience" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="City, State">
+                </div>
+                
+                <div class="form-group">
+                    <label for="license_document">License Document</label>
+                    <input type="file" id="license_document" name="license_document" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleLawyerFields() {
+    const lawyerFields = document.getElementById('lawyerFields');
+    const isLawyer = document.querySelector('input[name="user_type"]:checked').value === 'lawyer';
+    lawyerFields.style.display = isLawyer ? 'block' : 'none';
+}
+
+// Password validation
+document.getElementById('password').addEventListener('input', function(e) {
+    const password = e.target.value;
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+    const isValid = regex.test(password);
+    
+    e.target.style.borderColor = isValid ? '#28a745' : '#dc3545';
+});
+</script>
+{% endblock %}

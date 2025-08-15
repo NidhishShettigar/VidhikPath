@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - VidhikPath{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Top Header -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <h1 class="app-name">VidhikPath</h1>
+            <p class="app-slogan">न्याय सबके लिए - Justice for All</p>
+        </div>
+        
+        <div class="header-right">
+            <button class="profile-btn" onclick="openProfile()">
+                <div class="profile-avatar">
+                    {% if user.userprofile.profile_photo %}
+                        <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
+                    {% else %}
+                        <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
+                    {% endif %}
+                </div>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Main Content Area -->
+    <main class="dashboard-main" id="dashboardMain">
+        <!-- Default: Chatbot View -->
+        <div class="feature-content active" id="chatbotContent">
+            <div class="chatbot-container">
+                <div class="chat-header">
+                    <h3>VidhikAI - Legal Assistant</h3>
+                    <div class="language-selector">
+                        <select id="languageSelect">
+                            <option value="english">English</option>
+                            <option value="hindi">हिंदी</option>
+                            <option value="kannada">ಕನ್ನಡ</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <p>Hello! I'm VidhikAI, your legal assistant. How can I help you with legal matters today?</p>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="input-group">
+                        <input type="text" id="chatInput" placeholder="Ask your legal question...">
+                        <button class="voice-btn" id="voiceBtn">🎤</button>
+                        <button class="send-btn" id="sendBtn">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Document Summarizer -->
+        <div class="feature-content" id="summarizerContent">
+            <div class="summarizer-container">
+                <h3>Document Summarizer</h3>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <p>Upload your legal document</p>
+                    <div class="upload-buttons">
+                        <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                        <button class="btn btn-secondary" id="cameraBtn">📷 Camera</button>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                </div>
+                
+                <div class="summary-result" id="summaryResult" style="display: none;">
+                    <h4>Document Summary</h4>
+                    <div class="summary-content" id="summaryContent"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lawyer Connector -->
+        <div class="feature-content" id="lawyerContent">
+            <div class="lawyer-connector-container">
+                <h3>Find Lawyers</h3>
+                
+                <div class="search-section">
+                    <div class="search-inputs">
+                        <input type="text" id="locationInput" placeholder="Enter location...">
+                        <input type="text" id="typeInput" placeholder="Lawyer type (optional)...">
+                    </div>
+                    
+                    <div class="search-actions">
+                        <button class="btn btn-primary" onclick="searchLawyers()">Search</button>
+                        <button class="btn btn-secondary" onclick="useCurrentLocation()">📍 Use Current Location</button>
+                    </div>
+                </div>
+                
+                <div class="lawyers-results" id="lawyersResults">
+                    <!-- Lawyers will be populated here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Public Forum -->
+        <div class="feature-content" id="forumContent">
+            <div class="forum-container">
+                <h3>Public Forum</h3>
+                
+                <div class="create-post-section">
+                    <textarea id="postContent" placeholder="Share your thoughts or legal questions..."></textarea>
+                    <div class="post-actions">
+                        <input type="file" id="postImage" accept="image/*" style="display: none;">
+                        <button class="btn btn-secondary" onclick="document.getElementById('postImage').click()">📷 Add Image</button>
+                        <button class="btn btn-primary" onclick="createPost()">Post</button>
+                    </div>
+                </div>
+                
+                <div class="forum-posts" id="forumPosts">
+                    {% for post in posts %}
+                    <div class="forum-post" data-post-id="{{ post.id }}">
+                        <div class="post-header">
+                            <div class="post-user">{{ post.user.first_name }}</div>
+                            <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
+                        </div>
+                        
+                        <div class="post-content">
+                            <p>{{ post.content }}</p>
+                            {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="Post image" class="post-image">
+                            {% endif %}
+                        </div>
+                        
+                        <div class="post-actions">
+                            <button class="action-btn like-btn" onclick="likePost({{ post.id }})">
+                                👍 <span class="like-count">{{ post.likes.count }}</span>
+                            </button>
+                            <button class="action-btn reply-btn" onclick="toggleReply({{ post.id }})">💬 Reply</button>
+                            <button class="action-btn share-btn" onclick="sharePost({{ post.id }})">📤 Share</button>
+                        </div>
+                        
+                        <div class="reply-section" id="replySection{{ post.id }}" style="display: none;">
+                            <textarea placeholder="Write a reply..." id="replyText{{ post.id }}"></textarea>
+                            <button class="btn btn-sm btn-primary" onclick="submitReply({{ post.id }})">Reply</button>
+                        </div>
+                        
+                        <div class="replies" id="replies{{ post.id }}">
+                            {% for reply in post.replies.all %}
+                            <div class="reply">
+                                <strong>{{ reply.user.first_name }}:</strong> {{ reply.content }}
+                                <small>{{ reply.created_at|date:"M d, H:i" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchFeature('chatbot')" id="chatbotBtn">
+            <div class="nav-icon">🤖</div>
+            <span>VidhikAI</span>
+        </button>
+        
+        <button class="nav-btn" onclick="switchFeature('summarizer')" id="summarizerBtn">
+            <div class="nav-icon">📄</div>
+            <span>Summarizer</span>
+        </button>
+        
+        <button class="nav-btn" onclick="switchFeature('lawyer')" id="lawyerBtn">
+            <div class="nav-icon">⚖️</div>
+            <span>Find Lawyers</span>
+        </button>
+        
+        <button class="nav-btn" onclick="switchFeature('forum')" id="forumBtn">
+            <div class="nav-icon">💬</div>
+            <span>Forum</span>
+        </button>
+    </nav>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal" id="profileModal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Profile Settings</h3>
+            <button class="close-btn" onclick="closeProfile()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="profile-section">
+                <div class="profile-photo-section">
+                    {% if user.userprofile.profile_photo %}
+                        <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile" class="profile-photo">
+                    {% else %}
+                        <div class="profile-photo-placeholder">{{ user.first_name.0|upper }}</div>
+                    {% endif %}
+                    <button class="btn btn-sm btn-secondary">Change Photo</button>
+                </div>
+                
+                <div class="profile-info">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" value="{{ user.first_name }}" id="profileName">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" value="{{ user.username }}" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" value="{{ user.email }}" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h4>Settings</h4>
+                
+                <div class="setting-item">
+                    <label>Theme Mode</label>
+                    <div class="theme-toggle">
+                        <button class="theme-btn active" onclick="setTheme('light')">☀️ Light</button>
+                        <button class="theme-btn" onclick="setTheme('dark')">🌙 Dark</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}
