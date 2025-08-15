@@ -1,36 +1,69 @@
-from django.db import models
-from django.contrib.auth.models import User
+# models.py
+from .db_connection import db
+from datetime import datetime
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    is_lawyer = models.BooleanField(default=False)
-    phone = models.CharField(max_length=15, blank=True)
-    location = models.CharField(max_length=100, blank=True)
-    profile_photo = models.ImageField(upload_to='profiles/', blank=True)
-    
-    # Lawyer specific fields
-    lawyer_type = models.CharField(max_length=50, blank=True)
-    experience = models.IntegerField(null=True, blank=True)
-    license_document = models.FileField(upload_to='licenses/', blank=True)
-    
-    def __str__(self):
-        return f"{self.user.username} - {'Lawyer' if self.is_lawyer else 'User'}"
+# === UserProfile ===
+class UserProfile:
+    collection = db['user_profiles']
 
-class ForumPost(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-    image = models.ImageField(upload_to='forum_images/', blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
-    
-    def __str__(self):
-        return f"{self.user.username} - {self.content[:50]}"
+    @staticmethod
+    def create(username, is_lawyer=False, phone='', location='',
+               lawyer_type='', experience=None, license_document=''):
+        profile = {
+            "username": username,
+            "is_lawyer": is_lawyer,
+            "phone": phone,
+            "location": location,
+            "lawyer_type": lawyer_type,
+            "experience": experience,
+            "license_document": license_document,
+            "created_at": datetime.utcnow()
+        }
+        return UserProfile.collection.insert_one(profile)
 
-class ForumReply(models.Model):
-    post = models.ForeignKey(ForumPost, on_delete=models.CASCADE, related_name='replies')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"Reply by {self.user.username}"
+    @staticmethod
+    def find_by_username(username):
+        return UserProfile.collection.find_one({"username": username})
+
+
+# === ForumPost ===
+class ForumPost:
+    collection = db['forum_posts']
+
+    @staticmethod
+    def create(username, content, image=''):
+        post = {
+            "username": username,
+            "content": content,
+            "image": image,
+            "likes": [],
+            "created_at": datetime.utcnow(),
+            "replies": []
+        }
+        return ForumPost.collection.insert_one(post)
+
+    @staticmethod
+    def like(post_id, username):
+        return ForumPost.collection.update_one(
+            {"_id": post_id},
+            {"$addToSet": {"likes": username}}
+        )
+
+    @staticmethod
+    def add_reply(post_id, reply):
+        return ForumPost.collection.update_one(
+            {"_id": post_id},
+            {"$push": {"replies": reply}}
+        )
+
+
+# === ForumReply ===
+class ForumReply:
+    @staticmethod
+    def create(post_id, username, content):
+        reply = {
+            "username": username,
+            "content": content,
+            "created_at": datetime.utcnow()
+        }
+        return ForumPost.add_reply(post_id, reply)

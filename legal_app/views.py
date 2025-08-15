@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -6,9 +6,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.conf import settings
+from bson import ObjectId
 import json
 import os
 import base64
+from datetime import datetime
 from .models import UserProfile, ForumPost, ForumReply
 
 # Landing page with hammer animation
@@ -49,20 +51,29 @@ def register_page(request):
             first_name=name
         )
         
-        # Create profile
-        profile = UserProfile.objects.create(
-            user=user,
-            is_lawyer=(user_type == 'lawyer')
-        )
+        # Create profile using PyMongo
+        is_lawyer = (user_type == 'lawyer')
+        phone = ''
+        location = request.POST.get('location', '') if is_lawyer else ''
+        lawyer_type = request.POST.get('lawyer_type', '') if is_lawyer else ''
+        experience = int(request.POST.get('experience', 0)) if is_lawyer else None
+        license_document = ''
         
-        # If lawyer, save additional info
-        if user_type == 'lawyer':
-            profile.lawyer_type = request.POST.get('lawyer_type', '')
-            profile.experience = int(request.POST.get('experience', 0))
-            profile.location = request.POST.get('location', '')
-            if 'license_document' in request.FILES:
-                profile.license_document = request.FILES['license_document']
-            profile.save()
+        if is_lawyer and 'license_document' in request.FILES:
+            # Handle file upload for license document
+            file = request.FILES['license_document']
+            file_path = default_storage.save(f'licenses/{file.name}', file)
+            license_document = file_path
+        
+        UserProfile.create(
+            username=user.username,
+            is_lawyer=is_lawyer,
+            phone=phone,
+            location=location,
+            lawyer_type=lawyer_type,
+            experience=experience,
+            license_document=license_document
+        )
         
         login(request, user)
         return redirect('dashboard')
@@ -85,24 +96,45 @@ def document_summarizer(request):
 
 @login_required
 def lawyer_connector(request):
-    lawyers = UserProfile.objects.filter(is_lawyer=True)
+    lawyers = list(UserProfile.collection.find({"is_lawyer": True}))
     return render(request, 'lawyer_connector.html', {'lawyers': lawyers})
 
 @login_required
 def public_forum(request):
-    posts = ForumPost.objects.all().order_by('-created_at')
+    posts = list(ForumPost.collection.find().sort("created_at", -1))
     return render(request, 'forum.html', {'posts': posts})
 
 @login_required
 def user_profile(request):
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    profile = UserProfile.find_by_username(request.user.username)
+    
+    if not profile:
+        # Create profile if it doesn't exist
+        UserProfile.create(username=request.user.username)
+        profile = UserProfile.find_by_username(request.user.username)
     
     if request.method == 'POST':
-        profile.phone = request.POST.get('phone', '')
-        profile.location = request.POST.get('location', '')
+        phone = request.POST.get('phone', '')
+        location = request.POST.get('location', '')
+        profile_photo = ''
+        
         if 'profile_photo' in request.FILES:
-            profile.profile_photo = request.FILES['profile_photo']
-        profile.save()
+            file = request.FILES['profile_photo']
+            file_path = default_storage.save(f'profiles/{file.name}', file)
+            profile_photo = file_path
+        
+        # Update profile using PyMongo
+        update_data = {
+            "phone": phone,
+            "location": location
+        }
+        if profile_photo:
+            update_data["profile_photo"] = profile_photo
+            
+        UserProfile.collection.update_one(
+            {"username": request.user.username},
+            {"$set": update_data}
+        )
         
         # Update user info
         request.user.first_name = request.POST.get('name', '')
@@ -170,23 +202,30 @@ def find_lawyers_api(request):
         lawyer_type = data.get('lawyer_type', '')
         use_current_location = data.get('use_current_location', False)
         
-        lawyers = UserProfile.objects.filter(is_lawyer=True)
+        query = {"is_lawyer": True}
         
         if location:
-            lawyers = lawyers.filter(location__icontains=location)
+            query["location"] = {"$regex": location, "$options": "i"}
         
         if lawyer_type:
-            lawyers = lawyers.filter(lawyer_type__icontains=lawyer_type)
+            query["lawyer_type"] = {"$regex": lawyer_type, "$options": "i"}
+        
+        lawyers = list(UserProfile.collection.find(query))
         
         lawyers_data = []
         for lawyer in lawyers:
-            lawyers_data.append({
-                'name': lawyer.user.first_name,
-                'type': lawyer.lawyer_type,
-                'experience': lawyer.experience,
-                'location': lawyer.location,
-                'email': lawyer.user.email
-            })
+            # Get user info from Django User model
+            try:
+                user = User.objects.get(username=lawyer['username'])
+                lawyers_data.append({
+                    'name': user.first_name,
+                    'type': lawyer.get('lawyer_type', ''),
+                    'experience': lawyer.get('experience', 0),
+                    'location': lawyer.get('location', ''),
+                    'email': user.email
+                })
+            except User.DoesNotExist:
+                continue
         
         return JsonResponse({'lawyers': lawyers_data})
 
@@ -195,20 +234,25 @@ def find_lawyers_api(request):
 def create_post_api(request):
     if request.method == 'POST':
         content = request.POST.get('content', '')
-        image = request.FILES.get('image')
+        image = ''
         
-        post = ForumPost.objects.create(
-            user=request.user,
+        if 'image' in request.FILES:
+            file = request.FILES['image']
+            file_path = default_storage.save(f'forum_images/{file.name}', file)
+            image = file_path
+        
+        result = ForumPost.create(
+            username=request.user.username,
             content=content,
             image=image
         )
         
         return JsonResponse({
-            'id': post.id,
-            'content': post.content,
-            'user': post.user.first_name,
-            'created_at': post.created_at.strftime('%Y-%m-%d %H:%M'),
-            'likes_count': post.likes.count()
+            'id': str(result.inserted_id),
+            'content': content,
+            'user': request.user.first_name,
+            'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M'),
+            'likes_count': 0
         })
 
 @csrf_exempt
@@ -218,19 +262,34 @@ def like_post_api(request):
         data = json.loads(request.body)
         post_id = data.get('post_id')
         
-        post = get_object_or_404(ForumPost, id=post_id)
-        
-        if request.user in post.likes.all():
-            post.likes.remove(request.user)
-            liked = False
-        else:
-            post.likes.add(request.user)
-            liked = True
-        
-        return JsonResponse({
-            'liked': liked,
-            'likes_count': post.likes.count()
-        })
+        try:
+            post = ForumPost.collection.find_one({"_id": ObjectId(post_id)})
+            if not post:
+                return JsonResponse({'error': 'Post not found'}, status=404)
+            
+            likes = post.get('likes', [])
+            
+            if request.user.username in likes:
+                # Remove like
+                ForumPost.collection.update_one(
+                    {"_id": ObjectId(post_id)},
+                    {"$pull": {"likes": request.user.username}}
+                )
+                liked = False
+                likes_count = len(likes) - 1
+            else:
+                # Add like
+                ForumPost.like(ObjectId(post_id), request.user.username)
+                liked = True
+                likes_count = len(likes) + 1
+            
+            return JsonResponse({
+                'liked': liked,
+                'likes_count': likes_count
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': 'Invalid post ID'}, status=400)
 
 @csrf_exempt
 @login_required
@@ -240,16 +299,18 @@ def reply_post_api(request):
         post_id = data.get('post_id')
         content = data.get('content')
         
-        post = get_object_or_404(ForumPost, id=post_id)
-        reply = ForumReply.objects.create(
-            post=post,
-            user=request.user,
-            content=content
-        )
-        
-        return JsonResponse({
-            'id': reply.id,
-            'content': reply.content,
-            'user': reply.user.first_name,
-            'created_at': reply.created_at.strftime('%Y-%m-%d %H:%M')
-        })
+        try:
+            post = ForumPost.collection.find_one({"_id": ObjectId(post_id)})
+            if not post:
+                return JsonResponse({'error': 'Post not found'}, status=404)
+            
+            ForumReply.create(ObjectId(post_id), request.user.username, content)
+            
+            return JsonResponse({
+                'content': content,
+                'user': request.user.first_name,
+                'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': 'Invalid post ID'}, status=400)
