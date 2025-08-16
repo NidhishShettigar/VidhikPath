@@ -1,0 +1,161 @@
+/* ===== Global ===== */
+body {
+    margin: 0;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background-color: white; /* parchment background */
+    color: #2C2C2C;
+}
+
+/* ===== Forum Container ===== */
+.forum-container {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #fff;
+    border: 2px solid #B96902; /* Brown-Orange */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(185, 105, 2, 0.2);
+}
+
+.forum-container h3 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    color: #B96902;
+    border-bottom: 2px solid #F4E2CC;
+    padding-bottom: 8px;
+}
+
+/* ===== Create Post Section ===== */
+.create-post-section {
+    margin-bottom: 20px;
+}
+
+.create-post-section textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #B96902;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    background: #FAF6F1;
+    resize: vertical;
+}
+
+.post-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+/* ===== Forum Posts ===== */
+.forum-post {
+    background: #FAF6F1;
+    border: 1px solid #E2C9A6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(185, 105, 2, 0.1);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #6B4C36;
+    font-weight: bold;
+}
+
+.post-content p {
+    margin: 0 0 10px 0;
+    line-height: 1.5;
+}
+
+.post-image {
+    max-width: 100%;
+    border-radius: 6px;
+    margin-top: 8px;
+    border: 2px solid #E2C9A6;
+}
+
+/* ===== Post Actions ===== */
+.action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    color: #B96902;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.action-btn:hover {
+    color: #8a4b01;
+}
+
+/* ===== Reply Section ===== */
+.reply-section {
+    margin-top: 10px;
+}
+
+.reply-section textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #B96902;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: #fff;
+    margin-bottom: 5px;
+}
+
+/* ===== Replies ===== */
+.replies {
+    margin-top: 12px;
+    padding-left: 12px;
+    border-left: 2px solid #E2C9A6;
+}
+
+.reply {
+    background: #fff;
+    border: 1px solid #E2C9A6;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+.reply strong {
+    color: #B96902;
+}
+
+/* ===== Buttons (reuse base theme) ===== */
+.btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.btn-primary {
+    background: #B96902;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #8a4b01;
+}
+
+.btn-secondary {
+    background: #F4E2CC;
+    border: 1px solid #B96902;
+    color: #111;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+}

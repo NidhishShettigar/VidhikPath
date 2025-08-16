@@ -1,0 +1,161 @@
+/* register.css */
+
+/* Body styling */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: white; 
+    color: #fff; /* White text */
+    margin: 0;
+    padding: 0;
+}
+
+/* Center the auth container */
+.auth-container {
+    margin-top: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height:flex;
+}
+
+/* Card styling */
+.auth-card {
+    background-color: #111; /* Dark black card */
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    width: 600px;
+}
+
+/* Header styling */
+.auth-header h2 {
+    margin: 0;
+    font-size: 28px;
+    text-align: center;
+    color: #fff;
+}
+
+.auth-header p {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* Form styling */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #fff;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background-color: #222;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #fff;
+}
+
+/* Password hint */
+.password-hint {
+    font-size: 12px;
+    color: #ccc;
+    margin-top: 4px;
+}
+
+/* Radio buttons styling */
+.radio-group {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+    margin-right: 6px;
+}
+
+/* Button styling */
+.btn {
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #fff;
+    color: #000;
+}
+
+.btn-primary:hover {
+    background-color: #ccc;
+}
+
+.btn-full {
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Footer styling */
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.auth-footer a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.auth-footer a:hover {
+    color: #ccc;
+}
+
+/* File input customization */
+input[type="file"] {
+    padding: 6px;
+    background-color: #222;
+    border: 1px solid #555;
+    border-radius: 6px;
+    color: #fff;
+}
+
+/* Number input customization */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

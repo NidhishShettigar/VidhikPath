@@ -1,0 +1,127 @@
+/* login.css */
+
+/* General body styling */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: white; /* Black background */
+    color: #fff; /* White text */
+    margin: 0;
+    padding: 0;
+}
+
+/* Center the auth container */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full screen height */
+}
+
+/* Card styling */
+.auth-card {
+    background-color: #111; /* Dark black card */
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    width: 600px;
+}
+
+/* Header styling */
+.auth-header h2 {
+    margin: 0;
+    font-size: 28px;
+    text-align: center;
+    color: #fff;
+}
+
+.auth-header p {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* Error message styling */
+.error-message {
+    background-color: #ff4d4d; /* Red background */
+    color: #fff;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    text-align: center;
+}
+
+/* Form styling */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #fff;
+}
+
+.form-group input {
+    padding: 10px;
+    border: 1px solid #555; /* Grayish border */
+    border-radius: 6px;
+    background-color: #222; /* Dark input background */
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #fff; /* White border on focus */
+}
+
+/* Button styling */
+.btn {
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #fff;
+    color: #000;
+}
+
+.btn-primary:hover {
+    background-color: #ccc;
+}
+
+/* Full width button */
+.btn-full {
+    width: 100%;
+}
+
+/* Footer styling */
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.auth-footer a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.auth-footer a:hover {
+    color: #ccc;
+}

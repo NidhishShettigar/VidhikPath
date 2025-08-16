@@ -1,0 +1,125 @@
+/* landing.css */
+
+/* Landing container full screen */
+.landing-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #000; /* Black background */
+    color: #fff; /* White text */
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Hammer animation container */
+.hammer-animation {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Hammer styling */
+.hammer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: hammer-move 0.9s ease-in-out infinite;
+}
+
+/* Hammer head */
+.hammer-head {
+    width: 60px;
+    height: 20px;
+    background-color: #B96902;
+    border-radius: 4px;
+}
+
+/* Hammer handle */
+.hammer-handle {
+    width: 10px;
+    height: 80px;
+    background-color: #B96902;
+    margin-top: 4px;
+    border-radius: 3px;
+}
+
+/* Gavel base */
+.gavel-base {
+    width: 100px;
+    height: 10px;
+    background-color: #B96902;
+    margin-top: 20px;
+    border-radius: 4px;
+}
+
+/* Hammer animation keyframes */
+@keyframes hammer-move {
+    0%   { transform: rotate(-50deg); }   /* starting point */
+    100% { transform: rotate(-120deg); }  /* end point */
+}
+
+
+/* Welcome content */
+.welcome-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Logo section */
+.logo-section {
+    margin-bottom: 30px;
+}
+
+.app-title {
+    font-size: 48px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.app-slogan {
+    font-size: 18px;
+    color: #ccc;
+    margin-top: 8px;
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 20px;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #fff;
+    color: #000;
+}
+
+.btn-primary:hover {
+    background-color: #ccc;
+    color: #000;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #fff;
+    color: #000;
+}

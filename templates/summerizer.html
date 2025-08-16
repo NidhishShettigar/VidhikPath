@@ -1,0 +1,27 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+
+
+{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/summerizer.css' %}">{% endblock %}
+{% block extra %}
+<!-- Document Summarizer -->
+        <div class="feature-content" id="summarizerContent">
+            <div class="summarizer-container">
+                <h3>Document Summarizer</h3>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <p>Upload your legal document</p>
+                    <div class="upload-buttons">
+                        <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                        <button class="btn btn-secondary" id="cameraBtn">📷 Camera</button>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+                </div>
+                
+                <div class="summary-result" id="summaryResult" style="display: none;">
+                    <h4>Document Summary</h4>
+                    <div class="summary-content" id="summaryContent"></div>
+                </div>
+            </div>
+        </div>
+{% endblock %}

@@ -92,12 +92,12 @@ def chatbot(request):
 
 @login_required
 def document_summarizer(request):
-    return render(request, 'document_summarizer.html')
+    return render(request, 'summerizer.html')
 
 @login_required
 def lawyer_connector(request):
     lawyers = list(UserProfile.collection.find({"is_lawyer": True}))
-    return render(request, 'lawyer_connector.html', {'lawyers': lawyers})
+    return render(request, 'connector.html', {'lawyers': lawyers})
 
 @login_required
 def public_forum(request):

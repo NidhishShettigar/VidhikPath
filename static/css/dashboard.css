@@ -1,0 +1,243 @@
+/* ===========================
+   GLOBAL
+   =========================== */
+body {
+    font-family: Arial, sans-serif;
+    background: #fff;
+    color: #000;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===========================
+   HEADER
+   =========================== */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #000;
+    color: #fff;
+    padding: 15px 20px;
+}
+
+.dashboard-header .app-name {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.dashboard-header .app-slogan {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #ccc;
+}
+
+.profile-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.profile-avatar img,
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    background: #000;
+    color: #fff;
+}
+
+/* ===========================
+   FOOTER / BOTTOM NAVIGATION
+   =========================== */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    background: #000;
+    border-top: 1px solid #333;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-btn .nav-icon {
+    font-size: 1.2rem;
+    margin-bottom: 3px;
+}
+
+.nav-btn.active {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* ===========================
+   PROFILE MODAL
+   =========================== */
+.modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    display: none;        /* keep hidden until JS triggers */
+}
+
+.modal.show {
+    display: flex;        /* JS adds 'show' class to make it visible */
+}
+
+.modal-content {
+    background: #fff;
+    color: #000;
+    width: 420px;
+    max-width: 90%;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-header {
+    padding: 15px;
+    border-bottom: 1px solid #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #000;
+    color: #fff;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto; /* scroll if content too tall */
+}
+
+.profile-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid #000;
+    object-fit: cover;
+}
+
+.profile-photo-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #000;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.profile-info label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #444;
+}
+
+.profile-info input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    background: #fff;
+    color: #000;
+}
+
+/* Theme toggle buttons */
+.theme-btn {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #000;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.theme-btn.active {
+    background: #000;
+    color: #fff;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-primary {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #333;
+}
+
+.btn-danger {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background: #f2f2f2;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===========================
+   ADDITIONAL IMPROVEMENTS
+   =========================== */
+.modal .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #fff;
+    cursor: pointer;
+}
+
+.modal .close-btn:hover {
+    color: #ccc;
+}

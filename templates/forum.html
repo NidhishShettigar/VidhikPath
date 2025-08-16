@@ -1,0 +1,63 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+
+{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/forum.css' %}">{% endblock %}
+
+{% block extra %}
+<!-- Public Forum -->
+        
+<div class="feature-content" id="forumContent">
+            <div class="forum-container">
+                <h3>Public Forum</h3>
+                
+                <div class="create-post-section">
+                    <textarea id="postContent" placeholder="Share your thoughts or legal questions..."></textarea>
+                    <div class="post-actions">
+                        <input type="file" id="postImage" accept="image/*" style="display: none;">
+                        <button class="btn btn-secondary" onclick="document.getElementById('postImage').click()">📷 Add Image</button>
+                        <button class="btn btn-primary" onclick="createPost()">Post</button>
+                    </div>
+                </div>
+                
+                <div class="forum-posts" id="forumPosts">
+                    {% for post in posts %}
+                    <div class="forum-post" data-post-id="{{ post.id }}">
+                        <div class="post-header">
+                            <div class="post-user">{{ post.user.first_name }}</div>
+                            <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
+                        </div>
+                        
+                        <div class="post-content">
+                            <p>{{ post.content }}</p>
+                            {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="Post image" class="post-image">
+                            {% endif %}
+                        </div>
+                        
+                        <div class="post-actions">
+                            <button class="action-btn like-btn" onclick="likePost({{ post.id }})">
+                                👍 <span class="like-count">{{ post.likes.count }}</span>
+                            </button>
+                            <button class="action-btn reply-btn" onclick="toggleReply({{ post.id }})">💬 Reply</button>
+                            <button class="action-btn share-btn" onclick="sharePost({{ post.id }})">📤 Share</button>
+                        </div>
+                        
+                        <div class="reply-section" id="replySection{{ post.id }}" style="display: none;">
+                            <textarea placeholder="Write a reply..." id="replyText{{ post.id }}"></textarea>
+                            <button class="btn btn-sm btn-primary" onclick="submitReply({{ post.id }})">Reply</button>
+                        </div>
+                        
+                        <div class="replies" id="replies{{ post.id }}">
+                            {% for reply in post.replies.all %}
+                            <div class="reply">
+                                <strong>{{ reply.user.first_name }}:</strong> {{ reply.content }}
+                                <small>{{ reply.created_at|date:"M d, H:i" }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+{% endblock %}
