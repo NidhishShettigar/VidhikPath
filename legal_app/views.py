@@ -28,7 +28,7 @@ def login_page(request):
             user = authenticate(request, username=user.username, password=password)
             if user:
                 login(request, user)
-                return redirect('dashboard')
+                return redirect('chatbot')
             else:
                 return render(request, 'login.html', {'error': 'Invalid credentials'})
         except User.DoesNotExist:

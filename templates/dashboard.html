@@ -14,7 +14,7 @@
         </div>
         
         <div class="header-right">
-            <button class="profile-btn" onclick="openProfile()">
+            <a class="profile-btn" href="{% url 'profile' %}" >
                 <div class="profile-avatar">
                     {% if user.userprofile.profile_photo %}
                         <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
@@ -22,7 +22,7 @@
                         <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
                     {% endif %}
                 </div>
-            </button>
+            </a>
         </div>
     </header>
     
@@ -33,26 +33,27 @@
     
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="switchFeature('chatbot')" id="chatbotBtn">
+        <a class="nav-btn active" href="{% url 'chatbot' %}" id="chatbotBtn">
             <div class="nav-icon">🤖</div>
             <span>VidhikAI</span>
-        </button>
+        </a>
         
-        <button class="nav-btn" onclick="switchFeature('summarizer')" id="summarizerBtn">
+        <a class="nav-btn" href="{% url 'summerizer' %}" id="summarizerBtn">
             <div class="nav-icon">📄</div>
             <span>Summarizer</span>
-        </button>
+        </a>
         
-        <button class="nav-btn" onclick="switchFeature('lawyer')" id="lawyerBtn">
+        <a class="nav-btn" href="{% url 'connector' %}" id="lawyerBtn">
             <div class="nav-icon">⚖️</div>
             <span>Find Lawyers</span>
-        </button>
+        </a>
         
-        <button class="nav-btn" onclick="switchFeature('forum')" id="forumBtn">
+        <a class="nav-btn" href="{% url 'forum' %}" id="forumBtn">
             <div class="nav-icon">💬</div>
             <span>Forum</span>
-        </button>
+        </a>
     </nav>
+
 </div>
 
 <script src="/static/js/dashboard.js"></script>
