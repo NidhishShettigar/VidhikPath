@@ -1,196 +1,270 @@
 /* ===========================
-   GLOBAL BOX-SIZING
-   =========================== */
+   GLOBAL RESET & VARIABLES
+   ============================ */
 *,
 *::before,
 *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #ffffff;      /* background white */
+  --color-text: #000000;    /* primary text */
+  --color-accent: #000000;  /* accent (borders, buttons) */
+  --color-muted: #444444;   /* secondary text */
+  --overlay: rgba(0,0,0,0.6);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --shadow-lg: 0 6px 20px rgba(0,0,0,0.35);
+
+  --transition: 0.2s ease-in-out;
+  --font-main: 'Georgia', 'Times New Roman', serif;
 }
 
 /* ===========================
-   PROFILE MODAL
-   =========================== */
+   MODAL WRAPPER
+   ============================ */
+
+
+
 .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    font-family: Arial, sans-serif;
-    padding: 10px;
-    overflow-x: hidden;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--overlay);
+  padding: 20px;
+  z-index: 1000;
+  font-family: var(--font-main);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal-content {
-    background: #fff;
-    color: #000;
-    width: 100%;
-    max-width: 480px;
-    border-radius: 14px;
-    border: 3px solid #000;
-    padding: 20px 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  background: var(--color-bg);
+  color: var(--color-text);
+  width: 100%;
+  max-width: 520px;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.3s ease-out;
 }
 
 /* ===========================
-   MODAL BODY
-   =========================== */
+   HEADER
+   ============================ */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.modal-header h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.close-btn:hover {
+  transform: rotate(90deg);
+}
+
+/* ===========================
+   BODY
+   ============================ */
 .modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+}
+
+.profile-section {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 /* ===========================
-   PROFILE SECTION
-   =========================== */
-.profile-section {
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-}
-
+   PROFILE PHOTO
+   ============================ */
 .profile-photo-section {
-    flex-shrink: 0;
-    text-align: center;
+  flex-shrink: 0;
+  text-align: center;
 }
 
 .profile-photo,
 .profile-photo-placeholder {
-    width: 75px;
-    height: 75px;
-    border-radius: 50%;
-    border: 2px solid #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.5rem;
-    font-weight: bold;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  overflow: hidden;
 }
 
 .profile-photo-placeholder {
-    background: #000;
-    color: #fff;
+  background: var(--color-accent);
+  color: var(--color-bg);
 }
 
+.profile-photo-section .btn {
+  margin-top: 8px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.profile-photo-section .btn:hover {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* ===========================
+   PROFILE INFO
+   ============================ */
 .profile-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.profile-info label {
-    font-weight: bold;
-    font-size: 0.95rem;
-    color: #000;
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
 }
 
-.profile-info input {
-    width: 100%;
-    padding: 7px 12px;
-    border: 1.5px solid #000;
-    border-radius: 6px;
-    background: #fff;
-    color: #000;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
+.form-group input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  transition: border var(--transition), box-shadow var(--transition);
 }
 
-.profile-info input:focus {
-    outline: none;
-    border-color: #444;
+.form-group input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
 }
 
 /* ===========================
    SETTINGS SECTION
-   =========================== */
+   ============================ */
 .settings-section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border-top: 1.5px solid #000;
-    padding-top: 10px;
+  border-top: 2px solid var(--color-accent);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .settings-section h4 {
-    font-weight: bold;
-    font-size: 1rem;
-    color: #000;
-    margin-bottom: 4px;
+  font-size: 1rem;
+  font-weight: bold;
 }
 
 .setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
+/* Theme Toggle Buttons */
 .theme-toggle button {
-    padding: 6px 12px;
-    border: 1.5px solid #000;
-    border-radius: 6px;
-    background: #fff;
-    color: #000;
-    font-weight: 600;
-    cursor: pointer;
-    margin-left: 5px;
-    transition: all 0.2s;
+  padding: 6px 12px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 0.85rem;
 }
 
 .theme-toggle button:hover,
 .theme-toggle .active {
-    background: #000;
-    color: #fff;
+  background: var(--color-accent);
+  color: var(--color-bg);
 }
 
 /* ===========================
-   MODAL ACTIONS
-   =========================== */
+   FOOTER ACTIONS
+   ============================ */
 .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    padding-top: 12px;
-    border-top: 2px solid #000;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 2px solid var(--color-accent);
+  padding: 14px 18px;
 }
 
 .modal-actions .btn {
-    padding: 7px 18px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    border: 2px solid #000;
-    text-transform: uppercase;
-    transition: all 0.2s;
+  padding: 8px 16px;
+  font-weight: bold;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-accent);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all var(--transition);
 }
 
 .modal-actions .btn-primary {
-    background: #000;
-    color: #fff;
+  background: var(--color-accent);
+  color: var(--color-bg);
 }
 
 .modal-actions .btn-primary:hover {
-    background: #fff;
-    color: #000;
-}
-
-.modal-actions .btn-danger {
-    background: #fff;
-    color: #000;
+  background: var(--color-bg);
+  color: var(--color-accent);
 }
 
 .modal-actions .btn-danger:hover {
-    background: #000;
-    color: #fff;
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* ===========================
+   ANIMATIONS
+   ============================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: none; opacity: 1; }
 }

@@ -2,7 +2,7 @@
    GLOBAL
    =========================== */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Georgia', 'Times New Roman', serif;
     background: #fff;
     color: #000;
     margin: 0;
@@ -71,14 +71,21 @@ body {
 }
 
 .nav-btn {
-    background: none;
-    border: none;
+    border: 2px solid transparent;
     color: #fff;
-    font-size: 0.85rem;
-    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-weight: bold;
+    transition: border 0.3s ease;
+}
+
+.nav-btn.active {
+    border: 2px solid white; /* white border stays on current page */
+}
+
+a{
+    text-decoration: none;
 }
 
 .nav-btn .nav-icon {
@@ -86,7 +93,3 @@ body {
     margin-bottom: 3px;
 }
 
-.nav-btn.active {
-    font-weight: bold;
-    text-decoration: underline;
-}

@@ -33,26 +33,30 @@
     
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
-        <a class="nav-btn active" href="{% url 'chatbot' %}" id="chatbotBtn">
+        <a class="nav-btn {% if request.resolver_match.url_name == 'chatbot' %}active{% endif %}" 
+        href="{% url 'chatbot' %}" id="chatbotBtn">
             <div class="nav-icon">🤖</div>
             <span>VidhikAI</span>
         </a>
         
-        <a class="nav-btn" href="{% url 'summerizer' %}" id="summarizerBtn">
+        <a class="nav-btn {% if request.resolver_match.url_name == 'summerizer' %}active{% endif %}" 
+        href="{% url 'summerizer' %}" id="summarizerBtn">
             <div class="nav-icon">📄</div>
             <span>Summarizer</span>
         </a>
         
-        <a class="nav-btn" href="{% url 'connector' %}" id="lawyerBtn">
+        <a class="nav-btn {% if request.resolver_match.url_name == 'connector' %}active{% endif %}" 
+        href="{% url 'connector' %}" id="lawyerBtn">
             <div class="nav-icon">⚖️</div>
             <span>Find Lawyers</span>
         </a>
         
-        <a class="nav-btn" href="{% url 'forum' %}" id="forumBtn">
+        <a class="nav-btn {% if request.resolver_match.url_name == 'forum' %}active{% endif %}" 
+        href="{% url 'forum' %}" id="forumBtn">
             <div class="nav-icon">💬</div>
             <span>Forum</span>
-        </a>
-    </nav>
+    </a>
+</nav>
 
 </div>
 
