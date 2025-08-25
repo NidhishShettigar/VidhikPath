@@ -21,8 +21,13 @@ import torch
 import spacy
 import pickle
 import os
-import google.generativeai as genai
-from google.genai.types import HttpOptions
+# import google.generativeai as genai
+# from google.genai.types import HttpOptions
+import tempfile
+import cv2
+import pytesseract
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
 # Landing page with hammer animation
@@ -200,8 +205,6 @@ def search_faiss(query: str, top_k: int = 3):
     return results
 
 
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
-
 @csrf_exempt
 @login_required
 def chat_api(request):
@@ -254,28 +257,80 @@ def chat_api(request):
 
 
 
+def get_legalbert_embedding(text):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    return outputs.last_hidden_state[:, 0, :].cpu().numpy().flatten()
+
+
+def clean_image(path):
+    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    _, thresh = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    cleaned_path = path.replace(".pdf", "_cleaned.png")
+    cv2.imwrite(cleaned_path, thresh)
+    return cleaned_path
+
+
+def extract_text(image_path):
+    return pytesseract.image_to_string(image_path)
+
+
+def chunk_text(text, max_len=1000):
+    return [text[i:i + max_len] for i in range(0, len(text), max_len)]
+
+
+def summarize_chunk(chunk):
+    prompt = f"Summarize the legal text below:\n\n{chunk}"
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a legal document summarizer."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=500,
+        temperature=0.2
+    )
+    return response.choices[0].message.content
+
+
 @csrf_exempt
 @login_required
 def summarize_api(request):
-    if request.method == 'POST':
-        if 'document' in request.FILES:
-            document = request.FILES['document']
-            
-            # Placeholder for document processing
-            # Here you would implement:
-            # 1. OpenCV image cleaning
-            # 2. Tesseract OCR
-            # 3. Text extraction and chunking
-            # 4. GPT-4o summarization
-            
-            summary = f"Document Summary: This document contains legal information that has been processed and summarized for easy understanding."
-            
-            return JsonResponse({
-                'summary': summary,
-                'status': 'success'
-            })
-        
-        return JsonResponse({'error': 'No document provided'}, status=400)
+    if request.method == 'POST' and 'document' in request.FILES:
+        document = request.FILES['document']
+
+        # Write uploaded file to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+            for chunk in document.chunks():
+                tmp_file.write(chunk)
+            temp_path = tmp_file.name
+
+        # Convert PDF page(s) to images if needed here (not included)
+        # For demo assume uploaded file is image or convert externally
+
+        # Clean image for better OCR
+        cleaned_path = clean_image(temp_path)
+
+        # Extract text via OCR
+        raw_text = extract_text(cleaned_path)
+
+        # Chunk the text for summarization
+        chunks = chunk_text(raw_text)
+
+        # Summarize each chunk through GPT-4o API
+        summaries = [summarize_chunk(chunk) for chunk in chunks]
+
+        # Combine summaries into final summary
+        final_summary = "\n\n".join(summaries)
+
+        return JsonResponse({'summary': final_summary, 'status': 'success'})
+
+    return JsonResponse({'error': 'No document provided'}, status=400)
+
+
+
+
 
 @csrf_exempt
 @login_required
