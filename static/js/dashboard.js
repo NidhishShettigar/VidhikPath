@@ -144,7 +144,7 @@ function toggleVoiceRecording() {
 
   if (isRecording) {
     recognition.stop()
-    voiceBtn.textContent = "🎤"
+    voiceBtn.textContent = "🎙️"
     voiceBtn.style.backgroundColor = "var(--secondary-color)"
     isRecording = false
   } else {

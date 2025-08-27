@@ -21,18 +21,12 @@ import torch
 import spacy
 import pickle
 import os
+import re
+# import google.generativeai as genai
 # from google.genai.types import HttpOptions
 import tempfile
 import cv2
 import pytesseract
-import os
-import cv2
-import tempfile
-import pdfplumber
-from pdf2image import convert_from_path
-import google.generativeai as genai
-
-
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
@@ -174,9 +168,6 @@ def logout_view(request):
 with open("legal_app\prompts\system_prompt.txt", "r", encoding="utf-8") as f:
     system_prompt = f.read()
 
-# Load keywords from file once at startup
-with open("legal_app\prompts\legal_keywords.txt", "r", encoding="utf-8") as f:
-    LEGAL_KEYWORDS = [line.strip().lower() for line in f if line.strip()]
 import google.generativeai as genai
 
 # Configure Gemini API key (best: from Django settings or environment variable)
@@ -200,227 +191,299 @@ with open("ipc_id_mapping.json", "r", encoding="utf-8") as f:
 
 def get_embedding(text: str):
     """Generate LegalBERT embeddings for text"""
-    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
-    with torch.no_grad():
-        outputs = model(**inputs)
-    # Use [CLS] token embedding
-    embedding = outputs.last_hidden_state[:, 0, :].numpy()
-    return embedding
+    try:
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True, max_length=512)
+        with torch.no_grad():
+            outputs = model(**inputs)
+        # Use [CLS] token embedding
+        embedding = outputs.last_hidden_state[:, 0, :].numpy()
+        return embedding
+    except Exception as e:
+        print(f"Error generating embedding: {e}")
+        return None
 
-def search_faiss(query: str, top_k: int = 3):
+
+def search_faiss(query: str, top_k: int = 5):  # Increased to 5 for better context
     """Search FAISS index for top_k IPC sections"""
-    query_vec = get_embedding(query).reshape(1, -1)
-    distances, indices = index.search(query_vec, top_k)
-    results = []
-    for idx in indices[0]:
-        if idx != -1 and idx < len(id_mapping):  # valid index
-            doc_id = id_mapping[idx]
-            doc = ipc_collection.find_one({"_id": ObjectId(doc_id)})
-            if doc:
-                results.append({
-                    "Section": doc.get("Section"),
-                    "section_title": doc.get("section_title"),
-                    "section_desc": doc.get("section_desc"),
-                })
-    return results
-
+    try:
+        query_vec = get_embedding(query)
+        if query_vec is None:
+            return []
+        
+        query_vec = query_vec.reshape(1, -1)
+        distances, indices = index.search(query_vec, top_k)
+        
+        results = []
+        seen_sections = set()  # Avoid duplicate sections
+        
+        for idx, distance in zip(indices[0], distances[0]):
+            if idx != -1 and idx < len(id_mapping):
+                doc_id = id_mapping[idx]
+                doc = ipc_collection.find_one({"_id": ObjectId(doc_id)})
+                
+                if doc and doc.get("Section") not in seen_sections:
+                    seen_sections.add(doc.get("Section"))
+                    results.append({
+                        "Section": doc.get("Section"),
+                        "section_title": doc.get("section_title"),
+                        "section_desc": doc.get("section_desc"),
+                        "relevance_score": float(distance)  # Include similarity score
+                    })
+        
+        return results
+    except Exception as e:
+        print(f"Error in FAISS search: {e}")
+        return []
+    
+    
 LEGAL_KEYWORDS = [
     "ipc", "section", "act", "law", "rights", "punishment", "bail", "crime", 
     "offence", "offense", "arrest", "case", "legal", "court", "judge", 
     "criminal", "civil", "constitution", "advocate", "lawyer", "police",
     "complaint", "fir", "chargesheet", "evidence", "witness", "trial",
-    "sentence", "fine", "imprisonment", "appeal", "petition", "writ","commite"
+    "sentence", "fine", "imprisonment", "appeal", "petition", "writ"
 ]
 
 def is_legal_query(text: str) -> bool:
-    """Check if the query looks legal-related."""
+    """Enhanced legal query detection"""
     text_lower = text.lower()
-    return any(word in text_lower for word in LEGAL_KEYWORDS)
+    
+    # Check for legal keywords
+    keyword_matches = sum(1 for word in LEGAL_KEYWORDS if word in text_lower)
+    
+    # Check for legal patterns
+    legal_patterns = [
+        r'\bipc\s+\d+', r'section\s+\d+', r'article\s+\d+',
+        r'criminal\s+law', r'civil\s+law', r'legal\s+advice',
+        r'court\s+case', r'file\s+case', r'legal\s+action'
+    ]
+    
+    pattern_matches = sum(1 for pattern in legal_patterns if re.search(pattern, text_lower))
+    
+    # Consider it legal if multiple keywords or patterns match
+    return keyword_matches >= 2 or pattern_matches >= 1 or keyword_matches >= 1 and len(text.split()) <= 5
+
+def preprocess_query(message: str) -> str:
+    """Enhanced query preprocessing"""
+    try:
+        # Basic cleaning
+        message = re.sub(r'[^\w\s]', ' ', message.lower())
+        message = ' '.join(message.split())
+        
+        # NLP processing
+        doc = nlp(message)
+        
+        # Extract meaningful tokens (avoid stopwords, keep legal terms)
+        legal_stopwords = {'what', 'how', 'when', 'where', 'why', 'can', 'should', 'would'}
+        processed_tokens = []
+        
+        for token in doc:
+            if (token.pos_ in ['NOUN', 'VERB', 'ADJ'] or 
+                token.text in LEGAL_KEYWORDS or
+                token.ent_type_ in ['LAW', 'ORG', 'PERSON']):
+                processed_tokens.append(token.lemma_)
+        
+        return ' '.join(processed_tokens) if processed_tokens else message
+    
+    except Exception as e:
+        print(f"Error in preprocessing: {e}")
+        return message.lower()
+
+def format_rag_context(ipc_results: list) -> str:
+    """Format retrieved context for better prompt structure"""
+    if not ipc_results:
+        return "No specific IPC sections found directly relevant to this query."
+    
+    context_parts = []
+    for i, result in enumerate(ipc_results, 1):
+        if isinstance(result, dict):
+            section_info = (
+                f"**IPC Section {result.get('Section', 'N/A')}** - {result.get('section_title', 'No title')}\n"
+                f"Description: {result.get('section_desc', 'No description available')}\n"
+            )
+            context_parts.append(section_info)
+    
+    return "\n".join(context_parts)
 
 
 @csrf_exempt
 @login_required
 def chat_api(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        message = data.get('message', '').strip()
-        language = data.get('language', 'english')
+        try:
+            data = json.loads(request.body)
+            message = data.get('message', '').strip()
+            language = data.get('language', 'english')
 
-        # 👋 Handle small-talk / non-legal queries
-        if not is_legal_query(message):
+            if not message:
+                return JsonResponse({
+                    "response": "Please provide a legal question for assistance.",
+                    "context": [],
+                    "language": language
+                })
+
+            # Enhanced legal query detection
+            if not is_legal_query(message):
+                return JsonResponse({
+                    "response": (
+                        "I specialize in Indian legal matters and criminal law. "
+                        f"Your query '{message}' doesn't appear to be law-related. "
+                        "Please ask about IPC sections, criminal procedures, legal rights, "
+                        "or other Indian legal topics."
+                    ),
+                    "context": [],
+                    "language": language
+                })
+
+            # Enhanced preprocessing
+            processed_message = preprocess_query(message)
+
+            # Retrieve relevant IPC sections
+            ipc_results = search_faiss(processed_message, top_k=5)
+
+            # Format context for better prompt
+            rag_context = format_rag_context(ipc_results)
+
+            # Create structured prompt
+            user_prompt = f"""
+Legal Query: {message}
+
+Relevant Legal Context:
+{rag_context}
+
+Please provide a comprehensive legal analysis addressing this query. Focus on:
+1. Identifying the specific legal issues involved
+2. Explaining relevant IPC sections and legal provisions
+3. Analyzing how the law applies to this situation
+4. Providing practical guidance and next steps
+5. Including appropriate legal disclaimers
+
+Ensure your response is well-structured, professional, and educational in nature.
+"""
+
+            full_prompt = system_prompt + "\n\n" + user_prompt
+
+            # Call Gemini API with improved configuration
+            gemini_model = genai.GenerativeModel(
+                "models/gemini-1.5-flash",
+                generation_config={
+                    "temperature": 0.1,  # Lower for more consistent legal responses
+                    "top_p": 0.85,
+                    "top_k": 40,
+                    "max_output_tokens": 2048,  # Increased for detailed responses
+                    "stop_sequences": ["---END---"]
+                }
+            )
+            
+            response = gemini_model.generate_content(full_prompt)
+            gemini_response = response.text
+
+            # Add standard legal disclaimer if not present
+            if "disclaimer" not in gemini_response.lower():
+                gemini_response += (
+                    "\n\n**Important Legal Disclaimer**: This information is provided for "
+                    "educational purposes only and does not constitute legal advice. "
+                    "Laws and their interpretations can vary based on specific circumstances. "
+                    "For matters involving legal proceedings or specific legal advice, "
+                    "please consult with a qualified legal professional."
+                )
+
             return JsonResponse({
-                "response": f"I’m here to assist with Indian law. Your message ('{message}') does not seem like a legal query.",
-                "context": [],
-                "language": language
+                'response': gemini_response,
+                'context': ipc_results,
+                'language': language,
+                'query_processed': processed_message,
+                'sections_found': len(ipc_results)
             })
 
-        # 1. NLP preprocessing
-        doc = nlp(message.lower())
-        processed_message = " ".join([token.lemma_ for token in doc])
+        except json.JSONDecodeError:
+            return JsonResponse({
+                "error": "Invalid JSON format",
+                "response": "Please ensure your request is properly formatted."
+            }, status=400)
+        
+        except Exception as e:
+            print(f"Error in chat_api: {e}")
+            return JsonResponse({
+                "error": "Internal server error",
+                "response": "I'm experiencing technical difficulties. Please try again."
+            }, status=500)
 
-        # 2 & 3. Embed & Search FAISS
-        ipc_results = search_faiss(processed_message, top_k=3)
-
-        # 4. Prepare RAG context
-        rag_context = "\n".join([
-            f"Section {sec['Section']} ({sec['section_title']}): {sec['section_desc']}"
-            for sec in ipc_results if isinstance(sec, dict)
-        ])
-
-
-        user_input = (
-            f"User Question: {message}\n\n"
-            f"Relevant IPC Context:\n{rag_context if rag_context else 'No relevant IPC context found.'}\n\n"
-            f"Answer in detail with reference to Indian law."
-        )
-
-        gemini_prompt = system_prompt + "\n\nUser Query: " + user_input
-
-        # 6. Call Gemini API
-        gemini_model = genai.GenerativeModel(
-            "models/gemini-1.5-flash",
-            generation_config={
-                "temperature": 0.2,
-                "top_p": 0.8,
-                "top_k": 40,
-                "max_output_tokens": 1024
-            }
-        )
-        response = gemini_model.generate_content(gemini_prompt)
-
-        gemini_response = response.text  
-
-        # 7. Return JSON response
-        return JsonResponse({
-            'response': gemini_response,
-            'context': ipc_results,
-            'language': language
-        })
-
+    return JsonResponse({"error": "Only POST requests allowed"}, status=405)
 
 #document summerizer
 
-# ✅ Initialize Gemini model once
-genai.configure(api_key=settings.GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+def get_legalbert_embedding(text):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    return outputs.last_hidden_state[:, 0, :].cpu().numpy().flatten()
 
 
 def clean_image(path):
-    """Clean image for OCR (thresholding)."""
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     _, thresh = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    cleaned_path = path.replace(".png", "_cleaned.png")
+    cleaned_path = path.replace(".pdf", "_cleaned.png")
     cv2.imwrite(cleaned_path, thresh)
     return cleaned_path
 
 
-def extract_text_from_pdf(path):
-    """Extract text if PDF has embedded text."""
-    text = ""
-    with pdfplumber.open(path) as pdf:
-        for page in pdf.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + "\n"
-    return text.strip()
+def extract_text(image_path):
+    return pytesseract.image_to_string(image_path)
 
 
-def ocr_pdf(path):
-    """OCR scanned PDF (convert each page to image)."""
-    pages = convert_from_path(path, dpi=300)
-    text = ""
-    for i, page in enumerate(pages):
-        img_path = f"{path}_page_{i}.png"
-        page.save(img_path, "PNG")
-        cleaned = clean_image(img_path)
-        text += pytesseract.image_to_string(cleaned) + "\n"
-        os.remove(img_path)
-        os.remove(cleaned)
-    return text.strip()
-
-
-def ocr_image(path):
-    """OCR on single uploaded image."""
-    cleaned = clean_image(path)
-    text = pytesseract.image_to_string(cleaned)
-    os.remove(cleaned)
-    return text.strip()
-
-
-def chunk_text(text, max_len=3000):
-    """Split text into smaller chunks for Gemini."""
+def chunk_text(text, max_len=1000):
     return [text[i:i + max_len] for i in range(0, len(text), max_len)]
 
 
 def summarize_chunk(chunk):
-    """Summarize one chunk using Gemini."""
-    prompt = f"""
-    Summarize the following legal document text and clearly explain the laws used in simple words:
-
-    {chunk}
-    """
-    response = model.generate_content(prompt)
-    return response.text.strip()
+    prompt = f"Summarize the legal text below:\n\n{chunk}"
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a legal document summarizer."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=500,
+        temperature=0.2
+    )
+    return response.choices[0].message.content
 
 
 @csrf_exempt
 @login_required
 def summarize_api(request):
-    if request.method == "POST" and "document" in request.FILES:
-        document = request.FILES["document"]
+    if request.method == 'POST' and 'document' in request.FILES:
+        document = request.FILES['document']
 
-        # Save file temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix=document.name) as tmp_file:
+        # Write uploaded file to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
             for chunk in document.chunks():
                 tmp_file.write(chunk)
             temp_path = tmp_file.name
 
-        raw_text = ""
-        ext = os.path.splitext(document.name)[1].lower()
+        # Convert PDF page(s) to images if needed here (not included)
+        # For demo assume uploaded file is image or convert externally
 
-        try:
-            # 🔹 PDF
-            if ext == ".pdf":
-                raw_text = extract_text_from_pdf(temp_path)
-                if not raw_text:  # fallback if scanned PDF
-                    raw_text = ocr_pdf(temp_path)
+        # Clean image for better OCR
+        cleaned_path = clean_image(temp_path)
 
-            # 🔹 Images
-            elif ext in [".png", ".jpg", ".jpeg"]:
-                raw_text = ocr_image(temp_path)
+        # Extract text via OCR
+        raw_text = extract_text(cleaned_path)
 
-            else:
-                return JsonResponse(
-                    {"error": f"Unsupported file type: {ext}"}, status=400
-                )
+        # Chunk the text for summarization
+        chunks = chunk_text(raw_text)
 
-            if not raw_text.strip():
-                return JsonResponse(
-                    {"error": "No readable text found in document"}, status=400
-                )
+        # Summarize each chunk through GPT-4o API
+        summaries = [summarize_chunk(chunk) for chunk in chunks]
 
-            # Chunk + Summarize
-            chunks = chunk_text(raw_text)
-            summaries = [summarize_chunk(chunk) for chunk in chunks]
-            final_summary = "\n\n".join(summaries)
+        # Combine summaries into final summary
+        final_summary = "\n\n".join(summaries)
 
-            return JsonResponse(
-                {
-                    "status": "success",
-                    "summary": final_summary,
-                    "chunks_processed": len(chunks),
-                }
-            )
+        return JsonResponse({'summary': final_summary, 'status': 'success'})
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({'error': 'No document provided'}, status=400)
 
-        finally:
-            # Cleanup temp file
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-
-    return JsonResponse({"error": "No document provided"}, status=400)
 
 
 

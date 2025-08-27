@@ -16,13 +16,19 @@ from .models import UserProfile, ForumPost, ForumReply
 import faiss
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
-# import openai
+from openai import OpenAI
 import torch
 import spacy
 import pickle
 import os
-import google.generativeai as genai
-from google.genai.types import HttpOptions
+# import google.generativeai as genai
+# from google.genai.types import HttpOptions
+import tempfile
+import cv2
+import pytesseract
+
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
 
 # Landing page with hammer animation
 def landing_page(request):
@@ -158,189 +164,173 @@ def logout_view(request):
     return redirect('landing')
 
 
-# MongoDB collection
-law_db = db['law_data']
 
-# Load LegalBERT & spaCy once at server startup
+# Load MongoDB collection
+ipc_collection = db["ipc"]
+
+# Load LegalBERT + SpaCy once at server start
 tokenizer = AutoTokenizer.from_pretrained("nlpaueb/legal-bert-base-uncased")
 model = AutoModel.from_pretrained("nlpaueb/legal-bert-base-uncased")
 nlp = spacy.load("en_core_web_lg")
 
-# Global FAISS variables
-index = None
-id_mapping = None
+# Load FAISS index + mapping
+index = faiss.read_index("ipc_index.faiss")
+with open("ipc_id_mapping.json", "r", encoding="utf-8") as f:
+    id_mapping = json.load(f)     # List of MongoDB IDs (as strings)
 
-
-def load_or_create_index():
-    """Load existing FAISS index or create new one if it doesn't exist"""
-    global index, id_mapping
-    
-    index_path = "legal_clauses.faiss"
-    mapping_path = "id_mapping.pkl"
-    
-    if os.path.exists(index_path) and os.path.exists(mapping_path):
-        try:
-            index = faiss.read_index(index_path)
-            with open(mapping_path, "rb") as f:
-                id_mapping = pickle.load(f)
-            print("✅ Loaded existing FAISS index and ID mapping")
-            return True
-        except Exception as e:
-            print(f"⚠️ Error loading existing index: {e}")
-    
-    print("⚡ Creating new FAISS index...")
-    return create_new_index()
-
-
-def create_new_index():
-    """Create a new FAISS index from MongoDB documents"""
-    global index, id_mapping
-    
-    documents = list(law_db.find({}, {'clause_text': 1}))
-    texts, ids = [], []
-    
-    for doc in documents:
-        clause = doc.get('clause_text', '')
-        if clause and isinstance(clause, str) and clause.strip():
-            texts.append(clause)
-            ids.append(doc['_id'])
-    
-    if not texts:
-        raise ValueError("No valid clause_text found in MongoDB. Populate your DB first.")
-    
-    # Create embeddings
-    embeddings = np.vstack([embed_text(t) for t in texts]).astype('float32')
-    
-    # Build FAISS index
-    dim = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dim)   # simple, no training needed
-    index.add(embeddings)
-    
-    # Save index + ID mapping
-    faiss.write_index(index, "legal_clauses.faiss")
-    with open("id_mapping.pkl", "wb") as f:
-        pickle.dump(ids, f)
-    
-    id_mapping = ids
-    print("✅ FAISS index created and saved")
-    return True
-
-
-def embed_text(text: str) -> np.ndarray:
-    """Convert text to embeddings with LegalBERT"""
-    encoded = tokenizer(text, padding=True, truncation=True, return_tensors='pt')
+def get_embedding(text: str):
+    """Generate LegalBERT embeddings for text"""
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
-        outputs = model(**encoded)
-    emb = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
-    return emb  # shape (1, dim)
+        outputs = model(**inputs)
+    # Use [CLS] token embedding
+    embedding = outputs.last_hidden_state[:, 0, :].numpy()
+    return embedding
 
-
-def prepare_rag_prompt(user_query, matched_docs):
-    """Prepare the RAG prompt for Gemini"""
-    context = "\n\n".join([f"(Doc {i+1}): {doc.get('clause_text','')}" for i, doc in enumerate(matched_docs)])
-    return f"User query: {user_query}\n\nRelevant legal clauses:\n{context}\n\nProvide a detailed legal answer based on the above clauses."
-
-
-def generate_gemini_response(prompt: str) -> str:
-    """Generate response using Google Gemini"""
-    try:
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-2.0-flash")  # choose stable model
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        return f"⚠️ Error generating Gemini response: {str(e)}"
+def search_faiss(query: str, top_k: int = 3):
+    """Search FAISS index for top_k IPC sections"""
+    query_vec = get_embedding(query).reshape(1, -1)
+    distances, indices = index.search(query_vec, top_k)
+    results = []
+    for idx in indices[0]:
+        if idx != -1 and idx < len(id_mapping):  # valid index
+            doc_id = id_mapping[idx]
+            doc = ipc_collection.find_one({"_id": ObjectId(doc_id)})
+            if doc:
+                results.append({
+                    "Section": doc.get("Section"),
+                    "section_title": doc.get("section_title"),
+                    "section_desc": doc.get("section_desc"),
+                })
+    return results
 
 
 @csrf_exempt
 @login_required
 def chat_api(request):
-    """Handle chatbot API requests"""
-    global index, id_mapping
-    
-    # Load FAISS index once if not available
-    if index is None or id_mapping is None:
-        try:
-            load_or_create_index()
-        except Exception as e:
-            return JsonResponse({'error': f"Failed to init index: {str(e)}"}, status=500)
-    
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            message = data.get('message', '')
-            language = data.get('language', 'english')
-            
-            if not message.strip():
-                return JsonResponse({'error': 'Empty message'}, status=400)
-            
-            # Preprocess query
-            doc = nlp(message.lower())
-            tokens = [t.lemma_ for t in doc if not t.is_stop and not t.is_punct]
-            clean_query = " ".join(tokens)
-            
-            # Embed query
-            query_emb = embed_text(clean_query).astype('float32')
-            
-            # Search FAISS
-            k = 5
-            distances, indices = index.search(query_emb, k)
-            
-            # Retrieve top documents
-            matched_docs = []
-            for idx in indices[0]:
-                if idx < len(id_mapping):
-                    doc_id = id_mapping[idx]
-                    doc = law_db.find_one({'_id': doc_id})
-                    if doc:
-                        matched_docs.append(doc)
-            
-            if not matched_docs:
-                return JsonResponse({
-                    'response': 'No relevant legal clauses found.',
-                    'language': language
-                })
-            
-            # Build RAG prompt + call Gemini
-            rag_prompt = prepare_rag_prompt(message, matched_docs)
-            bot_reply = generate_gemini_response(rag_prompt)
-            
-            return JsonResponse({
-                'response': bot_reply,
-                'language': language
-            })
-        
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-        except Exception as e:
-            return JsonResponse({'error': f'Internal error: {str(e)}'}, status=500)
-    
-    return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+        data = json.loads(request.body)
+        message = data.get('message', '')
+        language = data.get('language', 'english')
 
+        # 1. NLP preprocessing
+        doc = nlp(message.lower())
+        processed_message = " ".join([token.lemma_ for token in doc])
+
+        # 2 & 3. Embed & Search FAISS
+        ipc_results = search_faiss(processed_message, top_k=3)
+
+        # 4. Prepare RAG context
+        rag_context = "\n".join([
+            f"Section {sec['Section']} ({sec['section_title']}): {sec['section_desc']}"
+            for sec in ipc_results if isinstance(sec, dict)
+        ])
+
+        # 5. Prepare GPT prompt with context
+        gpt_prompt = (
+            f"User Question: {message}\n\n"
+            f"Relevant IPC Context:\n{rag_context}\n\n"
+            f"Answer in detail with reference to the context."
+        )
+
+        # 6. Call GPT-4o chat API
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are an expert legal assistant providing answers based on the Indian Penal Code."},
+                {"role": "user", "content": gpt_prompt}
+            ],
+            max_tokens=1000,
+            temperature=0.2
+        )
+
+        gpt_response = response.choices[0].message.content
+
+        # 7. Return JSON response
+        return JsonResponse({
+            'response': gpt_response,
+            'context': ipc_results,
+            'language': language
+        })
+
+        
+
+
+
+def get_legalbert_embedding(text):
+    inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    return outputs.last_hidden_state[:, 0, :].cpu().numpy().flatten()
+
+
+def clean_image(path):
+    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    _, thresh = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    cleaned_path = path.replace(".pdf", "_cleaned.png")
+    cv2.imwrite(cleaned_path, thresh)
+    return cleaned_path
+
+
+def extract_text(image_path):
+    return pytesseract.image_to_string(image_path)
+
+
+def chunk_text(text, max_len=1000):
+    return [text[i:i + max_len] for i in range(0, len(text), max_len)]
+
+
+def summarize_chunk(chunk):
+    prompt = f"Summarize the legal text below:\n\n{chunk}"
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a legal document summarizer."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=500,
+        temperature=0.2
+    )
+    return response.choices[0].message.content
 
 
 @csrf_exempt
 @login_required
 def summarize_api(request):
-    if request.method == 'POST':
-        if 'document' in request.FILES:
-            document = request.FILES['document']
-            
-            # Placeholder for document processing
-            # Here you would implement:
-            # 1. OpenCV image cleaning
-            # 2. Tesseract OCR
-            # 3. Text extraction and chunking
-            # 4. GPT-4o summarization
-            
-            summary = f"Document Summary: This document contains legal information that has been processed and summarized for easy understanding."
-            
-            return JsonResponse({
-                'summary': summary,
-                'status': 'success'
-            })
-        
-        return JsonResponse({'error': 'No document provided'}, status=400)
+    if request.method == 'POST' and 'document' in request.FILES:
+        document = request.FILES['document']
+
+        # Write uploaded file to temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+            for chunk in document.chunks():
+                tmp_file.write(chunk)
+            temp_path = tmp_file.name
+
+        # Convert PDF page(s) to images if needed here (not included)
+        # For demo assume uploaded file is image or convert externally
+
+        # Clean image for better OCR
+        cleaned_path = clean_image(temp_path)
+
+        # Extract text via OCR
+        raw_text = extract_text(cleaned_path)
+
+        # Chunk the text for summarization
+        chunks = chunk_text(raw_text)
+
+        # Summarize each chunk through GPT-4o API
+        summaries = [summarize_chunk(chunk) for chunk in chunks]
+
+        # Combine summaries into final summary
+        final_summary = "\n\n".join(summaries)
+
+        return JsonResponse({'summary': final_summary, 'status': 'success'})
+
+    return JsonResponse({'error': 'No document provided'}, status=400)
+
+
+
+
 
 @csrf_exempt
 @login_required

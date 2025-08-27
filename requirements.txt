@@ -11,3 +11,5 @@ fiass
 transformers
 torch
 spaCy
+pdfplumber
+pdf2image
