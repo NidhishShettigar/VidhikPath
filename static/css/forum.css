@@ -2,7 +2,7 @@
 body {
     margin: 0;
     font-family: 'Georgia', 'Times New Roman', serif;
-    background-color: white; /* parchment background */
+    background-color: white;
     color: #2C2C2C;
 }
 
@@ -11,7 +11,7 @@ body {
     max-width: 900px;
     margin: 20px auto;
     background: #fff;
-    border: 2px solid #B96902; /* Brown-Orange */
+    border: 2px solid #B96902;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 12px rgba(185, 105, 2, 0.2);
@@ -28,23 +28,37 @@ body {
 /* ===== Create Post Section ===== */
 .create-post-section {
     margin-bottom: 20px;
+    background: #FAF6F1;
+    border: 1px solid #E2C9A6;
+    border-radius: 8px;
+    padding: 15px;
 }
 
 .create-post-section textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #B96902;
     border-radius: 6px;
     font-family: inherit;
     font-size: 0.95rem;
-    background: #FAF6F1;
+    background: #fff;
     resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.create-post-section textarea:focus {
+    outline: none;
+    border-color: #8a4b01;
+    box-shadow: 0 0 0 2px rgba(185, 105, 2, 0.2);
 }
 
 .post-actions {
     margin-top: 10px;
     display: flex;
     gap: 10px;
+    align-items: center;
 }
 
 /* ===== Forum Posts ===== */
@@ -55,89 +69,206 @@ body {
     padding: 15px;
     margin-bottom: 20px;
     box-shadow: 0 2px 6px rgba(185, 105, 2, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.forum-post:hover {
+    box-shadow: 0 4px 8px rgba(185, 105, 2, 0.15);
 }
 
 .post-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-    color: #6B4C36;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #E2C9A6;
+}
+
+.post-user {
+    font-size: 0.95rem;
+    color: #B96902;
     font-weight: bold;
+}
+
+.post-time {
+    font-size: 0.85rem;
+    color: #6B4C36;
 }
 
 .post-content p {
     margin: 0 0 10px 0;
-    line-height: 1.5;
+    line-height: 1.6;
+    color: #2C2C2C;
 }
 
 .post-image {
     max-width: 100%;
+    height: auto;
     border-radius: 6px;
-    margin-top: 8px;
+    margin-top: 10px;
     border: 2px solid #E2C9A6;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.post-image:hover {
+    transform: scale(1.02);
 }
 
 /* ===== Post Actions ===== */
+.post-actions {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #E2C9A6;
+    display: flex;
+    gap: 15px;
+}
+
 .action-btn {
     background: transparent;
     border: none;
     cursor: pointer;
     font-size: 0.9rem;
-    margin-right: 10px;
     color: #B96902;
     font-weight: bold;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
+    padding: 5px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .action-btn:hover {
     color: #8a4b01;
+    background: rgba(185, 105, 2, 0.1);
+    transform: translateY(-1px);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.like-btn.liked {
+    color: #8a4b01;
+    background: rgba(185, 105, 2, 0.15);
+}
+
+.like-count {
+    margin-left: 2px;
+    font-size: 0.85rem;
 }
 
 /* ===== Reply Section ===== */
 .reply-section {
-    margin-top: 10px;
+    margin-top: 15px;
+    background: #fff;
+    border: 1px solid #E2C9A6;
+    border-radius: 6px;
+    padding: 10px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .reply-section textarea {
     width: 100%;
-    padding: 8px;
+    padding: 8px 10px;
     border: 1px solid #B96902;
     border-radius: 6px;
     font-family: inherit;
     font-size: 0.9rem;
     background: #fff;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.reply-section textarea:focus {
+    outline: none;
+    border-color: #8a4b01;
+    box-shadow: 0 0 0 2px rgba(185, 105, 2, 0.2);
 }
 
 /* ===== Replies ===== */
 .replies {
-    margin-top: 12px;
-    padding-left: 12px;
-    border-left: 2px solid #E2C9A6;
+    margin-top: 15px;
+}
+
+.replies:not(:empty) {
+    padding-left: 15px;
+    border-left: 3px solid #E2C9A6;
 }
 
 .reply {
     background: #fff;
     border: 1px solid #E2C9A6;
     border-radius: 6px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     margin-bottom: 8px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .reply strong {
     color: #B96902;
+    margin-right: 5px;
 }
 
-/* ===== Buttons (reuse base theme) ===== */
+.reply small {
+    color: #6B4C36;
+    font-size: 0.8rem;
+    float: right;
+    margin-top: 2px;
+}
+
+/* ===== Buttons ===== */
 .btn {
-    padding: 8px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
     border: none;
     font-size: 0.9rem;
-    transition: background 0.3s ease;
+    font-family: inherit;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+    transform: translateY(0);
 }
 
 .btn-primary {
@@ -152,10 +283,123 @@ body {
 .btn-secondary {
     background: #F4E2CC;
     border: 1px solid #B96902;
-    color: #111;
+    color: #B96902;
+}
+
+.btn-secondary:hover {
+    background: #E2C9A6;
+    color: #8a4b01;
 }
 
 .btn-sm {
-    padding: 5px 10px;
-    font-size: 0.8rem;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* ===== Notifications ===== */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    max-width: 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.notification.success {
+    background-color: #4CAF50;
+}
+
+.notification.error {
+    background-color: #f44336;
+}
+
+.notification.warning {
+    background-color: #ff9800;
+}
+
+/* ===== Loading States ===== */
+.btn.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .forum-container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .post-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .action-btn {
+        font-size: 0.85rem;
+    }
+}
+
+/* ===== Empty States ===== */
+.forum-posts:empty::before {
+    content: "No posts yet. Be the first to share something!";
+    display: block;
+    text-align: center;
+    color: #6B4C36;
+    font-style: italic;
+    padding: 40px;
+    background: #FAF6F1;
+    border: 1px dashed #E2C9A6;
+    border-radius: 6px;
+}
+
+.replies:empty::before {
+    content: "No replies yet.";
+    display: block;
+    color: #6B4C36;
+    font-style: italic;
+    font-size: 0.85rem;
+    padding: 10px;
+    text-align: center;
 }

@@ -485,57 +485,117 @@ def find_lawyers_api(request):
         
         return JsonResponse({'lawyers': lawyers_data})
 
+
+#forum
+
+@login_required
+def forum_view(request):
+    """Render the forum page with existing posts"""
+    # Fetch posts from MongoDB (you'll need to implement this based on your existing structure)
+    posts_data = list(ForumPost.collection.find().sort("created_at", -1))
+    
+    # Convert MongoDB data to template-friendly format
+    posts = []
+    for post_data in posts_data:
+        post = {
+            'id': str(post_data['_id']),
+            'user': {'first_name': post_data.get('username', 'Anonymous')},
+            'content': post_data.get('content', ''),
+            'image': {'url': f"/media/{post_data['image']}"} if post_data.get('image') else None,
+            'created_at': post_data.get('created_at', datetime.utcnow()),
+            'likes': {'count': len(post_data.get('likes', []))},
+            'replies': {'all': [
+                {
+                    'user': {'first_name': reply.get('username', 'Anonymous')},
+                    'content': reply.get('content', ''),
+                    'created_at': reply.get('created_at', datetime.utcnow())
+                }
+                for reply in post_data.get('replies', [])
+            ]}
+        }
+        posts.append(post)
+    
+    return render(request, 'forum.html', {'posts': posts})
+
 @csrf_exempt
 @login_required
 def create_post_api(request):
+    """API endpoint to create a new forum post"""
     if request.method == 'POST':
-        content = request.POST.get('content', '')
-        image = ''
+        content = request.POST.get('content', '').strip()
         
+        if not content:
+            return JsonResponse({'error': 'Content is required'}, status=400)
+        
+        image_path = ''
         if 'image' in request.FILES:
             file = request.FILES['image']
+            # Validate file type
+            if not file.content_type.startswith('image/'):
+                return JsonResponse({'error': 'Invalid file type. Please upload an image.'}, status=400)
+            
+            # Save the file
             file_path = default_storage.save(f'forum_images/{file.name}', file)
-            image = file_path
+            image_path = file_path
         
-        result = ForumPost.create(
-            username=request.user.username,
-            content=content,
-            image=image
-        )
-        
-        return JsonResponse({
-            'id': str(result.inserted_id),
-            'content': content,
-            'user': request.user.first_name,
-            'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M'),
-            'likes_count': 0
-        })
+        try:
+            # Create the post
+            result = ForumPost.create(
+                username=request.user.username,
+                content=content,
+                image=image_path
+            )
+            
+            return JsonResponse({
+                'id': str(result.inserted_id),
+                'content': content,
+                'user': request.user.first_name or request.user.username,
+                'created_at': datetime.utcnow().strftime('%b %d, %Y %H:%M'),
+                'likes_count': 0,
+                'image': image_path
+            })
+        except Exception as e:
+            return JsonResponse({'error': f'Error creating post: {str(e)}'}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 @login_required
 def like_post_api(request):
+    """API endpoint to like/unlike a forum post"""
     if request.method == 'POST':
-        data = json.loads(request.body)
-        post_id = data.get('post_id')
-        
         try:
-            post = ForumPost.collection.find_one({"_id": ObjectId(post_id)})
+            data = json.loads(request.body)
+            post_id = data.get('post_id')
+            
+            if not post_id:
+                return JsonResponse({'error': 'Post ID is required'}, status=400)
+            
+            # Validate ObjectId
+            try:
+                post_object_id = ObjectId(post_id)
+            except:
+                return JsonResponse({'error': 'Invalid post ID format'}, status=400)
+            
+            # Find the post
+            post = ForumPost.collection.find_one({"_id": post_object_id})
             if not post:
                 return JsonResponse({'error': 'Post not found'}, status=404)
             
             likes = post.get('likes', [])
+            username = request.user.username
             
-            if request.user.username in likes:
+            if username in likes:
                 # Remove like
                 ForumPost.collection.update_one(
-                    {"_id": ObjectId(post_id)},
-                    {"$pull": {"likes": request.user.username}}
+                    {"_id": post_object_id},
+                    {"$pull": {"likes": username}}
                 )
                 liked = False
                 likes_count = len(likes) - 1
             else:
                 # Add like
-                ForumPost.like(ObjectId(post_id), request.user.username)
+                ForumPost.like(post_object_id, username)
                 liked = True
                 likes_count = len(likes) + 1
             
@@ -544,29 +604,87 @@ def like_post_api(request):
                 'likes_count': likes_count
             })
             
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': 'Invalid post ID'}, status=400)
+            return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 @login_required
 def reply_post_api(request):
+    """API endpoint to reply to a forum post"""
     if request.method == 'POST':
-        data = json.loads(request.body)
-        post_id = data.get('post_id')
-        content = data.get('content')
-        
         try:
-            post = ForumPost.collection.find_one({"_id": ObjectId(post_id)})
+            data = json.loads(request.body)
+            print("Data received:", data)
+            post_id = data.get('post_id')
+            print("post_id:", post_id)
+            content = data.get('content', '').strip()
+            
+            if not post_id:
+                return JsonResponse({'error': 'Post ID is required'}, status=400)
+            
+            if not content:
+                return JsonResponse({'error': 'Reply content is required'}, status=400)
+            
+            # Validate ObjectId
+            try:
+                post_object_id = ObjectId(post_id)
+            except:
+                return JsonResponse({'error': 'Invalid post ID format'}, status=400)
+            
+            # Check if post exists
+            post = ForumPost.collection.find_one({"_id": post_object_id})
             if not post:
                 return JsonResponse({'error': 'Post not found'}, status=404)
             
-            ForumReply.create(ObjectId(post_id), request.user.username, content)
+            # Create the reply
+            ForumReply.create(post_object_id, request.user.username, content)
             
             return JsonResponse({
                 'content': content,
-                'user': request.user.first_name,
-                'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+                'user': request.user.first_name or request.user.username,
+                'created_at': datetime.utcnow().strftime('%b %d, %H:%M')
             })
             
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': 'Invalid post ID'}, status=400)
+            return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@login_required
+def get_post_details(request, post_id):
+    """API endpoint to get detailed information about a specific post"""
+    try:
+        post_object_id = ObjectId(post_id)
+        post = ForumPost.collection.find_one({"_id": post_object_id})
+        
+        if not post:
+            return JsonResponse({'error': 'Post not found'}, status=404)
+        
+        post_data = {
+            'id': str(post['_id']),
+            'username': post.get('username', 'Anonymous'),
+            'content': post.get('content', ''),
+            'image': post.get('image', ''),
+            'likes_count': len(post.get('likes', [])),
+            'liked_by_user': request.user.username in post.get('likes', []),
+            'created_at': post.get('created_at', datetime.utcnow()).strftime('%b %d, %Y %H:%M'),
+            'replies': [
+                {
+                    'username': reply.get('username', 'Anonymous'),
+                    'content': reply.get('content', ''),
+                    'created_at': reply.get('created_at', datetime.utcnow()).strftime('%b %d, %H:%M')
+                }
+                for reply in post.get('replies', [])
+            ]
+        }
+        
+        return JsonResponse(post_data)
+        
+    except:
+        return JsonResponse({'error': 'Invalid post ID'}, status=400)
