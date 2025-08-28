@@ -31,6 +31,7 @@ import tempfile
 import pdfplumber
 from pdf2image import convert_from_path
 import google.generativeai as genai
+import re
 
 
 
@@ -138,9 +139,9 @@ def user_profile(request):
         profile = UserProfile.find_by_username(request.user.username)
     
     if request.method == 'POST':
-        phone = request.POST.get('phone', '')
-        location = request.POST.get('location', '')
-        profile_photo = ''
+        phone = request.POST.get('phone') or profile.get("phone", "")
+        location = request.POST.get('location') or profile.get("location", "")
+        profile_photo = profile.get("profile_photo", "")
         
         if 'profile_photo' in request.FILES:
             file = request.FILES['profile_photo']
@@ -150,25 +151,27 @@ def user_profile(request):
         # Update profile using PyMongo
         update_data = {
             "phone": phone,
-            "location": location
+            "location": location,
+            "profile_photo": profile_photo
         }
-        if profile_photo:
-            update_data["profile_photo"] = profile_photo
-            
+        
         UserProfile.collection.update_one(
             {"username": request.user.username},
             {"$set": update_data}
         )
         
-        # Update user info
-        request.user.first_name = request.POST.get('name', '')
+        # Update user info (Django User model)
+        request.user.first_name = request.POST.get('name') or request.user.first_name
         request.user.save()
+
+        # 🔑 Reload the updated profile after update
+        profile = UserProfile.find_by_username(request.user.username)
     
     return render(request, 'profile.html', {'profile': profile})
 
 def logout_view(request):
     logout(request)
-    return redirect('landing')
+    return redirect('login')
 
 
 with open("legal_app\prompts\system_prompt.txt", "r", encoding="utf-8") as f:
@@ -190,7 +193,7 @@ ipc_collection = db["ipc"]
 
 # Load LegalBERT + SpaCy once at server start
 tokenizer = AutoTokenizer.from_pretrained("nlpaueb/legal-bert-base-uncased")
-model = AutoModel.from_pretrained("nlpaueb/legal-bert-base-uncased")
+bert_model = AutoModel.from_pretrained("nlpaueb/legal-bert-base-uncased")
 nlp = spacy.load("en_core_web_lg")
 
 # Load FAISS index + mapping
@@ -202,7 +205,7 @@ def get_embedding(text: str):
     """Generate LegalBERT embeddings for text"""
     inputs = tokenizer(text, return_tensors="pt", truncation=True, padding=True)
     with torch.no_grad():
-        outputs = model(**inputs)
+        outputs = bert_model(**inputs)
     # Use [CLS] token embedding
     embedding = outputs.last_hidden_state[:, 0, :].numpy()
     return embedding
@@ -300,10 +303,12 @@ def chat_api(request):
 
 #document summerizer
 
-# ✅ Initialize Gemini model once
+#✅ Initialize Gemini model once
 genai.configure(api_key=settings.GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+gemini_model = genai.GenerativeModel("gemini-1.5-flash")
 
+
+# ---------- OCR & Text Extraction ------
 
 def clean_image(path):
     """Clean image for OCR (thresholding)."""
@@ -312,7 +317,6 @@ def clean_image(path):
     cleaned_path = path.replace(".png", "_cleaned.png")
     cv2.imwrite(cleaned_path, thresh)
     return cleaned_path
-
 
 def extract_text_from_pdf(path):
     """Extract text if PDF has embedded text."""
@@ -323,7 +327,6 @@ def extract_text_from_pdf(path):
             if page_text:
                 text += page_text + "\n"
     return text.strip()
-
 
 def ocr_pdf(path):
     """OCR scanned PDF (convert each page to image)."""
@@ -338,7 +341,6 @@ def ocr_pdf(path):
         os.remove(cleaned)
     return text.strip()
 
-
 def ocr_image(path):
     """OCR on single uploaded image."""
     cleaned = clean_image(path)
@@ -346,22 +348,38 @@ def ocr_image(path):
     os.remove(cleaned)
     return text.strip()
 
+# ---------- Text Processing ----------
 
 def chunk_text(text, max_len=3000):
-    """Split text into smaller chunks for Gemini."""
-    return [text[i:i + max_len] for i in range(0, len(text), max_len)]
-
+    """Split text into chunks by sentence boundaries."""
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    chunks, current = [], ""
+    for sentence in sentences:
+        if len(current) + len(sentence) < max_len:
+            current += " " + sentence
+        else:
+            chunks.append(current.strip())
+            current = sentence
+    if current:
+        chunks.append(current.strip())
+    return chunks
 
 def summarize_chunk(chunk):
     """Summarize one chunk using Gemini."""
     prompt = f"""
-    Summarize the following legal document text and clearly explain the laws used in simple words:
+    You are a legal assistant. Summarize the following legal document text.
+    
+    Provide output in two parts:
+    1. **Plain summary** – explain clearly in simple words.
+    2. **Key points** – bullet points highlighting important laws, rights, duties, or penalties.
 
+    Text:
     {chunk}
     """
-    response = model.generate_content(prompt)
+    response = gemini_model.generate_content(prompt)
     return response.text.strip()
 
+# ---------- API View ----------
 
 @csrf_exempt
 @login_required
@@ -402,7 +420,15 @@ def summarize_api(request):
             # Chunk + Summarize
             chunks = chunk_text(raw_text)
             summaries = [summarize_chunk(chunk) for chunk in chunks]
-            final_summary = "\n\n".join(summaries)
+            final_summary = "\n\n---\n\n".join(summaries)
+
+            # (Optional) Store in DB
+            # db["summaries"].insert_one({
+            #     "user_id": request.user.id,
+            #     "filename": document.name,
+            #     "summary": final_summary,
+            #     "created_at": datetime.utcnow()
+            # })
 
             return JsonResponse(
                 {
@@ -421,8 +447,6 @@ def summarize_api(request):
                 os.remove(temp_path)
 
     return JsonResponse({"error": "No document provided"}, status=400)
-
-
 
 
 @csrf_exempt
