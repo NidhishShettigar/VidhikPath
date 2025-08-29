@@ -2,7 +2,11 @@
 {% load static %}
 
 {% block title %}Dashboard - VidhikPath{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">{% endblock %}
+
+{% block extra_css %}
+<!-- Dashboard-specific styles -->
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
@@ -12,9 +16,8 @@
             <h1 class="app-name">VidhikPath</h1>
             <p class="app-slogan">A Legal Support System For Common People</p>
         </div>
-        
         <div class="header-right">
-            <a class="profile-btn" href="{% url 'profile' %}" >
+            <a class="profile-btn" href="{% url 'profile' %}">
                 <div class="profile-avatar">
                     {% if user.userprofile.profile_photo %}
                         <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
@@ -25,41 +28,39 @@
             </a>
         </div>
     </header>
-    
+
     <!-- Main Content Area -->
     <main class="dashboard-main" id="dashboardMain">
-        {% block extra %}{% endblock%}
+        {% block extra %}{% endblock %}
     </main>
-    
+
     <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <a class="nav-btn {% if request.resolver_match.url_name == 'chatbot' %}active{% endif %}" 
-        href="{% url 'chatbot' %}" id="chatbotBtn">
-            <div class="nav-icon">🤖</div>
+           href="{% url 'chatbot' %}" id="chatbotBtn">
+            <div class="nav-icon"></div>
             <span>VidhikAI</span>
         </a>
-        
         <a class="nav-btn {% if request.resolver_match.url_name == 'summerizer' %}active{% endif %}" 
-        href="{% url 'summerizer' %}" id="summarizerBtn">
-            <div class="nav-icon">📄</div>
+           href="{% url 'summerizer' %}" id="summarizerBtn">
+            <div class="nav-icon"></div>
             <span>Summarizer</span>
         </a>
-        
         <a class="nav-btn {% if request.resolver_match.url_name == 'connector' %}active{% endif %}" 
-        href="{% url 'connector' %}" id="lawyerBtn">
-            <div class="nav-icon">⚖️</div>
+           href="{% url 'connector' %}" id="lawyerBtn">
+            <div class="nav-icon"></div>
             <span>Find Lawyers</span>
         </a>
-        
         <a class="nav-btn {% if request.resolver_match.url_name == 'forum' %}active{% endif %}" 
-        href="{% url 'forum' %}" id="forumBtn">
-            <div class="nav-icon">💬</div>
+           href="{% url 'forum' %}" id="forumBtn">
+            <div class="nav-icon"></div>
             <span>Forum</span>
-    </a>
-</nav>
+        </a>
+    </nav>
 
 </div>
 
+<!-- Dashboard JavaScript -->
 <script src="/static/js/dashboard.js"></script>
 
 {% endblock %}

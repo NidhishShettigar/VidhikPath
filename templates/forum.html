@@ -3,16 +3,16 @@
 
 {% block extra_css %}
 {{ block.super }}
+<!-- Forum page styles -->
 <link rel="stylesheet" href="{% static 'css/forum.css' %}">
 {% endblock %}
-
 
 {% block extra %}
 <!-- Public Forum -->
 <div class="feature-content" id="forumContent">
     <div class="forum-container">
         <h3>Public Forum</h3>
-        
+
         <!-- Create Post Section -->
         <div class="create-post-section">
             <textarea 
@@ -23,10 +23,10 @@
             <div class="post-actions">
                 <input type="file" id="postImage" accept="image/*" style="display: none;">
                 <button class="btn btn-secondary" onclick="document.getElementById('postImage').click()">
-                    📷 Add Image
+                    Add Image
                 </button>
                 <button class="btn btn-primary" onclick="createPost()" id="createPostBtn">
-                    📝 Post
+                    Post
                 </button>
                 <small style="color: #6B4C36; margin-left: auto;">
                     <span id="charCount">0</span>/5000 characters
@@ -34,10 +34,10 @@
             </div>
             <div id="imagePreview" style="margin-top: 10px; display: none;">
                 <img id="previewImg" style="max-width: 200px; border-radius: 6px; border: 1px solid #E2C9A6;">
-                <button onclick="removeImagePreview()" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer;">✕</button>
+                <button onclick="removeImagePreview()" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer;">×</button>
             </div>
         </div>
-        
+
         <!-- Forum Posts -->
         <div class="forum-posts" id="forumPosts">
             {% for post in posts %}
@@ -46,14 +46,14 @@
                     <div class="post-user">{{ post.first_name|default:post.username }}</div>
                     <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
                 </div>
-                
+
                 <div class="post-content">
                     <p>{{ post.content|linebreaks }}</p>
                     {% if post.image %}
                     <img src="/media/{{ post.image }}" alt="Post image" class="post-image" onclick="openImageModal(this.src)">
                     {% endif %}
                 </div>
-                
+
                 <div class="post-actions">
                     <button class="action-btn like-btn {% if user.username in post.likes %}liked{% endif %}" onclick="likePost('{{ post.id }}')">
                         👍 <span class="like-count">{{ post.likes|length }}</span>
@@ -62,10 +62,10 @@
                         💬 Reply
                     </button>
                     <button class="action-btn share-btn" onclick="sharePost('{{ post.id }}')">
-                        📤 Share
+                        Share
                     </button>
                 </div>
-                
+
                 <div class="reply-section" id="replySection{{ post.id }}" style="display: none;">
                     <textarea 
                         placeholder="Write a respectful reply..." 
@@ -81,11 +81,11 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="replies" id="replies{{ post.id }}">
                     {% for reply in post.replies %}
                     <div class="reply">
-                        <strong>{{ reply.username }}:</strong> 
+                        <strong>{{ reply.username }}:</strong>
                         {{ reply.content|linebreaks }}
                         <small>{{ reply.created_at|date:"M d, H:i" }}</small>
                     </div>
@@ -100,8 +100,8 @@
             </div>
             {% endfor %}
         </div>
-        
-        <!-- Load More Button (if you implement pagination) -->
+
+        <!-- Load More Button for pagination -->
         <div style="text-align: center; margin-top: 20px;">
             <button class="btn btn-secondary" id="loadMoreBtn" style="display: none;" onclick="loadMorePosts()">
                 Load More Posts
@@ -110,14 +110,16 @@
     </div>
 </div>
 
-<!-- Image Modal -->
+<!-- Image Modal for post images -->
 <div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); cursor: pointer;" onclick="closeImageModal()">
     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%;">
         <img id="modalImage" style="width: 100%; height: auto; border-radius: 8px;">
         <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;" onclick="closeImageModal()">×</div>
     </div>
 </div>
+
 {% block extra_js %}
+<!-- Forum JavaScript -->
 <script src="{% static 'js/forum.js' %}"></script>
 {% endblock %}
 {% endblock %}

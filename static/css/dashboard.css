@@ -1,6 +1,4 @@
-/* ===========================
-   GLOBAL
-   =========================== */
+/* GLOBAL */
 body {
     font-family: 'Georgia', 'Times New Roman', serif;
     background: #fff;
@@ -9,9 +7,7 @@ body {
     padding: 0;
 }
 
-/* ===========================
-   HEADER
-   =========================== */
+/* HEADER*/
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -54,9 +50,7 @@ body {
     color: #fff;
 }
 
-/* ===========================
-   FOOTER / BOTTOM NAVIGATION
-   =========================== */
+/* FOOTER / BOTTOM NAVIGATION */
 .bottom-nav {
     display: flex;
     justify-content: space-around;
@@ -84,7 +78,7 @@ body {
     border: 2px solid white; /* white border stays on current page */
 }
 
-a{
+a {
     text-decoration: none;
 }
 
@@ -92,4 +86,3 @@ a{
     font-size: 1.2rem;
     margin-bottom: 3px;
 }
-

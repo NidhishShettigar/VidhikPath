@@ -61,14 +61,13 @@
     100% { transform: rotate(-120deg); }  /* end point */
 }
 
-
 /* Welcome content */
 .welcome-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    justify-content: center ;
+    justify-content: center;
 }
 
 /* Logo section */

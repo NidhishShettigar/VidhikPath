@@ -210,14 +210,16 @@ def get_embedding(text: str):
     embedding = outputs.last_hidden_state[:, 0, :].numpy()
     return embedding
 
-def search_faiss(query: str, top_k: int = 3):
-    """Search FAISS index for top_k IPC sections"""
+def search_faiss(query: str, top_k: int = 20):
     query_vec = get_embedding(query).reshape(1, -1)
     distances, indices = index.search(query_vec, top_k)
+    print("Indices:", indices)
     results = []
     for idx in indices[0]:
-        if idx != -1 and idx < len(id_mapping):  # valid index
+        print("Checking index:", idx)
+        if idx != -1 and idx < len(id_mapping):
             doc_id = id_mapping[idx]
+            print("Mapped doc_id:", doc_id)
             doc = ipc_collection.find_one({"_id": ObjectId(doc_id)})
             if doc:
                 results.append({
@@ -225,7 +227,11 @@ def search_faiss(query: str, top_k: int = 3):
                     "section_title": doc.get("section_title"),
                     "section_desc": doc.get("section_desc"),
                 })
+            else:
+                print("⚠️ No document found for:", doc_id)
+    print("Final Results:", results)
     return results
+
 
 LEGAL_KEYWORDS = [
     "ipc", "section", "act", "law", "rights", "punishment", "bail", "crime", 
@@ -262,7 +268,7 @@ def chat_api(request):
         processed_message = " ".join([token.lemma_ for token in doc])
 
         # 2 & 3. Embed & Search FAISS
-        ipc_results = search_faiss(processed_message, top_k=3)
+        ipc_results = search_faiss(processed_message, top_k=20)
 
         # 4. Prepare RAG context
         rag_context = "\n".join([

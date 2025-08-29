@@ -3,6 +3,7 @@
 
 {% block extra_css %}
 {{ block.super }}
+<!-- Profile-specific styles -->
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 {% endblock %}
 
@@ -12,15 +13,13 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>Profile Settings</h3>
-            <!-- close button will redirect -->
+            <!-- Close button to dismiss modal -->
             <button class="close-btn" onclick="closeProfile()">&times;</button>
         </div>
-        
         <div class="modal-body">
-            <!-- FORM START -->
+            <!-- Profile Form -->
             <form id="profileForm" method="POST" enctype="multipart/form-data" action="{% url 'profile' %}">
                 {% csrf_token %}
-                
                 <div class="profile-section">
                     <div class="profile-photo-section">
                         {% if user.userprofile.profile_photo %}
@@ -30,58 +29,52 @@
                         {% endif %}
                         <input type="file" name="profile_photo" class="form-control mt-2">
                     </div>
-                    
                     <div class="profile-info">
                         <div class="form-group">
                             <label>Name</label>
                             <input type="text" name="name" value="{{ user.first_name }}" id="profileName">
                         </div>
-                        
                         <div class="form-group">
                             <label>Phone</label>
                             <input type="text" name="phone" value="{{ profile.phone|default:'' }}">
                         </div>
-                        
                         <div class="form-group">
                             <label>Location</label>
                             <input type="text" name="location" value="{{ profile.location|default:'' }}">
                         </div>
-
+                        {# Username field is commented out as not currently used #}
                         {% comment %} <div class="form-group">
                             <label>Username</label>
                             <input type="text" value="{{ user.username }}" readonly>
-                        </div> {% endcomment %}
-                        
+                        </div>  {% endcomment %}
                         <div class="form-group">
                             <label>Email</label>
                             <input type="email" value="{{ user.email }}" readonly> <br><br>
                         </div>
                     </div>
                 </div>
-                
+                {# Theme settings section is commented out #}
                 {% comment %} <div class="settings-section">
                     <h4>Settings</h4>
-                    
                     <div class="setting-item">
                         <label>Theme Mode</label>
                         <div class="theme-toggle">
-                            <button type="button" class="theme-btn active" onclick="setTheme('light')">☀️ Light</button>
-                            <button type="button" class="theme-btn" onclick="setTheme('dark')">🌙 Dark</button> <br><br>
+                            <button type="button" class="theme-btn active" onclick="setTheme('light')">Light</button>
+                            <button type="button" class="theme-btn" onclick="setTheme('dark')">Dark</button> <br><br>
                         </div>
                     </div>
-                </div>
-                 {% endcomment %}
+                </div>  {% endcomment %}
                 <div class="modal-actions">
                     <button type="button" class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
                     <button type="button" class="btn btn-danger" onclick="logout()">Logout</button>
                 </div>
             </form>
-            <!-- FORM END -->
         </div>
     </div>
 </div>
 
 {% block extra_js %}
+<!-- Profile JavaScript -->
 <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}
 {% endblock %}

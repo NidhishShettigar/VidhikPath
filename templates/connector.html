@@ -1,29 +1,33 @@
 {% extends 'dashboard.html' %}
 {% load static %}
 
-{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/connector.css' %}">{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<!-- Lawyer connector specific styles -->
+<link rel="stylesheet" href="{% static 'css/connector.css' %}">
+{% endblock %}
+
 {% block extra %}
-<!-- Lawyer Connector -->
-        <div class="feature-content" id="lawyerContent">
-            <div class="lawyer-connector-container">
-                <h3>Find Lawyers</h3>
-                
-                <div class="search-section">
-                    <div class="search-inputs">
-                        <input type="text" id="locationInput" placeholder="Enter location...">
-                        <input type="text" id="typeInput" placeholder="Lawyer type (optional)...">
-                    </div>
-                    
-                    <div class="search-actions">
-                        <button class="btn btn-primary" onclick="searchLawyers()">Search</button>
-                        <button class="btn btn-secondary" onclick="useCurrentLocation()">📍 Use Current Location</button>
-                    </div>
-                </div>
-                
-                <div class="lawyers-results" id="lawyersResults">
-                    <!-- Lawyers will be populated here -->
-                </div>
+<!-- Lawyer Connector Feature -->
+<div class="feature-content" id="lawyerContent">
+    <div class="lawyer-connector-container">
+        <h3>Find Lawyers</h3>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-inputs">
+                <input type="text" id="locationInput" placeholder="Enter location...">
+                <input type="text" id="typeInput" placeholder="Lawyer type (optional)...">
+            </div>
+            <div class="search-actions">
+                <button class="btn btn-primary" onclick="searchLawyers()">Search</button>
+                <button class="btn btn-secondary" onclick="useCurrentLocation()">Use Current Location</button>
             </div>
         </div>
 
+        <div class="lawyers-results" id="lawyersResults">
+            <!-- Lawyers will be populated here -->
+        </div>
+    </div>
+</div>
 {% endblock %}

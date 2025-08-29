@@ -1,231 +1,236 @@
 // VidhikPath - Main JavaScript Functions
 
 // Global variables
-let currentTheme = "light"
-const isRecording = false
-let recognition = null
-const processDocument = null // Declare processDocument variable
+let currentTheme = "light";
+const isRecording = false;
+let recognition = null;
+const processDocument = null; // Declare processDocument variable placeholder
 
-// Initialize app
+// Initialize app on DOM load
 document.addEventListener("DOMContentLoaded", () => {
-  initializeApp()
-})
+  initializeApp();
+});
 
 function initializeApp() {
-  // Initialize speech recognition if available
+  // Initialize speech recognition if supported
   if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    recognition = new SpeechRecognition()
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.lang = "en-US"
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript
-      const chatInput = document.getElementById("chatInput")
+      const transcript = event.results[0][0].transcript;
+      const chatInput = document.getElementById("chatInput");
       if (chatInput) {
-        chatInput.value = transcript
+        chatInput.value = transcript;
       }
-    }
+    };
 
     recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error)
-      showNotification("Speech recognition error. Please try again.", "error")
-    }
+      console.error("Speech recognition error:", event.error);
+      showNotification("Speech recognition error. Please try again.", "error");
+    };
   }
 
-  // Load saved theme
-  const savedTheme = localStorage.getItem("vidhikpath-theme") || "light"
-  setTheme(savedTheme)
+  // Load saved theme from local storage or default to light
+  const savedTheme = localStorage.getItem("vidhikpath-theme") || "light";
+  setTheme(savedTheme);
 
   // Initialize file upload handlers
-  initializeFileHandlers()
+  initializeFileHandlers();
 }
 
-// Theme management
+// Theme management: switch light/dark modes
 function setTheme(theme) {
-  currentTheme = theme
-  document.body.classList.toggle("dark-mode", theme === "dark")
-  localStorage.setItem("vidhikpath-theme", theme)
+  currentTheme = theme;
+  document.body.classList.toggle("dark-mode", theme === "dark");
+  localStorage.setItem("vidhikpath-theme", theme);
 
-  // Update theme buttons
-  const themeButtons = document.querySelectorAll(".theme-btn")
+  // Update theme toggle buttons' active state
+  const themeButtons = document.querySelectorAll(".theme-btn");
   themeButtons.forEach((btn) => {
-    btn.classList.toggle("active", btn.textContent.toLowerCase().includes(theme))
-  })
+    btn.classList.toggle("active", btn.textContent.toLowerCase().includes(theme));
+  });
 }
 
-// Navigation functions
+// Navigation: switch visible feature content and active nav button
 function switchFeature(feature) {
-  // Hide all content
-  const contents = document.querySelectorAll(".feature-content")
-  contents.forEach((content) => content.classList.remove("active"))
+  // Hide all feature content areas
+  const contents = document.querySelectorAll(".feature-content");
+  contents.forEach((content) => content.classList.remove("active"));
 
-  // Show selected content
-  const targetContent = document.getElementById(feature + "Content")
+  // Show selected feature content
+  const targetContent = document.getElementById(feature + "Content");
   if (targetContent) {
-    targetContent.classList.add("active")
+    targetContent.classList.add("active");
   }
 
-  // Update navigation buttons
-  const navButtons = document.querySelectorAll(".nav-btn")
-  navButtons.forEach((btn) => btn.classList.remove("active"))
+  // Update nav button active states
+  const navButtons = document.querySelectorAll(".nav-btn");
+  navButtons.forEach((btn) => btn.classList.remove("active"));
 
-  const activeButton = document.getElementById(feature + "Btn")
+  const activeButton = document.getElementById(feature + "Btn");
   if (activeButton) {
-    activeButton.classList.add("active")
+    activeButton.classList.add("active");
   }
 }
 
-// Profile modal functions
+// Profile modal open/close handlers
 function openProfile() {
-  const modal = document.getElementById("profileModal")
+  const modal = document.getElementById("profileModal");
   if (modal) {
-    modal.style.display = "flex"
+    modal.style.display = "flex";
   }
 }
 
 function closeProfile() {
-  const modal = document.getElementById("profileModal")
+  const modal = document.getElementById("profileModal");
   if (modal) {
-    modal.style.display = "none"
+    modal.style.display = "none";
   }
 }
 
+// Save profile placeholder function
 function saveProfile() {
-  const name = document.getElementById("profileName")?.value
+  const name = document.getElementById("profileName")?.value;
 
-  // Here you would typically send this data to the server
-  // For now, we'll just show a success message
-  showNotification("Profile updated successfully!", "success")
-  closeProfile()
+  // Typically would send data to backend here
+
+  showNotification("Profile updated successfully!", "success");
+  closeProfile();
 }
 
+// Confirm and handle logout
 function logout() {
   if (confirm("Are you sure you want to logout?")) {
-    window.location.href = "/logout/"
+    window.location.href = "/logout/";
   }
 }
 
-// Notification system
+// Notification system for messages of various types
 function showNotification(message, type = "info") {
-  const notification = document.createElement("div")
-  notification.className = `notification ${type}`
-  notification.textContent = message
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
 
-  // Style the notification
+  // Style the notification element
   notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        z-index: 10000;
-        animation: slideInRight 0.3s ease-out;
-    `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      z-index: 10000;
+      animation: slideInRight 0.3s ease-out;
+  `;
 
-  // Set background color based on type
+  // Set background color per notification type
   switch (type) {
     case "success":
-      notification.style.backgroundColor = "#28A745"
-      break
+      notification.style.backgroundColor = "#28A745";
+      break;
     case "error":
-      notification.style.backgroundColor = "#DC3545"
-      break
+      notification.style.backgroundColor = "#DC3545";
+      break;
     case "warning":
-      notification.style.backgroundColor = "#FFC107"
-      notification.style.color = "#000"
-      break
+      notification.style.backgroundColor = "#FFC107";
+      notification.style.color = "#000";
+      break;
     default:
-      notification.style.backgroundColor = "#007BFF"
+      notification.style.backgroundColor = "#007BFF";
   }
 
-  document.body.appendChild(notification)
+  document.body.appendChild(notification);
 
-  // Remove after 3 seconds
+  // Auto-remove notification after 3 seconds with fade-out animation
   setTimeout(() => {
-    notification.style.animation = "slideOutRight 0.3s ease-out"
+    notification.style.animation = "slideOutRight 0.3s ease-out";
     setTimeout(() => {
       if (notification.parentNode) {
-        notification.parentNode.removeChild(notification)
+        notification.parentNode.removeChild(notification);
       }
-    }, 300)
-  }, 3000)
+    }, 300);
+  }, 3000);
 }
 
-// File upload handlers
+// File upload handlers: drag & drop, click, camera button
 function initializeFileHandlers() {
-  // Document upload handler
-  const fileInput = document.getElementById("fileInput")
+  // File input change handler
+  const fileInput = document.getElementById("fileInput");
   if (fileInput) {
-    fileInput.addEventListener("change", handleDocumentUpload)
+    fileInput.addEventListener("change", handleDocumentUpload);
   }
 
-  // Drag and drop for upload area
-  const uploadArea = document.getElementById("uploadArea")
+  // Upload area drag & drop handlers
+  const uploadArea = document.getElementById("uploadArea");
   if (uploadArea) {
-    uploadArea.addEventListener("dragover", handleDragOver)
-    uploadArea.addEventListener("drop", handleDrop)
+    uploadArea.addEventListener("dragover", handleDragOver);
+    uploadArea.addEventListener("drop", handleDrop);
   }
 
-  // Camera button handler
-  const cameraBtn = document.getElementById("cameraBtn")
+  // Camera button click handler
+  const cameraBtn = document.getElementById("cameraBtn");
   if (cameraBtn) {
-    cameraBtn.addEventListener("click", handleCameraCapture)
+    cameraBtn.addEventListener("click", handleCameraCapture);
   }
 }
 
+// Handle drag over upload area for styling
 function handleDragOver(e) {
-  e.preventDefault()
-  e.currentTarget.style.borderColor = "var(--primary-color)"
-  e.currentTarget.style.backgroundColor = "#FFF8F5"
+  e.preventDefault();
+  e.currentTarget.style.borderColor = "var(--primary-color)";
+  e.currentTarget.style.backgroundColor = "#FFF8F5";
 }
 
+// Handle dropped files in upload area
 function handleDrop(e) {
-  e.preventDefault()
-  const files = e.dataTransfer.files
+  e.preventDefault();
+  const files = e.dataTransfer.files;
   if (files.length > 0) {
-    processDocument(files[0])
+    processDocument(files[0]);
   }
 
-  // Reset styles
-  e.currentTarget.style.borderColor = "var(--border-color)"
-  e.currentTarget.style.backgroundColor = "white"
+  // Reset upload area styles
+  e.currentTarget.style.borderColor = "var(--border-color)";
+  e.currentTarget.style.backgroundColor = "white";
 }
 
+// Handle file selection via input
 function handleDocumentUpload(e) {
-  const file = e.target.files[0]
+  const file = e.target.files[0];
   if (file) {
-    processDocument(file)
+    processDocument(file);
   }
 }
 
+// Placeholder camera capture handler
 function handleCameraCapture() {
-  // This would typically open camera interface
-  // For now, we'll show a placeholder message
-  showNotification("Camera feature will be implemented with device camera access", "info")
+  // Placeholder action for camera use
+  showNotification("Camera feature will be implemented with device camera access", "info");
 }
 
-// Utility functions
+// Utility: get named cookie from document.cookie
 function getCookie(name) {
-  let cookieValue = null
+  let cookieValue = null;
   if (document.cookie && document.cookie !== "") {
-    const cookies = document.cookie.split(";")
+    const cookies = document.cookie.split(";");
     for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim()
+      const cookie = cookies[i].trim();
       if (cookie.substring(0, name.length + 1) === name + "=") {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-        break
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
       }
     }
   }
-  return cookieValue
+  return cookieValue;
 }
 
-// Add CSS animations
-const style = document.createElement("style")
+// Add CSS animations dynamically to document head
+const style = document.createElement("style");
 style.textContent = `
     @keyframes slideInRight {
         from {
@@ -248,5 +253,5 @@ style.textContent = `
             opacity: 0;
         }
     }
-`
-document.head.appendChild(style)
+`;
+document.head.appendChild(style);

@@ -1,6 +1,4 @@
-/* ===========================
-   GLOBAL RESET & VARIABLES
-   ============================ */
+/* GLOBAL RESET & VARIABLES */
 *,
 *::before,
 *::after {
@@ -10,10 +8,10 @@
 }
 
 :root {
-  --color-bg: #ffffff;      /* background white */
-  --color-text: #000000;    /* primary text */
-  --color-accent: #000000;  /* accent (borders, buttons) */
-  --color-muted: #444444;   /* secondary text */
+  --color-bg: #ffffff;       /* background white */
+  --color-text: #000000;     /* primary text */
+  --color-accent: #000000;   /* accent (borders, buttons) */
+  --color-muted: #444444;    /* secondary text */
   --overlay: rgba(0,0,0,0.6);
 
   --radius-sm: 6px;
@@ -24,12 +22,7 @@
   --font-main: 'Georgia', 'Times New Roman', serif;
 }
 
-/* ===========================
-   MODAL WRAPPER
-   ============================ */
-
-
-
+/* MODAL WRAPPER */
 .modal {
   position: fixed;
   inset: 0;
@@ -57,9 +50,7 @@
   animation: slideUp 0.3s ease-out;
 }
 
-/* ===========================
-   HEADER
-   ============================ */
+/* HEADER */
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -86,9 +77,7 @@
   transform: rotate(90deg);
 }
 
-/* ===========================
-   BODY
-   ============================ */
+/* BODY */
 .modal-body {
   display: flex;
   flex-direction: column;
@@ -102,9 +91,7 @@
   align-items: flex-start;
 }
 
-/* ===========================
-   PROFILE PHOTO
-   ============================ */
+/*PROFILE PHOTO */
 .profile-photo-section {
   flex-shrink: 0;
   text-align: center;
@@ -145,9 +132,7 @@
   color: var(--color-bg);
 }
 
-/* ===========================
-   PROFILE INFO
-   ============================ */
+/* PROFILE INFO */
 .profile-info {
   flex: 1;
   display: flex;
@@ -178,9 +163,7 @@
   box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
 }
 
-/* ===========================
-   SETTINGS SECTION
-   ============================ */
+/* SETTINGS SECTION */
 .settings-section {
   border-top: 2px solid var(--color-accent);
   padding-top: 14px;
@@ -218,9 +201,7 @@
   color: var(--color-bg);
 }
 
-/* ===========================
-   FOOTER ACTIONS
-   ============================ */
+/* FOOTER ACTIONS */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -256,9 +237,7 @@
   color: var(--color-bg);
 }
 
-/* ===========================
-   ANIMATIONS
-   ============================ */
+/* ANIMATIONS */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
