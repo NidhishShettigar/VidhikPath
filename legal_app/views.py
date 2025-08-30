@@ -493,35 +493,60 @@ def find_lawyers_api(request):
 
 
 #forum
+# Forum-related views only - Add these to your existing views.py
 
 @login_required
-def forum_view(request):
+def public_forum(request):
     """Render the forum page with existing posts"""
-    # Fetch posts from MongoDB (you'll need to implement this based on your existing structure)
-    posts_data = list(ForumPost.collection.find().sort("created_at", -1))
-    
-    # Convert MongoDB data to template-friendly format
-    posts = []
-    for post_data in posts_data:
-        post = {
-            'id': str(post_data['_id']),
-            'user': {'first_name': post_data.get('username', 'Anonymous')},
-            'content': post_data.get('content', ''),
-            'image': {'url': f"/media/{post_data['image']}"} if post_data.get('image') else None,
-            'created_at': post_data.get('created_at', datetime.utcnow()),
-            'likes': {'count': len(post_data.get('likes', []))},
-            'replies': {'all': [
-                {
-                    'user': {'first_name': reply.get('username', 'Anonymous')},
+    try:
+        posts_data = list(ForumPost.collection.find().sort("created_at", -1).limit(20))
+        
+        # Convert MongoDB data to template-friendly format
+        posts = []
+        for post_data in posts_data:
+            # Get user's real name from Django User model
+            try:
+                user = User.objects.get(username=post_data.get('username', ''))
+                display_name = user.first_name or user.username
+            except User.DoesNotExist:
+                display_name = post_data.get('username', 'Anonymous')
+            
+            # Format replies
+            formatted_replies = []
+            for reply in post_data.get('replies', []):
+                try:
+                    reply_user = User.objects.get(username=reply.get('username', ''))
+                    reply_display_name = reply_user.first_name or reply_user.username
+                except User.DoesNotExist:
+                    reply_display_name = reply.get('username', 'Anonymous')
+                
+                formatted_replies.append({
+                    'username': reply_display_name,
                     'content': reply.get('content', ''),
                     'created_at': reply.get('created_at', datetime.utcnow())
-                }
-                for reply in post_data.get('replies', [])
-            ]}
-        }
-        posts.append(post)
+                })
+            
+            # Check if current user liked this post
+            user_likes = post_data.get('likes', [])
+            
+            post = {
+                'id': str(post_data['_id']),
+                'username': post_data.get('username', 'Anonymous'),
+                'first_name': display_name,
+                'content': post_data.get('content', ''),
+                'image': post_data.get('image', ''),
+                'created_at': post_data.get('created_at', datetime.utcnow()),
+                'likes': user_likes,  # List of usernames who liked
+                'replies': formatted_replies
+            }
+            posts.append(post)
+        
+        return render(request, 'forum.html', {'posts': posts})
     
-    return render(request, 'forum.html', {'posts': posts})
+    except Exception as e:
+        print(f"Error in public_forum view: {e}")
+        return render(request, 'forum.html', {'posts': []})
+
 
 @csrf_exempt
 @login_required
@@ -533,16 +558,28 @@ def create_post_api(request):
         if not content:
             return JsonResponse({'error': 'Content is required'}, status=400)
         
+        # Validate content length
+        if len(content) > 5000:
+            return JsonResponse({'error': 'Content too long. Maximum 5000 characters allowed.'}, status=400)
+        
         image_path = ''
         if 'image' in request.FILES:
             file = request.FILES['image']
+            
             # Validate file type
             if not file.content_type.startswith('image/'):
                 return JsonResponse({'error': 'Invalid file type. Please upload an image.'}, status=400)
             
+            # Validate file size (max 5MB)
+            if file.size > 5 * 1024 * 1024:
+                return JsonResponse({'error': 'File too large. Maximum 5MB allowed.'}, status=400)
+            
             # Save the file
-            file_path = default_storage.save(f'forum_images/{file.name}', file)
-            image_path = file_path
+            try:
+                file_path = default_storage.save(f'forum_images/{file.name}', file)
+                image_path = file_path
+            except Exception as e:
+                return JsonResponse({'error': f'Error saving image: {str(e)}'}, status=500)
         
         try:
             # Create the post
@@ -552,18 +589,26 @@ def create_post_api(request):
                 image=image_path
             )
             
+            # Get display name
+            display_name = request.user.first_name or request.user.username
+            
             return JsonResponse({
                 'id': str(result.inserted_id),
                 'content': content,
-                'user': request.user.first_name or request.user.username,
+                'user': display_name,
+                'username': request.user.username,
                 'created_at': datetime.utcnow().strftime('%b %d, %Y %H:%M'),
                 'likes_count': 0,
-                'image': image_path
+                'image': image_path,
+                'status': 'success'
             })
+            
         except Exception as e:
+            print(f"Error creating post: {e}")
             return JsonResponse({'error': f'Error creating post: {str(e)}'}, status=500)
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 @login_required
@@ -577,14 +622,14 @@ def like_post_api(request):
             if not post_id:
                 return JsonResponse({'error': 'Post ID is required'}, status=400)
             
-            # Validate ObjectId
+            # Validate and convert ObjectId
             try:
                 post_object_id = ObjectId(post_id)
-            except:
+            except Exception:
                 return JsonResponse({'error': 'Invalid post ID format'}, status=400)
             
             # Find the post
-            post = ForumPost.collection.find_one({"_id": post_object_id})
+            post = ForumPost.get_by_id(post_object_id)
             if not post:
                 return JsonResponse({'error': 'Post not found'}, status=404)
             
@@ -592,30 +637,36 @@ def like_post_api(request):
             username = request.user.username
             
             if username in likes:
-                # Remove like
-                ForumPost.collection.update_one(
-                    {"_id": post_object_id},
-                    {"$pull": {"likes": username}}
-                )
-                liked = False
-                likes_count = len(likes) - 1
+                # Remove like (unlike)
+                result = ForumPost.unlike(post_object_id, username)
+                if result and result.modified_count > 0:
+                    liked = False
+                    likes_count = len(likes) - 1
+                else:
+                    return JsonResponse({'error': 'Failed to remove like'}, status=500)
             else:
                 # Add like
-                ForumPost.like(post_object_id, username)
-                liked = True
-                likes_count = len(likes) + 1
+                result = ForumPost.like(post_object_id, username)
+                if result and result.modified_count > 0:
+                    liked = True
+                    likes_count = len(likes) + 1
+                else:
+                    return JsonResponse({'error': 'Failed to add like'}, status=500)
             
             return JsonResponse({
                 'liked': liked,
-                'likes_count': likes_count
+                'likes_count': likes_count,
+                'status': 'success'
             })
             
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
+            print(f"Error in like_post_api: {e}")
             return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 @login_required
@@ -624,9 +675,7 @@ def reply_post_api(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print("Data received:", data)
             post_id = data.get('post_id')
-            print("post_id:", post_id)
             content = data.get('content', '').strip()
             
             if not post_id:
@@ -635,62 +684,68 @@ def reply_post_api(request):
             if not content:
                 return JsonResponse({'error': 'Reply content is required'}, status=400)
             
-            # Validate ObjectId
+            # Validate content length
+            if len(content) > 1000:
+                return JsonResponse({'error': 'Reply too long. Maximum 1000 characters allowed.'}, status=400)
+            
+            # Validate and convert ObjectId
             try:
                 post_object_id = ObjectId(post_id)
-            except:
+            except Exception:
                 return JsonResponse({'error': 'Invalid post ID format'}, status=400)
             
             # Check if post exists
-            post = ForumPost.collection.find_one({"_id": post_object_id})
+            post = ForumPost.get_by_id(post_object_id)
             if not post:
                 return JsonResponse({'error': 'Post not found'}, status=404)
             
             # Create the reply
-            ForumReply.create(post_object_id, request.user.username, content)
+            result = ForumReply.create(post_object_id, request.user.username, content)
             
-            return JsonResponse({
-                'content': content,
-                'user': request.user.first_name or request.user.username,
-                'created_at': datetime.utcnow().strftime('%b %d, %H:%M')
-            })
+            if result and result.modified_count > 0:
+                # Get display name
+                display_name = request.user.first_name or request.user.username
+                
+                return JsonResponse({
+                    'content': content,
+                    'user': display_name,
+                    'username': request.user.username,
+                    'created_at': datetime.utcnow().strftime('%b %d, %H:%M'),
+                    'status': 'success'
+                })
+            else:
+                return JsonResponse({'error': 'Failed to create reply'}, status=500)
             
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
+            print(f"Error in reply_post_api: {e}")
             return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+# Additional utility view for forum stats (optional)
 @login_required
-def get_post_details(request, post_id):
-    """API endpoint to get detailed information about a specific post"""
+def forum_stats_api(request):
+    """Get forum statistics"""
     try:
-        post_object_id = ObjectId(post_id)
-        post = ForumPost.collection.find_one({"_id": post_object_id})
+        total_posts = ForumPost.collection.count_documents({})
         
-        if not post:
-            return JsonResponse({'error': 'Post not found'}, status=404)
+        # Get total replies count across all posts
+        pipeline = [
+            {"$project": {"reply_count": {"$size": "$replies"}}},
+            {"$group": {"_id": None, "total": {"$sum": "$reply_count"}}}
+        ]
+        result = list(ForumPost.collection.aggregate(pipeline))
+        total_replies = result[0]['total'] if result else 0
         
-        post_data = {
-            'id': str(post['_id']),
-            'username': post.get('username', 'Anonymous'),
-            'content': post.get('content', ''),
-            'image': post.get('image', ''),
-            'likes_count': len(post.get('likes', [])),
-            'liked_by_user': request.user.username in post.get('likes', []),
-            'created_at': post.get('created_at', datetime.utcnow()).strftime('%b %d, %Y %H:%M'),
-            'replies': [
-                {
-                    'username': reply.get('username', 'Anonymous'),
-                    'content': reply.get('content', ''),
-                    'created_at': reply.get('created_at', datetime.utcnow()).strftime('%b %d, %H:%M')
-                }
-                for reply in post.get('replies', [])
-            ]
-        }
+        return JsonResponse({
+            'total_posts': total_posts,
+            'total_replies': total_replies,
+            'status': 'success'
+        })
         
-        return JsonResponse(post_data)
-        
-    except:
-        return JsonResponse({'error': 'Invalid post ID'}, status=400)
+    except Exception as e:
+        print(f"Error in forum_stats_api: {e}")
+        return JsonResponse({'error': 'Failed to get forum stats'}, status=500)
