@@ -110,16 +110,23 @@ function sendMessage() {
     });
 }
 
+
 // Add a message div to the chat messages container
 function addMessageToChat(message, sender) {
   const chatMessages = document.getElementById("chatMessages");
   const messageDiv = document.createElement("div");
   messageDiv.className = `message ${sender}-message`;
-  messageDiv.innerHTML = `<p>${message}</p>`;
+
+  // Use marked.js to convert markdown to HTML
+  const htmlContent = marked.parse(message);
+
+  // Insert parsed HTML into the message div
+  messageDiv.innerHTML = htmlContent;
 
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 
 // Display typing indicator
 function showTypingIndicator() {
