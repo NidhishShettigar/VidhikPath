@@ -33,29 +33,6 @@ from pdf2image import convert_from_path
 import google.generativeai as genai
 import re
 
-from django.contrib.auth import login
-from firebase_admin import auth as firebase_auth
-
-@csrf_exempt
-def some_api(request):
-    id_token = request.META.get('HTTP_AUTHORIZATION')
-    if not id_token:
-        return JsonResponse({'error': 'No auth token'}, status=401)
-
-    # Remove Bearer if exists
-    if id_token.startswith('Bearer '):
-        id_token = id_token[len('Bearer '):]
-
-    try:
-        decoded_token = firebase_auth.verify_id_token(id_token)
-        uid = decoded_token['uid']
-        email = decoded_token.get('email')
-        user = User.objects.get(username=email)
-        login(request, user) 
-        # Now user is authenticated in Django session
-    except Exception as e:
-        return JsonResponse({'error': 'Invalid token'}, status=401)
-
 
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
@@ -124,7 +101,7 @@ def register_page(request):
         )
         
         login(request, user)
-        return redirect('dashboard')
+        return redirect('login_page')
     
     return render(request, 'register.html')
 

@@ -110,7 +110,6 @@ function sendMessage() {
     });
 }
 
-
 // Add a message div to the chat messages container
 function addMessageToChat(message, sender) {
   const chatMessages = document.getElementById("chatMessages");
@@ -126,7 +125,6 @@ function addMessageToChat(message, sender) {
   chatMessages.appendChild(messageDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-
 
 // Display typing indicator
 function showTypingIndicator() {
