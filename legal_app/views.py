@@ -1,176 +1,334 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import default_storage
 from django.conf import settings
+
 from bson import ObjectId
+from datetime import datetime
 import json
-from .db_connection import db
 import os
 import base64
-from datetime import datetime
-from .models import UserProfile, ForumPost, ForumReply
+import re
+import tempfile
+
+import cv2
+import pdfplumber
+import pytesseract
+from pdf2image import convert_from_path
+
 import faiss
 import numpy as np
-from transformers import AutoTokenizer, AutoModel
-from openai import OpenAI
 import torch
 import spacy
 import pickle
-import os
-# from google.genai.types import HttpOptions
-import tempfile
-import cv2
-import pytesseract
-import os
-import cv2
-import tempfile
-import pdfplumber
-from pdf2image import convert_from_path
-import google.generativeai as genai
-import re
+import functools
 
+from transformers import AutoTokenizer, AutoModel
+from openai import OpenAI
+import google.generativeai as genai
+
+from .firebase_utils import FirebaseAuth
+from .db_connection import db
+from .models import (
+    User,
+    ForumPost, 
+    ForumReply, 
+    FirebaseTokenManager,
+    UserSession   # keep if you still track sessions in Mongo
+)
 
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 
-# Landing page with hammer animation
+def firebase_login_required(view_func):
+    """Decorator to require Firebase authentication"""
+    @functools.wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        # Check for Firebase token in session or header
+        firebase_token = request.session.get('firebase_token') or request.headers.get('Authorization')
+        
+        if not firebase_token:
+            if request.is_ajax() or 'api' in request.path:
+                return JsonResponse({'error': 'Authentication required', 'redirect': '/login/'}, status=401)
+            return redirect('login')
+        
+        # Clean token if it has "Bearer " prefix
+        if firebase_token.startswith('Bearer '):
+            firebase_token = firebase_token[7:]
+        
+        # Verify token and get user
+        result = FirebaseTokenManager.get_user_from_token(firebase_token)
+        
+        if not result['success']:
+            # Clear invalid session
+            request.session.pop('firebase_token', None)
+            request.session.pop('firebase_uid', None)
+            
+            if request.is_ajax() or 'api' in request.path:
+                return JsonResponse({'error': 'Invalid token', 'redirect': '/login/'}, status=401)
+            return redirect('login')
+        
+        # Add user data to request
+        request.firebase_user = result['user']
+        request.firebase_uid = result['firebase_uid']
+        
+        return view_func(request, *args, **kwargs)
+    
+    return wrapper
+
+
+@firebase_login_required
+def update_profile(request):
+    if request.method == "POST":
+        try:
+            firebase_uid = request.session.get("firebase_uid")
+            if not firebase_uid:
+                return JsonResponse({"success": False, "error": "User not authenticated"})
+
+            name = request.POST.get("name")
+            phone = request.POST.get("phone")
+            location = request.POST.get("location")
+            profile_photo = request.FILES.get("profile_photo")
+
+            update_data = {
+                "name": name,
+                "phone": phone,
+                "location": location
+            }
+
+            # Handle photo upload
+            if profile_photo:
+                photo_path = os.path.join("media/profile_photos", profile_photo.name)
+                with open(photo_path, "wb+") as destination:
+                    for chunk in profile_photo.chunks():
+                        destination.write(chunk)
+                update_data["profile_photo"] = photo_path
+
+            # Update MongoDB
+            db.users.update_one(
+                {"firebase_uid": firebase_uid},
+                {"$set": update_data}
+            )
+
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid request"})
+
+# Landing page
 def landing_page(request):
     return render(request, 'landing.html')
 
-# Authentication views
+
+#login
 def login_page(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        
-        try:
-            user = User.objects.get(email=email)
-            user = authenticate(request, username=user.username, password=password)
-            if user:
-                login(request, user)
-                return redirect('chatbot')
-            else:
-                return render(request, 'login.html', {'error': 'Invalid credentials'})
-        except User.DoesNotExist:
-            return render(request, 'login.html', {'error': 'User not found'})
-    
+    if request.session.get('firebase_uid'):  # instead of firebase_token
+        return redirect('chatbot')
     return render(request, 'login.html')
 
+
+
+# registration
 def register_page(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        user_type = request.POST.get('user_type')
-        
-        # Create user
-        user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            first_name=name
-        )
-        
-        # Create profile using PyMongo
-        is_lawyer = (user_type == 'lawyer')
-        phone = ''
-        location = request.POST.get('location', '') if is_lawyer else ''
-        lawyer_type = request.POST.get('lawyer_type', '') if is_lawyer else ''
-        experience = int(request.POST.get('experience', 0)) if is_lawyer else None
-        license_document = ''
-        
-        if is_lawyer and 'license_document' in request.FILES:
-            # Handle file upload for license document
-            file = request.FILES['license_document']
-            file_path = default_storage.save(f'licenses/{file.name}', file)
-            license_document = file_path
-        
-        UserProfile.create(
-            username=user.username,
-            is_lawyer=is_lawyer,
-            phone=phone,
-            location=location,
-            lawyer_type=lawyer_type,
-            experience=experience,
-            license_document=license_document
-        )
-        
-        login(request, user)
-        return redirect('login_page')
+    # If already logged in, redirect to dashboard
+    if request.session.get('firebase_token'):
+        return redirect('login')
     
     return render(request, 'register.html')
 
-# Main dashboard
-@login_required
-def dashboard(request):
-    return render(request, 'dashboard.html')
+@csrf_exempt
+def firebase_verify_token(request):
+    """Verify Firebase ID token and create/login user"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            id_token = data.get('idToken')
+            user_data = data.get('userData', {})  # Additional user data from registration
+            
+            if not id_token:
+                return JsonResponse({'success': False, 'error': 'No token provided'})
+            
+            # Verify Firebase token
+            token_result = FirebaseTokenManager.verify_token(id_token)
+            
+            if not token_result['success']:
+                return JsonResponse({'success': False, 'error': 'Invalid token'})
+            
+            firebase_uid = token_result['firebase_uid']
+            email = token_result['email']
+            
+            # Check if user exists in MongoDB
+            user = User.find_by_firebase_uid(firebase_uid)
+            
+            if not user:
+                # Create new user if doesn't exist
+                user_creation_data = {
+                    'name': user_data.get('name', token_result.get('name', '')),
+                    'user_type': user_data.get('user_type', 'user'),
+                    'phone': user_data.get('phone', ''),
+                    'location': user_data.get('location', ''),
+                }
+                
+                # Add lawyer-specific fields if user_type is lawyer
+                if user_data.get('user_type') == 'lawyer':
+                    user_creation_data.update({
+                        'lawyer_type': user_data.get('lawyer_type', ''),
+                        'experience': int(user_data.get('experience', 0)),
+                        'license_number': user_data.get('license_number', ''),
+                        'languages_spoken': user_data.get('languages_spoken', []),
+                        'education': user_data.get('education', ''),
+                    })
+                
+                User.create(firebase_uid, email, **user_creation_data)
+                user = User.find_by_firebase_uid(firebase_uid)
+            
+            # Store session data
+            request.session['firebase_token'] = id_token
+            request.session['firebase_uid'] = firebase_uid
+            request.session['user_email'] = email
+            
+            # Update/create session in MongoDB
+            refresh_token = data.get('refreshToken', '')
+            UserSession.update_session(firebase_uid, id_token, refresh_token)
+            
+            return JsonResponse({
+                'success': True,
+                'user': {
+                    'firebase_uid': firebase_uid,
+                    'email': email,
+                    'name': user.get('name', ''),
+                    'user_type': user.get('user_type', 'user'),
+                    'is_lawyer': user.get('user_type') == 'lawyer'
+                },
+                'redirect': '/dashboard/'
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+        except Exception as e:
+            print(f"Error in firebase_verify_token: {e}")
+            return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+@csrf_exempt
+def firebase_password_reset(request):
+    """Send password reset email via Firebase"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            
+            result = FirebaseAuth.send_password_reset_email(email)
+            return JsonResponse(result)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
 
 # Feature views
-@login_required
+@firebase_login_required
+def dashboard(request):
+    return render(request, 'chatbot.html', {
+        'user': request.firebase_user,
+        'firebase_uid': request.firebase_uid
+    })
+
+
+@firebase_login_required
 def chatbot(request):
-    return render(request, 'chatbot.html')
+    return render(request, 'chatbot.html', {'user': request.firebase_user})
 
-@login_required
+
+@firebase_login_required
 def document_summarizer(request):
-    return render(request, 'summerizer.html')
+    return render(request, 'summerizer.html', {'user': request.firebase_user})
 
-@login_required
+
+@firebase_login_required
 def lawyer_connector(request):
-    lawyers = list(UserProfile.collection.find({"is_lawyer": True}))
-    return render(request, 'connector.html', {'lawyers': lawyers})
+    lawyers = User.find_lawyers()
+    return render(request, 'connector.html', {
+        'lawyers': lawyers,
+        'user': request.firebase_user
+    })
 
-@login_required
+@firebase_login_required
 def public_forum(request):
-    posts = list(ForumPost.collection.find().sort("created_at", -1))
-    return render(request, 'forum.html', {'posts': posts})
-
-@login_required
-def user_profile(request):
-    profile = UserProfile.find_by_username(request.user.username)
+    """Render the forum page with existing posts"""
+    try:
+        posts = ForumPost.get_all_with_user_info(limit=20)
+        
+        return render(request, 'forum.html', {
+            'posts': posts,
+            'user': request.firebase_user
+        })
     
-    if not profile:
-        # Create profile if it doesn't exist
-        UserProfile.create(username=request.user.username)
-        profile = UserProfile.find_by_username(request.user.username)
+    except Exception as e:
+        print(f"Error in public_forum view: {e}")
+        return render(request, 'forum.html', {
+            'posts': [],
+            'user': request.firebase_user
+        })
+
+
+@firebase_login_required
+def user_profile(request):
+    user = request.firebase_user
     
     if request.method == 'POST':
-        phone = request.POST.get('phone') or profile.get("phone", "")
-        location = request.POST.get('location') or profile.get("location", "")
-        profile_photo = profile.get("profile_photo", "")
+        # Handle profile update
+        update_data = {
+            'name': request.POST.get('name', user.get('name', '')),
+            'phone': request.POST.get('phone', user.get('phone', '')),
+            'location': request.POST.get('location', user.get('location', ''))
+        }
         
+        # Handle profile photo upload
         if 'profile_photo' in request.FILES:
             file = request.FILES['profile_photo']
             file_path = default_storage.save(f'profiles/{file.name}', file)
-            profile_photo = file_path
+            update_data['profile_photo'] = file_path
         
-        # Update profile using PyMongo
-        update_data = {
-            "phone": phone,
-            "location": location,
-            "profile_photo": profile_photo
-        }
+        # Update lawyer-specific fields if user is a lawyer
+        if user.get('user_type') == 'lawyer':
+            update_data.update({
+                'lawyer_type': request.POST.get('lawyer_type', user.get('lawyer_type', '')),
+                'experience': int(request.POST.get('experience', user.get('experience', 0))),
+                'license_number': request.POST.get('license_number', user.get('license_number', '')),
+                'education': request.POST.get('education', user.get('education', '')),
+            })
+            # Handle languages (assuming it's a comma-separated string)
+            languages_str = request.POST.get('languages_spoken', '')
+            if languages_str:
+                update_data['languages_spoken'] = [l.strip() for l in languages_str.split(',')]
         
-        UserProfile.collection.update_one(
-            {"username": request.user.username},
-            {"$set": update_data}
-        )
+        # Update in MongoDB
+        User.update_profile(request.firebase_uid, update_data)
         
-        # Update user info (Django User model)
-        request.user.first_name = request.POST.get('name') or request.user.first_name
-        request.user.save()
-
-        # 🔑 Reload the updated profile after update
-        profile = UserProfile.find_by_username(request.user.username)
+        # Refresh user data
+        request.firebase_user = User.find_by_firebase_uid(request.firebase_uid)
     
-    return render(request, 'profile.html', {'profile': profile})
+    return render(request, 'profile.html', {
+        'user': request.firebase_user
+    })
+
 
 def logout_view(request):
-    logout(request)
+    """Logout user by clearing session"""
+    firebase_uid = request.session.get('firebase_uid')
+    
+    # Invalidate session in MongoDB
+    if firebase_uid:
+        UserSession.invalidate_session(firebase_uid)
+    
+    # Clear Django session
+    request.session.flush()
+    
     return redirect('login')
 
 
@@ -248,7 +406,7 @@ def is_legal_query(text: str) -> bool:
 
 
 @csrf_exempt
-@login_required
+@firebase_login_required
 def chat_api(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -388,7 +546,7 @@ def summarize_chunk(chunk):
 # ---------- API View ----------
 
 @csrf_exempt
-@login_required
+@firebase_login_required  
 def summarize_api(request):
     if request.method == "POST" and "document" in request.FILES:
         document = request.FILES["document"]
@@ -456,100 +614,43 @@ def summarize_api(request):
 
 
 @csrf_exempt
-@login_required
+@firebase_login_required
 def find_lawyers_api(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        location = data.get('location', '')
-        lawyer_type = data.get('lawyer_type', '')
-        use_current_location = data.get('use_current_location', False)
-        
-        query = {"is_lawyer": True}
-        
-        if location:
-            query["location"] = {"$regex": location, "$options": "i"}
-        
-        if lawyer_type:
-            query["lawyer_type"] = {"$regex": lawyer_type, "$options": "i"}
-        
-        lawyers = list(UserProfile.collection.find(query))
-        
-        lawyers_data = []
-        for lawyer in lawyers:
-            # Get user info from Django User model
-            try:
-                user = User.objects.get(username=lawyer['username'])
+        try:
+            data = json.loads(request.body)
+            location = data.get('location', '')
+            lawyer_type = data.get('lawyer_type', '')
+            specialization = data.get('specialization', '')
+            
+            lawyers = User.find_lawyers(location, lawyer_type, specialization)
+            
+            lawyers_data = []
+            for lawyer in lawyers:
                 lawyers_data.append({
-                    'name': user.first_name,
-                    'type': lawyer.get('lawyer_type', ''),
+                    'firebase_uid': lawyer['firebase_uid'],
+                    'name': lawyer.get('name', ''),
+                    'lawyer_type': lawyer.get('lawyer_type', ''),
                     'experience': lawyer.get('experience', 0),
                     'location': lawyer.get('location', ''),
-                    'email': user.email
-                })
-            except User.DoesNotExist:
-                continue
-        
-        return JsonResponse({'lawyers': lawyers_data})
-
-
-#forum
-# Forum-related views only - Add these to your existing views.py
-
-@login_required
-def public_forum(request):
-    """Render the forum page with existing posts"""
-    try:
-        posts_data = list(ForumPost.collection.find().sort("created_at", -1).limit(20))
-        
-        # Convert MongoDB data to template-friendly format
-        posts = []
-        for post_data in posts_data:
-            # Get user's real name from Django User model
-            try:
-                user = User.objects.get(username=post_data.get('username', ''))
-                display_name = user.first_name or user.username
-            except User.DoesNotExist:
-                display_name = post_data.get('username', 'Anonymous')
-            
-            # Format replies
-            formatted_replies = []
-            for reply in post_data.get('replies', []):
-                try:
-                    reply_user = User.objects.get(username=reply.get('username', ''))
-                    reply_display_name = reply_user.first_name or reply_user.username
-                except User.DoesNotExist:
-                    reply_display_name = reply.get('username', 'Anonymous')
-                
-                formatted_replies.append({
-                    'username': reply_display_name,
-                    'content': reply.get('content', ''),
-                    'created_at': reply.get('created_at', datetime.utcnow())
+                    'email': lawyer.get('email', ''),
+                    'languages_spoken': lawyer.get('languages_spoken', []),
+                    'verified': lawyer.get('verified', False),
+                    'rating': lawyer.get('rating', 0.0)
                 })
             
-            # Check if current user liked this post
-            user_likes = post_data.get('likes', [])
+            return JsonResponse({'lawyers': lawyers_data})
             
-            post = {
-                'id': str(post_data['_id']),
-                'username': post_data.get('username', 'Anonymous'),
-                'first_name': display_name,
-                'content': post_data.get('content', ''),
-                'image': post_data.get('image', ''),
-                'created_at': post_data.get('created_at', datetime.utcnow()),
-                'likes': user_likes,  # List of usernames who liked
-                'replies': formatted_replies
-            }
-            posts.append(post)
-        
-        return render(request, 'forum.html', {'posts': posts})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
     
-    except Exception as e:
-        print(f"Error in public_forum view: {e}")
-        return render(request, 'forum.html', {'posts': []})
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
 @csrf_exempt
-@login_required
+@firebase_login_required
 def create_post_api(request):
     """API endpoint to create a new forum post"""
     if request.method == 'POST':
@@ -558,7 +659,6 @@ def create_post_api(request):
         if not content:
             return JsonResponse({'error': 'Content is required'}, status=400)
         
-        # Validate content length
         if len(content) > 5000:
             return JsonResponse({'error': 'Content too long. Maximum 5000 characters allowed.'}, status=400)
         
@@ -566,15 +666,12 @@ def create_post_api(request):
         if 'image' in request.FILES:
             file = request.FILES['image']
             
-            # Validate file type
             if not file.content_type.startswith('image/'):
                 return JsonResponse({'error': 'Invalid file type. Please upload an image.'}, status=400)
             
-            # Validate file size (max 5MB)
             if file.size > 5 * 1024 * 1024:
                 return JsonResponse({'error': 'File too large. Maximum 5MB allowed.'}, status=400)
             
-            # Save the file
             try:
                 file_path = default_storage.save(f'forum_images/{file.name}', file)
                 image_path = file_path
@@ -582,21 +679,17 @@ def create_post_api(request):
                 return JsonResponse({'error': f'Error saving image: {str(e)}'}, status=500)
         
         try:
-            # Create the post
             result = ForumPost.create(
-                username=request.user.username,
+                firebase_uid=request.firebase_uid,
                 content=content,
                 image=image_path
             )
             
-            # Get display name
-            display_name = request.user.first_name or request.user.username
-            
             return JsonResponse({
                 'id': str(result.inserted_id),
                 'content': content,
-                'user': display_name,
-                'username': request.user.username,
+                'user': request.firebase_user.get('name', 'Unknown User'),
+                'firebase_uid': request.firebase_uid,
                 'created_at': datetime.utcnow().strftime('%b %d, %Y %H:%M'),
                 'likes_count': 0,
                 'image': image_path,
@@ -611,7 +704,7 @@ def create_post_api(request):
 
 
 @csrf_exempt
-@login_required
+@firebase_login_required
 def like_post_api(request):
     """API endpoint to like/unlike a forum post"""
     if request.method == 'POST':
@@ -622,31 +715,27 @@ def like_post_api(request):
             if not post_id:
                 return JsonResponse({'error': 'Post ID is required'}, status=400)
             
-            # Validate and convert ObjectId
             try:
                 post_object_id = ObjectId(post_id)
             except Exception:
                 return JsonResponse({'error': 'Invalid post ID format'}, status=400)
             
-            # Find the post
             post = ForumPost.get_by_id(post_object_id)
             if not post:
                 return JsonResponse({'error': 'Post not found'}, status=404)
             
             likes = post.get('likes', [])
-            username = request.user.username
+            firebase_uid = request.firebase_uid
             
-            if username in likes:
-                # Remove like (unlike)
-                result = ForumPost.unlike(post_object_id, username)
+            if firebase_uid in likes:
+                result = ForumPost.unlike(post_object_id, firebase_uid)
                 if result and result.modified_count > 0:
                     liked = False
                     likes_count = len(likes) - 1
                 else:
                     return JsonResponse({'error': 'Failed to remove like'}, status=500)
             else:
-                # Add like
-                result = ForumPost.like(post_object_id, username)
+                result = ForumPost.like(post_object_id, firebase_uid)
                 if result and result.modified_count > 0:
                     liked = True
                     likes_count = len(likes) + 1
@@ -669,7 +758,7 @@ def like_post_api(request):
 
 
 @csrf_exempt
-@login_required
+@firebase_login_required
 def reply_post_api(request):
     """API endpoint to reply to a forum post"""
     if request.method == 'POST':
@@ -678,38 +767,28 @@ def reply_post_api(request):
             post_id = data.get('post_id')
             content = data.get('content', '').strip()
             
-            if not post_id:
-                return JsonResponse({'error': 'Post ID is required'}, status=400)
+            if not post_id or not content:
+                return JsonResponse({'error': 'Post ID and content are required'}, status=400)
             
-            if not content:
-                return JsonResponse({'error': 'Reply content is required'}, status=400)
-            
-            # Validate content length
             if len(content) > 1000:
                 return JsonResponse({'error': 'Reply too long. Maximum 1000 characters allowed.'}, status=400)
             
-            # Validate and convert ObjectId
             try:
                 post_object_id = ObjectId(post_id)
             except Exception:
                 return JsonResponse({'error': 'Invalid post ID format'}, status=400)
             
-            # Check if post exists
             post = ForumPost.get_by_id(post_object_id)
             if not post:
                 return JsonResponse({'error': 'Post not found'}, status=404)
             
-            # Create the reply
-            result = ForumReply.create(post_object_id, request.user.username, content)
+            result = ForumReply.create(post_object_id, request.firebase_uid, content)
             
             if result and result.modified_count > 0:
-                # Get display name
-                display_name = request.user.first_name or request.user.username
-                
                 return JsonResponse({
                     'content': content,
-                    'user': display_name,
-                    'username': request.user.username,
+                    'user': request.firebase_user.get('name', 'Unknown User'),
+                    'firebase_uid': request.firebase_uid,
                     'created_at': datetime.utcnow().strftime('%b %d, %H:%M'),
                     'status': 'success'
                 })
@@ -723,29 +802,3 @@ def reply_post_api(request):
             return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-
-# Additional utility view for forum stats (optional)
-@login_required
-def forum_stats_api(request):
-    """Get forum statistics"""
-    try:
-        total_posts = ForumPost.collection.count_documents({})
-        
-        # Get total replies count across all posts
-        pipeline = [
-            {"$project": {"reply_count": {"$size": "$replies"}}},
-            {"$group": {"_id": None, "total": {"$sum": "$reply_count"}}}
-        ]
-        result = list(ForumPost.collection.aggregate(pipeline))
-        total_replies = result[0]['total'] if result else 0
-        
-        return JsonResponse({
-            'total_posts': total_posts,
-            'total_replies': total_replies,
-            'status': 'success'
-        })
-        
-    except Exception as e:
-        print(f"Error in forum_stats_api: {e}")
-        return JsonResponse({'error': 'Failed to get forum stats'}, status=500)

@@ -1,97 +1,143 @@
-{% extends 'base.html' %}
-
-{% block title %}Register - VidhikPath{% endblock %}
-
-{% block extra_css %}
-    <!-- Registration page styles -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - VidhikPath</title>
     <link rel="stylesheet" href="/static/css/register.css">
-{% endblock %}
-
-{% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h2>Create Account</h2>
-            <p>Join VidhikPath community</p>
-        </div>
-        <!-- Registration Form -->
-        <form method="post" enctype="multipart/form-data" class="auth-form" id="registerForm">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h2>Create Account</h2>
+                <p>Join VidhikPath community</p>
             </div>
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-                <small class="password-hint">Must contain at least 8 characters, one uppercase, one lowercase, and one number</small>
-            </div>
-            <!-- Account Type Selection -->
-            <div class="form-group">
-                <label>Account Type</label>
-                <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="user_type" value="user" checked onchange="toggleLawyerFields()">
-                        <span>User</span>
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="user_type" value="lawyer" onchange="toggleLawyerFields()">
-                        <span>Lawyer</span>
-                    </label>
-                </div>
-            </div>
-            <!-- Lawyer-specific Fields (hidden by default) -->
-            <div id="lawyerFields" style="display: none;">
+            
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+            
+            <!-- Registration Form -->
+            <div class="auth-form">
+                <!-- Basic Info -->
                 <div class="form-group">
-                    <label for="lawyer_type">Lawyer Type</label>
-                    <select id="lawyer_type" name="lawyer_type">
-                        <option value="">Select Type</option>
-                        <option value="criminal">Criminal Lawyer</option>
-                        <option value="civil">Civil Lawyer</option>
-                        <option value="corporate">Corporate Lawyer</option>
-                        <option value="family">Family Lawyer</option>
-                        <option value="property">Property Lawyer</option>
-                    </select>
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" required>
                 </div>
+                
                 <div class="form-group">
-                    <label for="experience">Experience (Years)</label>
-                    <input type="number" id="experience" name="experience" min="0">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" required>
                 </div>
+                
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" required>
+                    <small class="password-hint">Must contain at least 6 characters</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="+91 9876543210">
+                </div>
+                
                 <div class="form-group">
                     <label for="location">Location</label>
-                    <input type="text" id="location" name="location" placeholder="City, State">
+                    <input type="text" id="location" placeholder="City, State">
                 </div>
+                
+                <!-- Account Type -->
                 <div class="form-group">
-                    <label for="license_document">License Document</label>
-                    <input type="file" id="license_document" name="license_document" accept=".pdf,.jpg,.jpeg,.png">
+                    <label>Account Type *</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="userType" value="user" checked onchange="toggleLawyerFields()">
+                            <span>User</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="userType" value="lawyer" onchange="toggleLawyerFields()">
+                            <span>Lawyer</span>
+                        </label>
+                    </div>
                 </div>
+                
+                <!-- Lawyer-specific fields -->
+                <div id="lawyerFields" style="display: none;">
+                    <h3 class="section-title">Professional Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="lawyerType">Practice Area *</label>
+                        <select id="lawyerType" required>
+                            <option value="">Select Practice Area</option>
+                            <option value="Criminal Law">Criminal Law</option>
+                            <option value="Civil Law">Civil Law</option>
+                            <option value="Family Law">Family Law</option>
+                            <option value="Corporate Law">Corporate Law</option>
+                            <option value="Property Law">Property Law</option>
+                            <option value="Labor Law">Labor Law</option>
+                            <option value="Tax Law">Tax Law</option>
+                            <option value="Constitutional Law">Constitutional Law</option>
+                            <option value="Immigration Law">Immigration Law</option>
+                            <option value="Environmental Law">Environmental Law</option>
+                            <option value="Intellectual Property">Intellectual Property</option>
+                            <option value="Banking Law">Banking Law</option>
+                            <option value="Insurance Law">Insurance Law</option>
+                            <option value="Consumer Protection">Consumer Protection</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="experience">Years of Experience *</label>
+                        <input type="number" id="experience" min="0" max="60" required>
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="licenseNumber">License Number *</label>
+                        <input type="text" id="licenseNumber" placeholder="Your Bar Council License Number" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="education">Education Qualification *</label>
+                        <input type="text" id="education" placeholder="e.g., LLB from XYZ University" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="languagesSpoken">Languages Spoken</label>
+                        <input type="text" id="languagesSpoken" placeholder="e.g., English, Hindi (comma-separated)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="licenseDocument">License Document</label>
+                        <input type="file" id="licenseDocument" accept=".pdf,.jpg,.jpeg,.png">
+                    </div>
+                </div>
+                
+                <!-- Terms -->
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <span>I agree to the <a href="/terms/" target="_blank">Terms</a> and <a href="/privacy/" target="_blank">Privacy Policy</a> *</span>
+                    </label>
+                </div>
+                
+                <button type="button" class="btn btn-primary btn-full" onclick="firebaseRegister()">
+                    Create Account
+                </button>
             </div>
-            <button type="submit" class="btn btn-primary btn-full">Create Account</button>
-        </form>
-        <div class="auth-footer">
-            <p>Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+            
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login/">Sign in here</a></p>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-// Toggle lawyer-specific fields based on account type
-function toggleLawyerFields() {
-    const lawyerFields = document.getElementById('lawyerFields');
-    const isLawyer = document.querySelector('input[name="user_type"]:checked').value === 'lawyer';
-    lawyerFields.style.display = isLawyer ? 'block' : 'none';
-}
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 
-// Password validation feedback
-document.getElementById('password').addEventListener('input', function(e) {
-    const password = e.target.value;
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-    const isValid = regex.test(password);
-    e.target.style.borderColor = isValid ? '#28a745' : '#dc3545';
-});
-</script>
-{% endblock %}
+    <!-- External JS -->
+    <script src="/static/js/register.js"></script>
+</body>
+</html>

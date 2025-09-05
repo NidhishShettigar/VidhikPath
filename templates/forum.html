@@ -43,7 +43,7 @@
             {% for post in posts %}
             <div class="forum-post" data-post-id="{{ post.id }}">
                 <div class="post-header">
-                    <div class="post-user">{{ post.first_name|default:post.username }}</div>
+                    <div class="post-user">{{ post.user.name }}</div>
                     <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
                 </div>
 
@@ -55,7 +55,7 @@
                 </div>
 
                 <div class="post-actions">
-                    <button class="action-btn like-btn {% if user.username in post.likes %}liked{% endif %}" onclick="likePost('{{ post.id }}')">
+                    <button class="action-btn like-btn {% if user.user in post.likes %}liked{% endif %}" onclick="likePost('{{ post.id }}')">
                         👍 <span class="like-count">{{ post.likes|length }}</span>
                     </button>
                     <button class="action-btn reply-btn" onclick="toggleReply('{{ post.id }}')">
@@ -85,7 +85,7 @@
                 <div class="replies" id="replies{{ post.id }}">
                     {% for reply in post.replies %}
                     <div class="reply">
-                        <strong>{{ reply.username }}:</strong>
+                        <strong>{{ reply.user.name }}:</strong>
                         {{ reply.content|linebreaks }}
                         <small>{{ reply.created_at|date:"M d, H:i" }}</small>
                     </div>

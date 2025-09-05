@@ -11,6 +11,7 @@ urlpatterns = [
     path('lawyer-connector/', views.lawyer_connector, name='connector'),
     path('forum/', views.public_forum, name='forum'),
     path('profile/', views.user_profile, name='profile'),
+    path("api/profile/update/", views.update_profile, name="update_profile"),
     path('logout/', views.logout_view, name='logout'),
     
     # API endpoints
@@ -20,4 +21,8 @@ urlpatterns = [
     path('api/forum/post/', views.create_post_api, name='create_post_api'),
     path('api/forum/like/', views.like_post_api, name='like_post_api'),
     path('api/forum/reply/', views.reply_post_api, name='reply_post_api'),
+    
+    # Firebase API endpoints
+    path('api/firebase/verify-token/', views.firebase_verify_token, name='firebase_verify_token'),
+    path('api/firebase/password-reset/', views.firebase_password_reset, name='firebase_password_reset'),
 ]

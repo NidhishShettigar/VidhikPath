@@ -1,4 +1,3 @@
-// Forum functionality
 
 // Create a new forum post
 function createPost() {

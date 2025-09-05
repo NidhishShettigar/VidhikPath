@@ -1,4 +1,3 @@
-// VidhikPath - Main JavaScript Functions
 
 // Global variables
 let currentTheme = "light";
