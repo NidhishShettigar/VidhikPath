@@ -15,7 +15,7 @@ def find_lawyers_api(request):
             lawyer_type = data.get('lawyer_type', '')
             specialization = data.get('specialization', '')
             
-            lawyers = User.find_lawyers(location, lawyer_type, specialization)
+            lawyers = User.find_lawyers(location, lawyer_type)
             
             lawyers_data = []
             for lawyer in lawyers:

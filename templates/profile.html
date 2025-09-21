@@ -5,6 +5,7 @@
 {{ block.super }}
 <!-- Profile-specific styles -->
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 {% endblock %}
 
 {% block extra %}
@@ -45,7 +46,7 @@
                         
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" value="{{ user.email }}" readonly> <br><br>
+                            <input type="email" value="{{ user.email }}" readonly> 
                         </div>
                     </div>
                 </div>

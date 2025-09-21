@@ -7,7 +7,7 @@ from ..models import User, UserSession, FirebaseTokenManager
 
 def login_page(request):
     if request.session.get('firebase_uid'):
-        return redirect('chatbot')
+        return redirect('dashboard')
     return render(request, 'login.html')
 
 def register_page(request):

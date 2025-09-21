@@ -5,11 +5,12 @@ import functools
 from ..firebase_utils import FirebaseAuth
 from ..models import UserSession, FirebaseTokenManager
 from openai import OpenAI
+from ..models import User
 
 # client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 def firebase_login_required(view_func):
-    """Decorator to require Firebase authentication"""
+    """Decorator to require Firebase authentication and attach user to request"""
     @functools.wraps(view_func)
     def wrapper(request, *args, **kwargs):
         # Check for Firebase token in session or header
@@ -24,8 +25,8 @@ def firebase_login_required(view_func):
         if firebase_token.startswith('Bearer '):
             firebase_token = firebase_token[7:]
         
-        # Verify token and get user
-        result = FirebaseTokenManager.get_user_from_token(firebase_token)
+        # Verify token and get Firebase info
+        result = FirebaseTokenManager.verify_token(firebase_token)
         
         if not result['success']:
             # Clear invalid session
@@ -36,13 +37,17 @@ def firebase_login_required(view_func):
                 return JsonResponse({'error': 'Invalid token', 'redirect': '/login/'}, status=401)
             return redirect('login')
         
-        # Add user data to request
-        request.firebase_user = result['user']
+        # Attach Firebase UID
         request.firebase_uid = result['firebase_uid']
+        
+        # Fetch full user document from MongoDB
+        user_doc = User.find_by_firebase_uid(result['firebase_uid'])
+        request.firebase_user = user_doc  # Attach full user object
         
         return view_func(request, *args, **kwargs)
     
     return wrapper
+
 
 def landing_page(request):
     return render(request, 'landing.html')

@@ -1,0 +1,20 @@
+Gemini model initialized successfully
+Processing 1 chunks
+Processed chunk 1/1
+Error during text processing: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Processing 1 chunks
+Processed chunk 1/1
+Error during text processing: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Gemini model initialized successfully
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None

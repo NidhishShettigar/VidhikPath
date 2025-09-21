@@ -1,40 +1,67 @@
-{% extends 'dashboard.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
+{% block title %}VidhikAI - VidhikPath{% endblock %}
+
 {% block extra_css %}
-{{ block.super }}
-<!-- Chatbot specific styles -->
+<!-- Dashboard and Chatbot specific styles -->
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
 {% endblock %}
 
-{% block extra %}
-<!-- Chatbot Feature -->
-<div class="feature-content active" id="chatbotContent">
-    <div class="chatbot-container">
-        <div class="chat-header">
-            <h3>VidhikAI - Legal Assistant</h3>
-            <div class="language-selector">
-                <select id="languageSelect">
-                    <option value="english">English</option>
-                    <option value="hindi">हिंदी</option>
-                    <option value="kannada">ಕನ್ನಡ</option>
-                </select>
-            </div>
+{% block content %}
+<div class="dashboard-container">
+    <!-- Added back arrow and fixed VidhikAI text color -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <a href="{% url 'dashboard' %}" class="back-arrow">←</a>
+            <h1 class="feature-title">VidhikAI</h1>
         </div>
+        <a class="profile-btn" href="{% url 'profile' %}">
+            <div class="profile-avatar">
+                {% if user.userprofile.profile_photo %}
+                    <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
+                {% endif %}
+            </div>
+        </a>
+    </nav>
 
-        <div class="chat-messages" id="chatMessages">
-            <div class="message bot-message">
-                <p>Hello! I'm VidhikAI, your legal assistant. How can I help you with legal matters today?</p>
-            </div>
-        </div>
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <div class="feature-content active" id="chatbotContent">
+            <div class="chatbot-container">
+                <div class="chat-header">
+                    <h3>VidhikAI - Legal Assistant</h3>
+                    <div class="language-selector">
+                        <select id="languageSelect">
+                            <option value="english">English</option>
+                            <option value="hindi">हिंदी</option>
+                            <option value="kannada">ಕನ್ನಡ</option>
+                        </select>
+                    </div>
+                </div>
 
-        <div class="chat-input-container">
-            <div class="input-group">
-                <input type="text" id="chatInput" placeholder="Ask your legal question...">
-                <button class="voice-btn" id="voiceBtn">Voice</button>
-                <button class="send-btn" id="sendBtn">Send</button>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        <p>Hello! I'm VidhikAI, your legal assistant. How can I help you with legal matters today?</p>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="input-group">
+                        <input type="text" id="chatInput" placeholder="Ask your legal question...">
+                        <button class="voice-btn" id="voiceBtn">Voice</button>
+                        <button class="send-btn" id="sendBtn">Send</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 </div>
+
+<!-- Chatbot JavaScript -->
+<script src="/static/js/dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 {% endblock %}

@@ -76,31 +76,6 @@ function switchFeature(feature) {
   }
 }
 
-// Profile modal open/close handlers
-function openProfile() {
-  const modal = document.getElementById("profileModal");
-  if (modal) {
-    modal.style.display = "flex";
-  }
-}
-
-function closeProfile() {
-  const modal = document.getElementById("profileModal");
-  if (modal) {
-    modal.style.display = "none";
-  }
-}
-
-// Save profile placeholder function
-function saveProfile() {
-  const name = document.getElementById("profileName")?.value;
-
-  // Typically would send data to backend here
-
-  showNotification("Profile updated successfully!", "success");
-  closeProfile();
-}
-
 // Confirm and handle logout
 function logout() {
   if (confirm("Are you sure you want to logout?")) {

@@ -56,7 +56,7 @@ class FirebaseAuthenticationMiddleware:
                 return HttpResponseRedirect(reverse('login'))
             
             # Verify token and get user
-            result = FirebaseTokenManager.get_user_from_token(firebase_token)
+            result = FirebaseTokenManager.verify_token(firebase_token)
             
             if not result['success']:
                 # Clear invalid session
@@ -71,13 +71,12 @@ class FirebaseAuthenticationMiddleware:
                 return HttpResponseRedirect(reverse('login'))
             
             # Add user data to request
-            request.firebase_user = result['user']
             request.firebase_uid = result['firebase_uid']
         
         # Handle guest-only routes (redirect if already logged in)
         elif is_guest_only and firebase_token:
             # Verify token is still valid
-            result = FirebaseTokenManager.get_user_from_token(firebase_token)
+            result = FirebaseTokenManager.verify_token(firebase_token)
             if result['success']:
                 return HttpResponseRedirect(reverse('dashboard'))
         

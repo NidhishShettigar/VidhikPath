@@ -1,229 +1,312 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
-/* Body styling */
+:root {
+  /* Colors */
+  --background: #0a0a0f;
+  --foreground: #f8fafc;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #cbd5e1;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+  --input: #1e293b;
+  --ring: #3b82f6;
+  --destructive: #ef4444;
+  --success: #10b981;
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Spacing */
+  --radius: 0.75rem;
+
+  /* Animations */
+  --transition-fast: 0.15s ease-out;
+  --transition-normal: 0.3s ease-out;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    background-color: white; 
-    color: #fff; /* White text */
-    margin: 0;
-    padding: 0;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  /* Enhanced background with modern gradient overlay */
+  background-image: radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0a0f 0%, #111827 100%);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Center the auth container */
 .auth-container {
-    margin-top: 5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: flex;
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+  animation: fadeIn 0.6s ease-out;
 }
 
-/* Card styling */
 .auth-card {
-    background-color: #111; /* Dark black card */
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    width: 600px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 2);
+  padding: 2.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Header styling */
+.auth-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
 .auth-header h2 {
-    margin: 0;
-    font-size: 28px;
-    text-align: center;
-    color: #fff;
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  /* Updated gradient text with modern colors */
+  background: linear-gradient(135deg, var(--foreground) 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .auth-header p {
-    text-align: center;
-    margin-top: 8px;
-    font-size: 14px;
-    color: #ccc;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
 }
 
-/* Form styling */
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
+.auth-form > * + * {
+  margin-top: 1.5rem;
 }
+
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
-    margin-bottom: 5px;
-    font-size: 14px;
-    color: #fff;
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
 }
 
 .form-group input,
 .form-group select {
-    padding: 10px;
-    border: 1px solid #555;
-    border-radius: 6px;
-    background-color: #222;
-    color: #fff;
-    font-size: 14px;
-    outline: none;
-    transition: border 0.3s;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background-color: var(--input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
 }
 
 .form-group input:focus,
 .form-group select:focus {
-    border-color: #fff;
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
-/* Password hint */
+.form-group input::placeholder {
+  color: var(--muted-foreground);
+}
+
 .password-hint {
-    font-size: 12px;
-    color: #ccc;
-    margin-top: 4px;
+  display: block;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
 }
 
-/* Radio buttons styling */
 .radio-group {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
 }
 
 .radio-label {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #fff;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 400;
 }
 
 .radio-label input[type="radio"] {
-    margin-right: 6px;
-}
-
-/* Button styling */
-.btn {
-    padding: 12px;
-    font-size: 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.btn-primary {
-    background-color: #fff;
-    color: #000;
-}
-
-.btn-primary:hover {
-    background-color: #ccc;
-}
-
-.btn-full {
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* Footer styling */
-.auth-footer {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 14px;
-    color: #ccc;
-}
-
-.auth-footer a {
-    color: #fff;
-    text-decoration: underline;
-}
-
-.auth-footer a:hover {
-    color: #ccc;
-}
-
-/* File input customization */
-input[type="file"] {
-    padding: 6px;
-    background-color: #222;
-    border: 1px solid #555;
-    border-radius: 6px;
-    color: #fff;
-}
-
-/* Number input customization */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.section-title {
-    color: #fff;
-    font-size: 18px;
-    margin: 20px 0 15px 0;
-    border-bottom: 2px solid #333;
-    padding-bottom: 5px;
-}
-
-.success-message {
-    background-color: #28a745;
-    color: #fff;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 6px;
-    text-align: center;
+  width: auto;
+  margin: 0;
 }
 
 .checkbox-label {
-    display: flex;
-    align-items: flex-start;
-    font-size: 14px;
-    color: #fff;
-    cursor: pointer;
-    line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
 .checkbox-label input[type="checkbox"] {
-    margin-right: 8px;
-    margin-top: 2px;
+  width: auto;
+  margin: 0;
+  margin-top: 0.125rem;
 }
 
 .checkbox-label a {
-    color: #fff;
-    text-decoration: underline;
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .checkbox-label a:hover {
-    color: #ccc;
+  color: #cbd5e1;
 }
 
-textarea {
-    padding: 10px;
-    border: 1px solid #555;
-    border-radius: 6px;
-    background-color: #222;
-    color: #fff;
-    font-size: 14px;
-    outline: none;
-    transition: border 0.3s;
-    resize: vertical;
-    font-family: inherit;
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
 }
 
-textarea:focus {
-    border-color: #fff;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .auth-card {
-        width: 95%;
-        padding: 20px;
-    }
-    
-    .section-title {
-        font-size: 16px;
-    }
+.btn-primary {
+  /* Updated primary button with modern gradient */
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: var(--primary-foreground);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary:hover {
+  /* Enhanced hover effect with modern colors */
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.auth-footer p {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+.auth-footer a {
+  color: var(--foreground);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.auth-footer a:hover {
+  color: #cbd5e1;
+}
+
+/* Messages */
+.error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.success-message {
+  /* Updated success message colors */
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #86efac;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 1rem;
+  }
+
+  .auth-card {
+    padding: 2rem;
+  }
+
+  .auth-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
 }

@@ -7,7 +7,7 @@ from ..models import User, ForumPost
 # Feature views
 @firebase_login_required
 def dashboard(request):
-    return render(request, 'chatbot.html', {
+    return render(request, 'dashboard.html', {
         'user': request.firebase_user,
         'firebase_uid': request.firebase_uid
     })

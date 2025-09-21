@@ -18,9 +18,18 @@ urlpatterns = [
     path('api/chat/', views.chat_api, name='chat_api'),
     path('api/summarize/', views.summarize_api, name='summarize_api'),
     path('api/find-lawyers/', views.find_lawyers_api, name='find_lawyers_api'),
+    
+    # Forum API endpoints - ENHANCED
     path('api/forum/post/', views.create_post_api, name='create_post_api'),
+    path('api/forum/edit/', views.edit_post_api, name='edit_post_api'),
     path('api/forum/like/', views.like_post_api, name='like_post_api'),
     path('api/forum/reply/', views.reply_post_api, name='reply_post_api'),
+    path('api/forum/reply/edit/', views.edit_reply_api, name='edit_reply_api'),
+    path('api/forum/reply/delete/', views.delete_reply_api, name='delete_reply_api'),
+    path('api/forum/nested-reply/', views.nested_reply_api, name='nested_reply_api'),
+    path('api/forum/nested-reply/edit/', views.edit_nested_reply_api, name='edit_nested_reply_api'),  # NEW
+    path('api/forum/nested-reply/delete/', views.delete_nested_reply_api, name='delete_nested_reply_api'),  # NEW
+    path('api/forum/delete/', views.delete_post_api, name='delete_post_api'),
     
     # Firebase API endpoints
     path('api/firebase/verify-token/', views.firebase_verify_token, name='firebase_verify_token'),

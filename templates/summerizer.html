@@ -1,32 +1,76 @@
-{% extends 'dashboard.html' %}
 {% load static %}
-
-{% block extra_css %}
-    {{ block.super }}
-    <!-- Custom styles for summarizer -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Summarizer - VidhikPath</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/summerizer.css' %}">
-{% endblock %}
-
-{% block extra %}
-<!-- Document Summarizer Feature -->
-<div class="feature-content" id="summarizerContent">
-    <div class="summarizer-container">
-        <h3>Document Summarizer</h3>
-        <div class="upload-area" id="uploadArea">
-            <div class="upload-icon"></div>
-            <p>Upload your legal document</p>
-            <div class="upload-buttons">
-                <!-- Button triggers file input for uploading documents -->
-                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">Choose File</button>
-                <button class="btn btn-secondary" id="cameraBtn">Camera</button>
-            </div>
-            <!-- Hidden file input for document uploads -->
-            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <!-- Added back arrow and restructured nav layout -->
+    <div class="top-nav">
+        <div class="nav-left">
+            <a href="{% url 'dashboard' %}" class="back-arrow">←</a>
+            <h2 class="feature-title">Document Summarizer</h2>
         </div>
-        <div class="summary-result" id="summaryResult" style="display: none;">
-            <h4>Document Summary</h4>
-            <div class="summary-content" id="summaryContent"></div>
+        <a class="profile-btn" href="{% url 'profile' %}">
+            <div class="profile-avatar">
+                {% if user.userprofile.profile_photo %}
+                    <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+
+    <!-- Document Summarizer Feature -->
+    <div class="feature-content" id="summarizerContent">
+        <div class="summarizer-container">
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <label for="languageSelect">Language:</label>
+                <select id="languageSelect">
+                    <option value="auto">Auto-detect</option>
+                    <option value="en">English</option>
+                    <option value="hi">Hindi (हिंदी)</option>
+                    <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                </select>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📄</div>
+                <p><strong>Upload your legal document</strong></p>
+                <p style="font-size: 0.9em; color: #666;">Drag and drop your file here or click to browse</p>
+                <p style="font-size: 0.8em; color: #999;">Supported formats: PDF, PNG, JPG, JPEG (Max: 10MB)</p>
+                
+                <div class="upload-buttons">
+                    <button class="btn" type="button" onclick="document.getElementById('fileInput').click()">Choose File</button>
+                </div>
+                
+                <!-- Hidden file input -->
+                <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+            </div>
+
+            <!-- Summary Result Area -->
+            <div class="summary-result" id="summaryResult" style="display: none;">
+                <h4>📋 Document Summary</h4>
+                <div class="summary-content" id="summaryContent"></div>
+                
+                <!-- Action Buttons -->
+                <div style="margin-top: 15px; text-align: center;">
+                    <button class="btn" onclick="copyToClipboard()" style="margin-right: 10px;">📋 Copy</button>
+                    <button class="btn" onclick="downloadSummary()">💾 Download</button>
+                    <button class="btn" onclick="clearSummary()" style="background: #dc3545;">🗑️ Clear</button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <script src="{% static 'js/summerizer.js' %}"></script>
+</body>
+</html>

@@ -177,8 +177,33 @@ class ForumPost:
                 reply['user'] = {
                     'name': reply_user.get('name', 'Unknown User') if reply_user else 'Unknown User'
                 }
+                
+                # Populate user info for nested replies
+                for nested_reply in reply.get('nested_replies', []):
+                    nested_user = User.find_by_firebase_uid(nested_reply['firebase_uid'])
+                    nested_reply['user'] = {
+                        'name': nested_user.get('name', 'Unknown User') if nested_user else 'Unknown User'
+                    }
         
         return posts
+    
+    @staticmethod
+    def update_content(post_id, content):
+        """Update post content"""
+        try:
+            if isinstance(post_id, str):
+                post_id = ObjectId(post_id)
+            return ForumPost.collection.update_one(
+                {"_id": post_id},
+                {
+                    "$set": {
+                        "content": content,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+        except Exception:
+            return None
     
     @staticmethod
     def like(post_id, firebase_uid):
@@ -227,20 +252,319 @@ class ForumPost:
             )
         except Exception:
             return None
+    
+    @staticmethod
+    def delete(post_id):
+        """Delete a post"""
+        try:
+            if isinstance(post_id, str):
+                post_id = ObjectId(post_id)
+            return ForumPost.collection.delete_one({"_id": post_id})
+        except Exception:
+            return None
 
 
+# Enhanced ForumReply class for infinite nested replies
 class ForumReply:
     @staticmethod
-    def create(post_id, firebase_uid, content):
+    def create(post_id, firebase_uid, content, reply_id=None):
         """Create a new reply to a post"""
+        if not reply_id:
+            reply_id = str(ObjectId())
+            
         reply = {
             "firebase_uid": firebase_uid,
             "content": content,
             "created_at": datetime.utcnow(),
-            "reply_id": str(ObjectId())
+            "reply_id": reply_id,
+            "nested_replies": []
         }
         return ForumPost.add_reply(post_id, reply)
-
+    
+    @staticmethod
+    def update_content(post_id, reply_id, firebase_uid, content):
+        """Update reply content - Enhanced for nested replies"""
+        try:
+            if isinstance(post_id, str):
+                post_id = ObjectId(post_id)
+            
+            # First try to update in main replies
+            result = ForumPost.collection.update_one(
+                {
+                    "_id": post_id,
+                    "replies.reply_id": reply_id,
+                    "replies.firebase_uid": firebase_uid
+                },
+                {
+                    "$set": {
+                        "replies.$.content": content,
+                        "replies.$.updated_at": datetime.utcnow(),
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+            
+            if result.modified_count > 0:
+                return result
+            
+            # If not found in main replies, try nested replies
+            # This handles infinite depth by searching through all nested levels
+            return ForumReply._update_nested_reply_recursive(post_id, reply_id, firebase_uid, content)
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def _update_nested_reply_recursive(post_id, reply_id, firebase_uid, content, path="replies"):
+        """Recursively update nested replies at any depth"""
+        try:
+            # Build dynamic query for nested replies
+            query = {"_id": post_id}
+            update_path = path
+            
+            # Try different nesting levels dynamically
+            for depth in range(1, 20):  # Support up to 20 levels deep
+                nested_path = path
+                for i in range(depth):
+                    nested_path += ".nested_replies"
+                
+                query_key = f"{nested_path}.reply_id"
+                uid_key = f"{nested_path}.firebase_uid"
+                
+                query[query_key] = reply_id
+                query[uid_key] = firebase_uid
+                
+                result = ForumPost.collection.update_one(
+                    query,
+                    {
+                        "$set": {
+                            f"{nested_path}.$.content": content,
+                            f"{nested_path}.$.updated_at": datetime.utcnow(),
+                            "updated_at": datetime.utcnow()
+                        }
+                    }
+                )
+                
+                if result.modified_count > 0:
+                    return result
+                
+                # Reset query for next iteration
+                query = {"_id": post_id}
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def delete_reply(post_id, reply_id, firebase_uid):
+        """Delete a reply - Enhanced for nested replies"""
+        try:
+            if isinstance(post_id, str):
+                post_id = ObjectId(post_id)
+            
+            # First try to delete from main replies
+            result = ForumPost.collection.update_one(
+                {"_id": post_id},
+                {
+                    "$pull": {
+                        "replies": {
+                            "reply_id": reply_id,
+                            "firebase_uid": firebase_uid
+                        }
+                    },
+                    "$set": {"updated_at": datetime.utcnow()}
+                }
+            )
+            
+            if result.modified_count > 0:
+                return result
+            
+            # If not found in main replies, try nested replies
+            return ForumReply._delete_nested_reply_recursive(post_id, reply_id, firebase_uid)
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def _delete_nested_reply_recursive(post_id, reply_id, firebase_uid, path="replies"):
+        """Recursively delete nested replies at any depth"""
+        try:
+            # Try different nesting levels dynamically
+            for depth in range(1, 20):  # Support up to 20 levels deep
+                nested_path = path
+                for i in range(depth):
+                    nested_path += ".nested_replies"
+                
+                result = ForumPost.collection.update_one(
+                    {"_id": post_id},
+                    {
+                        "$pull": {
+                            f"{nested_path}": {
+                                "reply_id": reply_id,
+                                "firebase_uid": firebase_uid
+                            }
+                        },
+                        "$set": {"updated_at": datetime.utcnow()}
+                    }
+                )
+                
+                if result.modified_count > 0:
+                    return result
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def create_nested_reply(post_id, parent_reply_id, firebase_uid, content, nested_reply_id=None):
+        """Create a nested reply - Enhanced for infinite depth"""
+        if not nested_reply_id:
+            nested_reply_id = str(ObjectId())
+            
+        nested_reply = {
+            "firebase_uid": firebase_uid,
+            "content": content,
+            "created_at": datetime.utcnow(),
+            "reply_id": nested_reply_id,
+            "nested_replies": []  # Allow further nesting
+        }
+        
+        try:
+            if isinstance(post_id, str):
+                post_id = ObjectId(post_id)
+            
+            # First try to add to main replies
+            result = ForumPost.collection.update_one(
+                {
+                    "_id": post_id,
+                    "replies.reply_id": parent_reply_id
+                },
+                {
+                    "$push": {"replies.$.nested_replies": nested_reply},
+                    "$set": {"updated_at": datetime.utcnow()}
+                }
+            )
+            
+            if result.modified_count > 0:
+                return result
+            
+            # If not found in main replies, search nested replies recursively
+            return ForumReply._add_nested_reply_recursive(post_id, parent_reply_id, nested_reply)
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def _add_nested_reply_recursive(post_id, parent_reply_id, nested_reply, path="replies"):
+        """Recursively add nested reply at any depth"""
+        try:
+            # Try different nesting levels dynamically
+            for depth in range(1, 20):  # Support up to 20 levels deep
+                nested_path = path
+                for i in range(depth):
+                    nested_path += ".nested_replies"
+                
+                result = ForumPost.collection.update_one(
+                    {
+                        "_id": post_id,
+                        f"{nested_path}.reply_id": parent_reply_id
+                    },
+                    {
+                        "$push": {f"{nested_path}.$.nested_replies": nested_reply},
+                        "$set": {"updated_at": datetime.utcnow()}
+                    }
+                )
+                
+                if result.modified_count > 0:
+                    return result
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def update_nested_reply(post_id, parent_reply_id, nested_reply_id, firebase_uid, content):
+        """Update nested reply content - Enhanced for infinite depth"""
+        try:
+            if isinstance(post_id, str):
+                post_id = ObjectId(post_id)
+            
+            # Try different nesting levels dynamically
+            for depth in range(1, 20):  # Support up to 20 levels deep
+                nested_path = "replies"
+                for i in range(depth):
+                    nested_path += ".nested_replies"
+                
+                # Build the query to find the specific nested reply
+                query = {
+                    "_id": post_id,
+                    f"{nested_path}.reply_id": nested_reply_id,
+                    f"{nested_path}.firebase_uid": firebase_uid
+                }
+                
+                # Use positional operator to update the specific nested reply
+                result = ForumPost.collection.update_one(
+                    query,
+                    {
+                        "$set": {
+                            f"{nested_path}.$.content": content,
+                            f"{nested_path}.$.updated_at": datetime.utcnow(),
+                            "updated_at": datetime.utcnow()
+                        }
+                    }
+                )
+                
+                if result.modified_count > 0:
+                    return result
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def delete_nested_reply(post_id, parent_reply_id, nested_reply_id, firebase_uid):
+        """Delete a nested reply - Enhanced for infinite depth"""
+        try:
+            if isinstance(post_id, str):
+                post_id = ObjectId(post_id)
+            
+            # Try different nesting levels dynamically
+            for depth in range(1, 20):  # Support up to 20 levels deep
+                nested_path = "replies"
+                for i in range(depth):
+                    nested_path += ".nested_replies"
+                
+                result = ForumPost.collection.update_one(
+                    {"_id": post_id},
+                    {
+                        "$pull": {
+                            f"{nested_path}": {
+                                "reply_id": nested_reply_id,
+                                "firebase_uid": firebase_uid
+                            }
+                        },
+                        "$set": {"updated_at": datetime.utcnow()}
+                    }
+                )
+                
+                if result.modified_count > 0:
+                    return result
+            
+            return None
+            
+        except Exception:
+            return None
+    
+    @staticmethod
+    def delete_by_post_id(post_id):
+        """Delete all replies for a post (when post is deleted)"""
+        # This is automatically handled when the post is deleted
+        # since replies are embedded in the post document
+        pass
 
 # === Firebase Token Verification Utility ===
 class FirebaseTokenManager:
@@ -262,16 +586,3 @@ class FirebaseTokenManager:
                 'success': False,
                 'error': str(e)
             }
-
-    @staticmethod
-    def get_user_from_token(id_token):
-        """Get user data from MongoDB using Firebase token"""
-        token_data = FirebaseTokenManager.verify_token(id_token)
-        if token_data['success']:
-            user = User.find_by_firebase_uid(token_data['firebase_uid'])
-            return {
-                'success': True,
-                'user': user,
-                'firebase_uid': token_data['firebase_uid']
-            }
-        return token_data

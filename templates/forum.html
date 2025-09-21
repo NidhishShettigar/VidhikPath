@@ -1,125 +1,254 @@
-{% extends 'dashboard.html' %}
 {% load static %}
 
-{% block extra_css %}
-{{ block.super }}
-<!-- Forum page styles -->
-<link rel="stylesheet" href="{% static 'css/forum.css' %}">
-{% endblock %}
-
-{% block extra %}
-<!-- Public Forum -->
-<div class="feature-content" id="forumContent">
-    <div class="forum-container">
-        <h3>Public Forum</h3>
-
-        <!-- Create Post Section -->
-        <div class="create-post-section">
-            <textarea 
-                id="postContent" 
-                placeholder="Share your thoughts, legal questions, or experiences..."
-                maxlength="5000"
-            ></textarea>
-            <div class="post-actions">
-                <input type="file" id="postImage" accept="image/*" style="display: none;">
-                <button class="btn btn-secondary" onclick="document.getElementById('postImage').click()">
-                    Add Image
-                </button>
-                <button class="btn btn-primary" onclick="createPost()" id="createPostBtn">
-                    Post
-                </button>
-                <small style="color: #6B4C36; margin-left: auto;">
-                    <span id="charCount">0</span>/5000 characters
-                </small>
-            </div>
-            <div id="imagePreview" style="margin-top: 10px; display: none;">
-                <img id="previewImg" style="max-width: 200px; border-radius: 6px; border: 1px solid #E2C9A6;">
-                <button onclick="removeImagePreview()" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer;">×</button>
-            </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Forum - VidhikPath</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forum.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <!-- Added back arrow and restructured nav layout -->
+    <div class="top-nav">
+        <div class="nav-left">
+            <a href="{% url 'dashboard' %}" class="back-arrow">←</a>
+            <h2 class="feature-title">Public Forum</h2>
         </div>
+        <a class="profile-btn" href="{% url 'profile' %}">
+            <div class="profile-avatar">
+                {% if user.userprofile.profile_photo %}
+                    <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
+                {% endif %}
+            </div>
+        </a>
+    </div>
 
-        <!-- Forum Posts -->
-        <div class="forum-posts" id="forumPosts">
-            {% for post in posts %}
-            <div class="forum-post" data-post-id="{{ post.id }}">
-                <div class="post-header">
-                    <div class="post-user">{{ post.user.name }}</div>
-                    <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
-                </div>
-
-                <div class="post-content">
-                    <p>{{ post.content|linebreaks }}</p>
-                    {% if post.image %}
-                    <img src="/media/{{ post.image }}" alt="Post image" class="post-image" onclick="openImageModal(this.src)">
-                    {% endif %}
-                </div>
-
+    <!-- Public Forum -->
+    <div class="feature-content" id="forumContent">
+        <div class="forum-container">
+            <!-- Create Post Section -->
+            <div class="create-post-section">
+                <textarea 
+                    id="postContent" 
+                    placeholder="Share your thoughts, legal questions, or experiences..."
+                    maxlength="5000"
+                    oninput="updateCharCount(this, 'charCount')"
+                ></textarea>
                 <div class="post-actions">
-                    <button class="action-btn like-btn {% if user.user in post.likes %}liked{% endif %}" onclick="likePost('{{ post.id }}')">
-                        👍 <span class="like-count">{{ post.likes|length }}</span>
+                    <input type="file" id="postImage" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                    <button class="btn btn-secondary" onclick="document.getElementById('postImage').click()">
+                        Add Image
                     </button>
-                    <button class="action-btn reply-btn" onclick="toggleReply('{{ post.id }}')">
-                        💬 Reply
+                    <button class="btn btn-primary" onclick="createPost()" id="createPostBtn">
+                        Post
                     </button>
-                    <button class="action-btn share-btn" onclick="sharePost('{{ post.id }}')">
-                        Share
-                    </button>
+                    <small style="color: #6B4C36; margin-left: auto;">
+                        <span id="charCount">0</span>/5000 characters
+                    </small>
                 </div>
+                <div id="imagePreview" style="margin-top: 10px; display: none;">
+                    <img id="previewImg" style="max-width: 200px; border-radius: 6px; border: 1px solid #E2C9A6;">
+                    <button onclick="removeImagePreview()" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer;">×</button>
+                </div>
+            </div>
 
-                <div class="reply-section" id="replySection{{ post.id }}" style="display: none;">
-                    <textarea 
-                        placeholder="Write a respectful reply..." 
-                        id="replyText{{ post.id }}"
-                        maxlength="1000"
-                    ></textarea>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-                        <small style="color: #6B4C36;">
-                            <span class="reply-char-count">0</span>/1000 characters
-                        </small>
-                        <button class="btn btn-sm btn-primary" onclick="submitReply('{{ post.id }}')">
-                            Reply
+            <!-- Forum Posts -->
+            <div class="forum-posts" id="forumPosts">
+                {% for post in posts %}
+                <div class="forum-post" data-post-id="{{ post.id }}">
+                    <div class="post-header">
+                        <div class="post-user">{{ post.user.name }}</div>
+                        <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
+                        {% if post.firebase_uid == user.firebase_uid %}
+                        <div class="post-options">
+                            <button class="action-btn edit-btn" onclick="editPost('{{ post.id }}')">Edit</button>
+                            <button class="action-btn delete-btn" onclick="confirmDeletePost('{{ post.id }}')">Delete</button>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="post-content" id="postContent{{ post.id }}">
+                        <p>{{ post.content|linebreaks }}</p>
+                        {% if post.image %}
+                        <img src="/media/{{ post.image }}" alt="Post image" class="post-image" onclick="openImageModal(this.src)">
+                        {% endif %}
+                    </div>
+
+                    <!-- Edit Post Section (Hidden by default) -->
+                    <div class="edit-post-section" id="editSection{{ post.id }}" style="display: none;">
+                        <textarea id="editText{{ post.id }}" maxlength="5000" oninput="updateCharCount(this, 'editCharCount{{ post.id }}')">{{ post.content }}</textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <small style="color: #6B4C36;">
+                                <span id="editCharCount{{ post.id }}">{{ post.content|length }}</span>/5000 characters
+                            </small>
+                            <div>
+                                <button class="btn btn-sm btn-secondary" onclick="cancelEditPost('{{ post.id }}')">Cancel</button>
+                                <button class="btn btn-sm btn-primary" onclick="saveEditPost('{{ post.id }}')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-actions">
+                        <button class="action-btn like-btn {% if user.firebase_uid in post.likes %}liked{% endif %}" onclick="likePost('{{ post.id }}')">
+                            👍 <span class="like-count">{{ post.likes|length }}</span>
+                        </button>
+                        <button class="action-btn reply-btn" onclick="toggleReply('{{ post.id }}')">
+                            💬 Reply
+                        </button>
+                        <button class="action-btn share-btn" onclick="sharePost('{{ post.id }}')">
+                            Share
                         </button>
                     </div>
-                </div>
 
-                <div class="replies" id="replies{{ post.id }}">
-                    {% for reply in post.replies %}
-                    <div class="reply">
-                        <strong>{{ reply.user.name }}:</strong>
-                        {{ reply.content|linebreaks }}
-                        <small>{{ reply.created_at|date:"M d, H:i" }}</small>
+                    <div class="reply-section" id="replySection{{ post.id }}" style="display: none;">
+                        <textarea 
+                            placeholder="Write a respectful reply..." 
+                            id="replyText{{ post.id }}"
+                            maxlength="1000"
+                            oninput="updateCharCount(this, 'replyCharCount{{ post.id }}')"
+                        ></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <small style="color: #6B4C36;">
+                                <span id="replyCharCount{{ post.id }}">0</span>/1000 characters
+                            </small>
+                            <button class="btn btn-sm btn-primary" onclick="submitReply('{{ post.id }}')">
+                                Reply
+                            </button>
+                        </div>
                     </div>
-                    {% endfor %}
+
+                    <div class="replies" id="replies{{ post.id }}">
+                        {% for reply in post.replies %}
+                        <div class="reply" data-reply-id="{{ reply.reply_id }}">
+                            <div class="reply-header">
+                                <strong>{{ reply.user.name }}:</strong>
+                                <small>{{ reply.created_at|date:"M d, H:i" }}</small>
+                                {% if reply.firebase_uid == user.firebase_uid %}
+                                <div class="reply-options">
+                                    <button class="reply-edit-btn" onclick="editReply('{{ post.id }}', '{{ reply.reply_id }}')">Edit</button>
+                                    <button class="reply-delete-btn" onclick="confirmDeleteReply('{{ post.id }}', '{{ reply.reply_id }}')">Delete</button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="reply-content" id="replyContent{{ reply.reply_id }}">
+                                {{ reply.content|linebreaks }}
+                            </div>
+                            <!-- Edit Reply Section (Hidden by default) -->
+                            <div class="edit-reply-section" id="editReplySection{{ reply.reply_id }}" style="display: none;">
+                                <textarea id="editReplyText{{ reply.reply_id }}" maxlength="1000" oninput="updateCharCount(this, 'editReplyCharCount{{ reply.reply_id }}')">{{ reply.content }}</textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                    <small style="color: #6B4C36;">
+                                        <span id="editReplyCharCount{{ reply.reply_id }}">{{ reply.content|length }}</span>/1000 characters
+                                    </small>
+                                    <div>
+                                        <button class="btn btn-xs btn-secondary" onclick="cancelEditReply('{{ reply.reply_id }}')">Cancel</button>
+                                        <button class="btn btn-xs btn-primary" onclick="saveEditReply('{{ post.id }}', '{{ reply.reply_id }}')">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Nested Reply Button -->
+                            <button class="nested-reply-btn" onclick="toggleNestedReply('{{ post.id }}', '{{ reply.reply_id }}')">↳ Reply</button>
+                            
+                            <!-- Nested Reply Section -->
+                            <div class="nested-reply-section" id="nestedReplySection{{ reply.reply_id }}" style="display: none;">
+                                <textarea 
+                                    placeholder="Reply to {{ reply.user.name }}..." 
+                                    id="nestedReplyText{{ reply.reply_id }}"
+                                    maxlength="1000"
+                                    oninput="updateCharCount(this, 'nestedReplyCharCount{{ reply.reply_id }}')"
+                                ></textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                    <small style="color: #6B4C36;">
+                                        <span id="nestedReplyCharCount{{ reply.reply_id }}">0</span>/1000 characters
+                                    </small>
+                                    <button class="btn btn-xs btn-primary" onclick="submitNestedReply('{{ post.id }}', '{{ reply.reply_id }}')">
+                                        Reply
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Nested Replies -->
+                            <div class="nested-replies" id="nestedReplies{{ reply.reply_id }}">
+                                {% for nested_reply in reply.nested_replies %}
+                                <div class="nested-reply" data-nested-reply-id="{{ nested_reply.reply_id }}">
+                                    <div class="nested-reply-header">
+                                        <strong>{{ nested_reply.user.name }}:</strong>
+                                        <small>{{ nested_reply.created_at|date:"M d, H:i" }}</small>
+                                        {% if nested_reply.firebase_uid == user.firebase_uid %}
+                                        <div class="nested-reply-options">
+                                            <button class="nested-reply-edit-btn" onclick="editNestedReply('{{ nested_reply.reply_id }}')">Edit</button>
+                                            <button class="nested-reply-delete-btn" onclick="deleteNestedReply('{{ post.id }}', '{{ reply.reply_id }}', '{{ nested_reply.reply_id }}')">Delete</button>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nested-reply-content" id="nestedReplyContent{{ nested_reply.reply_id }}">
+                                        {{ nested_reply.content|linebreaks }}
+                                    </div>
+                                    <!-- Edit Nested Reply Section -->
+                                    <div class="edit-nested-reply-section" id="editNestedReplySection{{ nested_reply.reply_id }}" style="display: none;">
+                                        <textarea id="editNestedReplyText{{ nested_reply.reply_id }}" maxlength="1000">{{ nested_reply.content }}</textarea>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                            <small style="color: #6B4C36;">
+                                                <span id="editNestedReplyCharCount{{ nested_reply.reply_id }}">{{ nested_reply.content|length }}</span>/1000 characters
+                                            </small>
+                                            <div>
+                                                <button class="btn btn-xs btn-secondary" onclick="cancelEditNestedReply('{{ nested_reply.reply_id }}')">Cancel</button>
+                                                <button class="btn btn-xs btn-primary" onclick="saveEditNestedReply('{{ post.id }}', '{{ reply.reply_id }}', '{{ nested_reply.reply_id }}')">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
+                {% empty %}
+                <div style="text-align: center; padding: 40px; color: #6B4C36; font-style: italic; background: #FAF6F1; border: 1px dashed #E2C9A6; border-radius: 6px;">
+                    <h4 style="color: #B96902;">Welcome to the VidhikPath Forum!</h4>
+                    <p>This is a space for legal discussions, questions, and knowledge sharing.</p>
+                    <p>Be the first to start a conversation!</p>
+                </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <div style="text-align: center; padding: 40px; color: #6B4C36; font-style: italic; background: #FAF6F1; border: 1px dashed #E2C9A6; border-radius: 6px;">
-                <h4 style="color: #B96902;">Welcome to the VidhikPath Forum!</h4>
-                <p>This is a space for legal discussions, questions, and knowledge sharing.</p>
-                <p>Be the first to start a conversation!</p>
-            </div>
-            {% endfor %}
-        </div>
 
-        <!-- Load More Button for pagination -->
-        <div style="text-align: center; margin-top: 20px;">
-            <button class="btn btn-secondary" id="loadMoreBtn" style="display: none;" onclick="loadMorePosts()">
-                Load More Posts
-            </button>
+            <!-- Load More Button for pagination -->
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-secondary" id="loadMoreBtn" style="display: none;" onclick="loadMorePosts()">
+                    Load More Posts
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Image Modal for post images -->
-<div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); cursor: pointer;" onclick="closeImageModal()">
-    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%;">
-        <img id="modalImage" style="width: 100%; height: auto; border-radius: 8px;">
-        <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;" onclick="closeImageModal()">×</div>
+    <!-- Image Modal for post images -->
+    <div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); cursor: pointer;" onclick="closeImageModal()">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%;">
+            <img id="modalImage" style="width: 100%; height: auto; border-radius: 8px;">
+            <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;" onclick="closeImageModal()">×</div>
+        </div>
     </div>
-</div>
 
-{% block extra_js %}
-<!-- Forum JavaScript -->
-<script src="{% static 'js/forum.js' %}"></script>
-{% endblock %}
-{% endblock %}
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" style="display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%;">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <p id="confirmMessage">Are you sure you want to perform this action?</p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirmAction" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fixed the script src to use forum.js instead of connector.js -->
+    <script src="{% static 'js/forum.js' %}"></script>
+
+</body>
+</html>

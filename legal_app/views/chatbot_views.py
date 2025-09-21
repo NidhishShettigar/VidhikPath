@@ -20,7 +20,8 @@ with open("legal_app\prompts\system_prompt.txt", "r", encoding="utf-8") as f:
 
 # Load keywords from file once at startup
 with open("legal_app\prompts\legal_keywords.txt", "r", encoding="utf-8") as f:
-    LEGAL_KEYWORDS = [line.strip().lower() for line in f if line.strip()]
+    LEGAL_KEYWORDS = set(line.strip().lower() for line in f if line.strip())
+    
 import google.generativeai as genai
 
 # Configure Gemini API key (best: from Django settings or environment variable)
@@ -54,13 +55,13 @@ def get_embedding(text: str):
 def search_faiss(query: str, top_k: int = 20):
     query_vec = get_embedding(query).reshape(1, -1)
     distances, indices = index.search(query_vec, top_k)
-    print("Indices:", indices)
+    # print("Indices:", indices)
     results = []
     for idx in indices[0]:
-        print("Checking index:", idx)
+        # print("Checking index:", idx)
         if idx != -1 and idx < len(id_mapping):
             doc_id = id_mapping[idx]
-            print("Mapped doc_id:", doc_id)
+            # print("Mapped doc_id:", doc_id)
             doc = ipc_collection.find_one({"_id": ObjectId(doc_id)})
             if doc:
                 results.append({
@@ -70,22 +71,14 @@ def search_faiss(query: str, top_k: int = 20):
                 })
             else:
                 print("⚠️ No document found for:", doc_id)
-    print("Final Results:", results)
+    # print("Final Results:", results)
     return results
 
-
-LEGAL_KEYWORDS = [
-    "ipc", "section", "act", "law", "rights", "punishment", "bail", "crime", 
-    "offence", "offense", "arrest", "case", "legal", "court", "judge", 
-    "criminal", "civil", "constitution", "advocate", "lawyer", "police",
-    "complaint", "fir", "chargesheet", "evidence", "witness", "trial",
-    "sentence", "fine", "imprisonment", "appeal", "petition", "writ","commite"
-]
-
 def is_legal_query(text: str) -> bool:
-    """Check if the query looks legal-related."""
+    """Check if the query contains any legal-related keyword."""
     text_lower = text.lower()
-    return any(word in text_lower for word in LEGAL_KEYWORDS)
+    words = text_lower.split() 
+    return any(word in LEGAL_KEYWORDS for word in words)
 
 
 @csrf_exempt
@@ -95,14 +88,6 @@ def chat_api(request):
         data = json.loads(request.body)
         message = data.get('message', '').strip()
         language = data.get('language', 'english')
-
-        # 👋 Handle small-talk / non-legal queries
-        if not is_legal_query(message):
-            return JsonResponse({
-                "response": f"I’m here to assist with Indian law. Your message ('{message}') does not seem like a legal query.",
-                "context": [],
-                "language": language
-            })
 
         # 1. NLP preprocessing
         doc = nlp(message.lower())

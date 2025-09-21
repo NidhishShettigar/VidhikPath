@@ -10,54 +10,54 @@
 
 {% block content %}
 <div class="dashboard-container">
-    <!-- Top Header -->
-    <header class="dashboard-header">
-        <div class="header-left">
+    <!-- Updated top navigation with app name/slogan on left and profile button on right -->
+    <nav class="top-nav">
+        <div class="nav-left" style = "flex-direction: column; align-items: flex-start;">
             <h1 class="app-name">VidhikPath</h1>
             <p class="app-slogan">A Legal Support System For Common People</p>
         </div>
-        <div class="header-right">
-            <a class="profile-btn" href="{% url 'profile' %}">
-                <div class="profile-avatar">
-                    {% if user.userprofile.profile_photo %}
-                        <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
-                    {% else %}
-                        <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
-                    {% endif %}
-                </div>
-            </a>
-        </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="dashboard-main" id="dashboardMain">
-        {% block extra %}{% endblock %}
-    </main>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <a class="nav-btn {% if request.resolver_match.url_name == 'chatbot' %}active{% endif %}" 
-           href="{% url 'chatbot' %}" id="chatbotBtn">
-            <div class="nav-icon"></div>
-            <span>VidhikAI</span>
-        </a>
-        <a class="nav-btn {% if request.resolver_match.url_name == 'summerizer' %}active{% endif %}" 
-           href="{% url 'summerizer' %}" id="summarizerBtn">
-            <div class="nav-icon"></div>
-            <span>Summarizer</span>
-        </a>
-        <a class="nav-btn {% if request.resolver_match.url_name == 'connector' %}active{% endif %}" 
-           href="{% url 'connector' %}" id="lawyerBtn">
-            <div class="nav-icon"></div>
-            <span>Find Lawyers</span>
-        </a>
-        <a class="nav-btn {% if request.resolver_match.url_name == 'forum' %}active{% endif %}" 
-           href="{% url 'forum' %}" id="forumBtn">
-            <div class="nav-icon"></div>
-            <span>Forum</span>
+        <a class="profile-btn" href="{% url 'profile' %}">
+            <div class="profile-avatar">
+                {% if user.userprofile.profile_photo %}
+                    <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
+                {% endif %}
+            </div>
         </a>
     </nav>
 
+    <!-- Main Content Area -->
+    <main class="dashboard-main" id="dashboardMain">
+        <!-- Removed dashboard header section -->
+
+        <!-- Updated center navigation to show 2 buttons per row -->
+        <div class="center-nav">
+            <a class="nav-card" href="{% url 'chatbot' %}" id="chatbotBtn">
+                <div class="nav-icon chatbot-icon"></div>
+                <h3>VidhikAI</h3>
+                <p>Legal Assistant Chatbot</p>
+            </a>
+            <a class="nav-card" href="{% url 'summerizer' %}" id="summarizerBtn">
+                <div class="nav-icon summarizer-icon"></div>
+                <h3>Summarizer</h3>
+                <p>Document Summarization</p>
+            </a>
+            <a class="nav-card" href="{% url 'connector' %}" id="lawyerBtn">
+                <div class="nav-icon lawyer-icon"></div>
+                <h3>Find Lawyers</h3>
+                <p>Connect with Legal Experts</p>
+            </a>
+            <a class="nav-card" href="{% url 'forum' %}" id="forumBtn">
+                <div class="nav-icon forum-icon"></div>
+                <h3>Forum</h3>
+                <p>Community Discussions</p>
+            </a>
+            <!-- Removed profile card from center navigation -->
+        </div>
+
+        {% block extra %}{% endblock %}
+    </main>
 </div>
 
 <!-- Dashboard JavaScript -->
