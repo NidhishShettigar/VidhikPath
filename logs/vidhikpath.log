@@ -18,3 +18,75 @@ Error in summarize_api: Database objects do not implement truth value testing or
 Gemini model initialized successfully
 Processed chunk 1/1
 Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Error summarizing chunk: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Error summarizing chunk: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Processed chunk 1/1
+Error in summarize_api: Database objects do not implement truth value testing or bool(). Please compare with None instead: database is not None
+Error summarizing chunk: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Processed chunk 1/1
+Error summarizing chunk: 'NoneType' object has no attribute 'generate_content'
+Processed chunk 1/1
+Error summarizing chunk: 'NoneType' object has no attribute 'generate_content'
+Processed chunk 1/1
+Error summarizing chunk: 'NoneType' object has no attribute 'generate_content'
+Processed chunk 1/1
+Error summarizing chunk: 'NoneType' object has no attribute 'generate_content'
+Processed chunk 1/1
+Error summarizing chunk: 'NoneType' object has no attribute 'generate_content'
+Processed chunk 1/1
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Found 20 relevant sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant BNS sections for query
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant BNS sections for query
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant BNS sections for query
+Found 20 relevant BNS sections for query
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Processed chunk 1/1
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Processed chunk 1/1
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Error summarizing chunk: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+Processed chunk 1/1
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Found 20 relevant BNS sections for query
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Found 20 relevant BNS sections for query
+Response blocked by safety filters despite BLOCK_NONE
+Processed chunk 1/1
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Processed chunk 1/1
+Embedding model loaded successfully
+FAISS index loaded: 358 vectors, dimension: 384
+Processed chunk 1/1

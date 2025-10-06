@@ -141,41 +141,7 @@ function formatSummary(summary) {
   return formatted;
 }
 
-// Check API health before processing
-async function checkApiHealth() {
-  try {
-    const response = await fetch("/api/health/", {
-      method: "GET",
-      headers: {
-        "X-CSRFToken": getCookie("csrftoken"),
-      }
-    });
-    
-    if (response.ok) {
-      const health = await response.json();
-      debugLog("API Health Check", health);
-      
-      if (health.status !== "healthy" && health.status !== "degraded") {
-        showNotification("API service is unavailable", "warning");
-        return false;
-      }
-      
-      // Check critical dependencies
-      if (health.dependencies && !health.dependencies.gemini_model) {
-        showNotification("AI service is not configured properly", "warning");
-        return false;
-      }
-      
-      return true;
-    } else {
-      debugLog("Health check failed", response.status);
-      return true; // Continue anyway if health check endpoint doesn't exist
-    }
-  } catch (error) {
-    debugLog("Health check error", error);
-    return true; // Continue anyway
-  }
-}
+
 
 // Process document for summarization
 async function processDocument(file) {
@@ -187,12 +153,6 @@ async function processDocument(file) {
 
   // Validate file first
   if (!validateFile(file)) {
-    return;
-  }
-
-  // Check API health
-  const isHealthy = await checkApiHealth();
-  if (!isHealthy) {
     return;
   }
 
@@ -708,3 +668,44 @@ window.addEventListener('error', function(e) {
     error: e.error
   });
 });
+
+// Add these to summerizer.js:
+
+function copyToClipboard() {
+    const summaryContent = document.getElementById('summaryContent');
+    const text = summaryContent.innerText;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showNotification('Summary copied to clipboard!', 'success');
+    }).catch(err => {
+        showNotification('Failed to copy', 'error');
+    });
+}
+
+function downloadSummary() {
+    const summaryContent = document.getElementById('summaryContent');
+    const text = summaryContent.innerText;
+    
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `summary_${new Date().getTime()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showNotification('Summary downloaded!', 'success');
+}
+
+function clearSummary() {
+    const summaryResult = document.getElementById('summaryResult');
+    const summaryContent = document.getElementById('summaryContent');
+    
+    if (summaryResult && summaryContent) {
+        summaryResult.style.display = 'none';
+        summaryContent.innerHTML = '';
+        showNotification('Summary cleared', 'info');
+    }
+}

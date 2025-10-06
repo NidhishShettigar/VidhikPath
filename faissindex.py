@@ -1,233 +1,284 @@
 import faiss
-import torch
 import numpy as np
 from pymongo import MongoClient
-from transformers import AutoTokenizer, AutoModel
+from sentence_transformers import SentenceTransformer
 import json
 import re
 from typing import List, Dict, Optional
 import logging
 from tqdm import tqdm
+import pickle
+from pathlib import Path
 
-# Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 1. Connect to MongoDB
+# MongoDB Connection
 try:
     client = MongoClient("mongodb+srv://vidhikpath:vidhikpath@cluster0.m2j80to.mongodb.net/")
     db = client["vidhikpath"]
-    ipc_collection = db["ipc"]
+    bns_collection = db["bns"]
     logger.info("Connected to MongoDB")
 except Exception as e:
     logger.error(f"MongoDB connection failed: {e}")
     exit(1)
 
-# 2. Load LegalBERT
+# Load efficient embedding model
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"  # Best balance
+
 try:
-    tokenizer = AutoTokenizer.from_pretrained("nlpaueb/legal-bert-base-uncased")
-    model = AutoModel.from_pretrained("nlpaueb/legal-bert-base-uncased")
-    model.eval()  # Set to evaluation mode
-    logger.info("LegalBERT model loaded")
+    model = SentenceTransformer(MODEL_NAME)
+    model.max_seq_length = 256  # Reduce from default 512 for speed
+    logger.info(f"Loaded model: {MODEL_NAME}")
 except Exception as e:
     logger.error(f"Model loading failed: {e}")
     exit(1)
 
+CACHE_DIR = Path("./cache")
+CACHE_DIR.mkdir(exist_ok=True)
+EMBEDDINGS_CACHE = CACHE_DIR / "embeddings_cache.pkl"
+
 def clean_text(text: str) -> str:
-    """Clean and normalize text for better embeddings"""
+    """Optimized text cleaning"""
     if not text:
         return ""
-    text = re.sub(r'\s+', ' ', text.strip())
+    text = ' '.join(text.split())  # Faster than regex for whitespace
     text = re.sub(r'[^\w\s\-\.\,\;\:\(\)\[\]]', ' ', text)
-    text = re.sub(r'\b(sec|section)\b', 'section', text, flags=re.IGNORECASE)
-    text = re.sub(r'\bipc\b', 'indian penal code', text, flags=re.IGNORECASE)
+    text = text.lower()
+    text = text.replace('sec.', 'section').replace('sec ', 'section ')
     return text.strip()
 
-def get_embedding(text: str, max_length: int = 512) -> Optional[np.ndarray]:
-    """Generate LegalBERT embeddings with error handling"""
-    try:
-        if not text or len(text.strip()) == 0:
-            logger.warning("Empty text provided for embedding")
-            return None
-        clean_txt = clean_text(text)
-        inputs = tokenizer(
-            clean_txt, 
-            return_tensors="pt", 
-            truncation=True, 
-            padding=True,
-            max_length=max_length
-        )
-        with torch.no_grad():
-            outputs = model(**inputs)
-        embedding = outputs.last_hidden_state[:, 0, :].numpy()
-        return embedding[0]
-    except Exception as e:
-        logger.error(f"Error generating embedding for text: {text[:50]}... Error: {e}")
-        return None
+def create_text_representation(doc: Dict) -> str:
+    """Create text representation matching BNS schema"""
+    # BNS schema fields (matching your data)
+    chapter = str(doc.get('Chapter', '')).strip()
+    chapter_name = str(doc.get('Chapter_name', '')).strip()
+    section = str(doc.get('Section', '')).strip()
+    section_name = str(doc.get('Section_name', '')).strip()
+    description = str(doc.get('Description', '')).strip()
+    
+    # Build comprehensive text representation
+    parts = []
+    
+    # Add section info (most important)
+    if section:
+        parts.append(f"BNS Section {section}")
+    
+    if section_name:
+        parts.append(section_name)
+    
+    # Add chapter context
+    if chapter and chapter_name:
+        parts.append(f"Chapter {chapter} {chapter_name}")
+    
+    # Add description (truncated for efficiency)
+    if description:
+        # Truncate to first 300 chars for better balance
+        parts.append(description[:300])
+    
+    return ' '.join(filter(None, parts))
 
-def create_enhanced_text_representation(doc: Dict) -> str:
-    """Create better text representation for each IPC section"""
-    try:
-        chapter = str(doc.get('chapter', '') or '').strip()
-        chapter_title = str(doc.get('chapter_title', '') or '').strip()
-        section = str(doc.get('Section', '') or '').strip()
-        section_title = str(doc.get('section_title', '') or '').strip()
-        section_desc = str(doc.get('section_desc', '') or '').strip()
-        text_parts = []
-        if section:
-            text_parts.append(f"Section {section}")
-        if section_title:
-            text_parts.append(section_title)
-        if chapter and chapter_title:
-            text_parts.append(f"Chapter {chapter} {chapter_title}")
-        elif chapter_title:
-            text_parts.append(chapter_title)
-        if section_desc:
-            text_parts.append(section_desc)
-        combined_text = f"IPC Section {section} {section_title}. " + " ".join(text_parts)
-        return combined_text
-    except Exception as e:
-        logger.error(f"Error creating text representation for doc {doc.get('_id')}: {e}")
-        return ""
-
-def validate_embeddings(embeddings: List[np.ndarray]) -> List[int]:
-    """Validate embeddings and return indices of valid ones"""
-    valid_indices = []
-    for i, emb in enumerate(embeddings):
-        if emb is not None and emb.shape[0] > 0:
-            if not (np.isnan(emb).any() or np.isinf(emb).any()):
-                valid_indices.append(i)
-            else:
-                logger.warning(f"Invalid embedding at index {i} (NaN/Inf values)")
-        else:
-            logger.warning(f"None or empty embedding at index {i}")
-    return valid_indices
-
-def create_faiss_index():
-    """Create optimized FAISS index with error handling"""
-    logger.info("Starting FAISS index creation...")
-    try:
-        ipc_docs = list(ipc_collection.find({}))
-        logger.info(f"Found {len(ipc_docs)} IPC documents")
-        if len(ipc_docs) == 0:
-            logger.error("No documents found in IPC collection")
-            return False
-    except Exception as e:
-        logger.error(f"Error fetching IPC documents: {e}")
-        return False
-
-    logger.info("Generating embeddings...")
-    embeddings = []
-    doc_metadata = []
-    for doc in tqdm(ipc_docs, desc="Processing documents"):
+def load_or_create_embeddings(bns_docs: List[Dict]) -> tuple:
+    """Cache embeddings to disk for faster subsequent runs"""
+    
+    # Check if cache exists and is valid
+    if EMBEDDINGS_CACHE.exists():
+        logger.info("Loading cached embeddings...")
         try:
-            text = create_enhanced_text_representation(doc)
-            if not text:
-                logger.warning(f"Empty text for document {doc.get('_id')}")
-                continue
-            embedding = get_embedding(text)
-            if embedding is not None:
-                embeddings.append(embedding)
-                doc_metadata.append({
-                    "id": str(doc["_id"]),
-                    "section": doc.get("Section", ""),
-                    "title": doc.get("section_title", ""),
-                    "chapter": doc.get("chapter", ""),
-                    "text_length": len(text)
-                })
-            else:
-                logger.warning(f"Failed to generate embedding for document {doc.get('_id')}")
+            with open(EMBEDDINGS_CACHE, 'rb') as f:
+                cached_data = pickle.load(f)
+                if len(cached_data['embeddings']) == len(bns_docs):
+                    logger.info(f"Loaded {len(cached_data['embeddings'])} cached embeddings")
+                    return cached_data['embeddings'], cached_data['metadata']
         except Exception as e:
-            logger.error(f"Error processing document {doc.get('_id')}: {e}")
-            continue
+            logger.warning(f"Cache load failed: {e}, regenerating...")
+    
+    # Generate new embeddings
+    logger.info("Generating embeddings...")
+    texts = []
+    metadata = []
+    
+    for doc in bns_docs:
+        text = create_text_representation(doc)
+        if text:
+            texts.append(clean_text(text))
+            metadata.append({
+                "id": str(doc["_id"]),
+                "section": doc.get("Section", ""),
+                "section_name": doc.get("Section_name", ""),
+                "chapter": doc.get("Chapter", ""),
+                "chapter_name": doc.get("Chapter_name", "")
+            })
+    
+    # Batch encoding (much faster than one-by-one)
+    logger.info(f"Encoding {len(texts)} documents in batches...")
+    embeddings = model.encode(
+        texts,
+        batch_size=32,  # Adjust based on your RAM
+        show_progress_bar=True,
+        convert_to_numpy=True,
+        normalize_embeddings=True  # Pre-normalize for cosine similarity
+    )
+    
+    # Cache for next time
+    try:
+        with open(EMBEDDINGS_CACHE, 'wb') as f:
+            pickle.dump({'embeddings': embeddings, 'metadata': metadata}, f)
+        logger.info("Embeddings cached successfully")
+    except Exception as e:
+        logger.warning(f"Failed to cache embeddings: {e}")
+    
+    return embeddings, metadata
+
+def create_optimized_faiss_index():
+    """Create optimized FAISS index with faster search"""
+    logger.info("Starting optimized FAISS index creation...")
+    
+    # Fetch documents
+    try:
+        bns_docs = list(bns_collection.find({}))
+        logger.info(f"Found {len(bns_docs)} BNS documents")
+        
+        if not bns_docs:
+            logger.error("No documents found in BNS collection")
+            return False
+        
+        # Log sample document structure
+        if bns_docs:
+            sample = bns_docs[0]
+            logger.info(f"Sample document structure:")
+            logger.info(f"  - Section: {sample.get('Section')}")
+            logger.info(f"  - Section_name: {sample.get('Section_name')}")
+            logger.info(f"  - Chapter: {sample.get('Chapter')}")
+            logger.info(f"  - Description length: {len(str(sample.get('Description', '')))}")
+            
+    except Exception as e:
+        logger.error(f"Error fetching documents: {e}")
+        return False
+    
+    # Get or generate embeddings
+    embeddings, metadata = load_or_create_embeddings(bns_docs)
+    
     if len(embeddings) == 0:
         logger.error("No valid embeddings generated")
         return False
-    logger.info(f"Generated {len(embeddings)} valid embeddings")
-
-    valid_indices = validate_embeddings(embeddings)
-    if len(valid_indices) != len(embeddings):
-        logger.warning(f"Filtering out {len(embeddings) - len(valid_indices)} invalid embeddings")
-        embeddings = [embeddings[i] for i in valid_indices]
-        doc_metadata = [doc_metadata[i] for i in valid_indices]
-
-    try:
-        embeddings_array = np.array(embeddings).astype("float32")
-        logger.info(f"Embeddings shape: {embeddings_array.shape}")
-    except Exception as e:
-        logger.error(f"Error converting embeddings to numpy array: {e}")
-        return False
-
-    try:
-        d = embeddings_array.shape[1]
-        faiss.normalize_L2(embeddings_array)
+    
+    embeddings_array = embeddings.astype('float32')
+    d = embeddings_array.shape[1]
+    n = embeddings_array.shape[0]
+    
+    logger.info(f"Embeddings shape: {embeddings_array.shape}")
+    
+    # Choose index type based on dataset size
+    if n < 1000:
+        # Small dataset: use exact search
         index = faiss.IndexFlatIP(d)
-        index.add(embeddings_array)
-        logger.info(f"FAISS index created with {index.ntotal} vectors")
-    except Exception as e:
-        logger.error(f"Error creating FAISS index: {e}")
-        return False
-
+        logger.info("Using IndexFlatIP (exact search)")
+    elif n < 10000:
+        # Medium dataset: use IVF with small number of clusters
+        nlist = min(100, n // 10)  # Number of clusters
+        quantizer = faiss.IndexFlatIP(d)
+        index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_INNER_PRODUCT)
+        index.train(embeddings_array)
+        logger.info(f"Using IndexIVFFlat with {nlist} clusters")
+    else:
+        # Large dataset: use HNSW for fast approximate search
+        index = faiss.IndexHNSWFlat(d, 32, faiss.METRIC_INNER_PRODUCT)
+        index.hnsw.efConstruction = 40
+        index.hnsw.efSearch = 16
+        logger.info("Using IndexHNSWFlat (fast approximate search)")
+    
+    # Add vectors
+    index.add(embeddings_array)
+    logger.info(f"Index created with {index.ntotal} vectors")
+    
+    # Save index and metadata
     try:
-        faiss.write_index(index, "ipc_index.faiss")
-        id_mapping = [meta["id"] for meta in doc_metadata]
-        with open("ipc_id_mapping.json", "w", encoding="utf-8") as f:
+        faiss.write_index(index, "bns_index.faiss")
+        
+        id_mapping = [meta["id"] for meta in metadata]
+        with open("bns_id_mapping.json", "w", encoding="utf-8") as f:
             json.dump(id_mapping, f, ensure_ascii=False, indent=2)
-        with open("ipc_metadata.json", "w", encoding="utf-8") as f:
-            json.dump(doc_metadata, f, ensure_ascii=False, indent=2)
-        logger.info("FAISS index and metadata saved successfully")
-        sections = [meta["section"] for meta in doc_metadata if meta["section"]]
-        logger.info("Index Statistics:")
-        logger.info(f"   - Total documents indexed: {len(doc_metadata)}")
-        logger.info(f"   - Sections with numbers: {len(sections)}")
-        logger.info(f"   - Average text length: {np.mean([meta['text_length'] for meta in doc_metadata]):.1f} chars")
-        logger.info(f"   - Embedding dimension: {d}")
+        
+        with open("bns_metadata.json", "w", encoding="utf-8") as f:
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
+        
+        logger.info("Index and metadata saved successfully")
+        logger.info(f"Statistics:")
+        logger.info(f"  - Documents indexed: {len(metadata)}")
+        logger.info(f"  - Embedding dimension: {d}")
+        logger.info(f"  - Index type: {type(index).__name__}")
+        
+        # Log some section numbers for verification
+        sections = [m['section'] for m in metadata[:10] if m['section']]
+        logger.info(f"  - Sample sections: {', '.join(sections)}")
+        
         return True
     except Exception as e:
-        logger.error(f"Error saving FAISS index: {e}")
+        logger.error(f"Error saving index: {e}")
         return False
 
-def test_index():
-    """Test the created index with sample queries"""
+def test_search_speed():
+    """Test search performance"""
     try:
-        logger.info("Testing the created index...")
-        index = faiss.read_index("ipc_index.faiss")
-        with open("ipc_id_mapping.json", "r", encoding="utf-8") as f:
+        logger.info("\nTesting search performance...")
+        index = faiss.read_index("bns_index.faiss")
+        
+        with open("bns_id_mapping.json", "r") as f:
             id_mapping = json.load(f)
+        
         test_queries = [
-            "murder",
-            "theft",
-            "section 302",
-            "kidnapping",
-            "fraud"
+            "murder and death penalty",
+            "theft of property",
+            "kidnapping children",
+            "fraud and cheating",
+            "assault and violence",
+            "preliminary provisions",
+            "short title and commencement"
         ]
+        
+        import time
+        total_time = 0
+        
         for query in test_queries:
-            query_embedding = get_embedding(query)
-            if query_embedding is not None:
-                query_vec = query_embedding.reshape(1, -1)
-                faiss.normalize_L2(query_vec)
-                distances, indices = index.search(query_vec, 3)
-                logger.info(f"\nQuery: '{query}'")
-                for i, (dist, idx) in enumerate(zip(distances[0], indices[0])):
-                    if idx != -1 and idx < len(id_mapping):
-                        doc_id = id_mapping[idx]
-                        doc = ipc_collection.find_one({"_id": ObjectId(doc_id)}) if ObjectId else None
-                        section = doc.get("Section", "N/A") if doc else "N/A"
-                        title = doc.get("section_title", "N/A") if doc else "N/A"
-                        logger.info(f"   {i+1}. Section {section}: {title} (similarity: {dist:.3f})")
-        logger.info("Index testing completed")
+            start = time.time()
+            
+            # Generate query embedding
+            query_emb = model.encode([query], normalize_embeddings=True)[0]
+            query_vec = query_emb.reshape(1, -1).astype('float32')
+            
+            # Search
+            distances, indices = index.search(query_vec, 5)
+            
+            elapsed = time.time() - start
+            total_time += elapsed
+            
+            logger.info(f"\nQuery: '{query}' ({elapsed*1000:.2f}ms)")
+            for i, (dist, idx) in enumerate(zip(distances[0], indices[0])):
+                if idx != -1 and idx < len(id_mapping):
+                    from bson import ObjectId
+                    doc_id = id_mapping[idx]
+                    doc = bns_collection.find_one({"_id": ObjectId(doc_id)})
+                    if doc:
+                        section = doc.get("Section", "N/A")
+                        section_name = doc.get("Section_name", "N/A")
+                        logger.info(f"  {i+1}. BNS Sec {section}: {section_name[:60]}... (sim: {dist:.3f})")
+        
+        avg_time = (total_time / len(test_queries)) * 1000
+        logger.info(f"\nAverage search time: {avg_time:.2f}ms")
+        
     except Exception as e:
         logger.error(f"Error testing index: {e}")
 
 if __name__ == "__main__":
-    success = create_faiss_index()
+    success = create_optimized_faiss_index()
+    
     if success:
-        logger.info("FAISS index creation completed successfully")
+        logger.info("\nFAISS index creation completed successfully!")
         try:
-            from bson import ObjectId
-            test_index()
+            test_search_speed()
         except ImportError:
-            logger.info("Skipping index test (bson not available)")
+            logger.info("Skipping test (missing dependencies)")
     else:
         logger.error("FAISS index creation failed")
         exit(1)

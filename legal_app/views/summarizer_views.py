@@ -6,6 +6,7 @@ import re
 import tempfile
 from datetime import datetime
 import logging
+import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ except ImportError:
 
 # Initialize Gemini
 genai.configure(api_key=settings.GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+gemini_model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Language configuration
 SUPPORTED_LANGUAGES = {
@@ -125,7 +126,7 @@ def detect_language(text):
 
 def chunk_text(text, max_len=3000):
     """Split text into manageable chunks for summarization."""
-    # Split by sentence boundaries
+    # Split by sentence boundaries including Indic punctuation
     sentences = re.split(r'(?<=[.!?।॥])\s+', text)
     
     if len(sentences) <= 1:
@@ -151,31 +152,61 @@ def get_summary_prompt(language_code, chunk):
     """Get language-specific prompts for summarization."""
     prompts = {
         'en': f"""
-        Summarize the following legal document text clearly and concisely.
+        Analyze this legal document excerpt and provide a clear summary in simple language.
         
         Provide:
-        1. **Plain summary** - explain in simple terms
-        2. **Key points** - important laws, rights, duties, or penalties
-
+        1. **Plain Language Summary** (2-3 sentences)
+           - What this document is about in simple terms
+        
+        2. **Key Legal Points**
+           - Important rights, obligations, or restrictions
+           - Any deadlines or time limits mentioned
+           - Relevant laws or sections cited
+        
+        3. **Action Items** (if any)
+           - What the reader should do or be aware of
+        
+        Keep language accessible for non-lawyers. Avoid legal jargon where possible.
+        
         Text: {chunk}
         """,
         
         'hi': f"""
-        निम्नलिखित कानूनी दस्तावेज़ पाठ का सारांश हिंदी में करें।
+        इस कानूनी दस्तावेज़ अंश का विश्लेषण करें और सरल भाषा में स्पष्ट सारांश प्रदान करें।
         
         प्रदान करें:
-        1. **सरल सारांश** - सरल शब्दों में स्पष्ट रूप से समझाएं
-        2. **मुख्य बिंदु** - महत्वपूर्ण कानून, अधिकार, कर्तव्य या दंड
+        1. **सरल भाषा सारांश** (2-3 वाक्य)
+           - यह दस्तावेज़ किस बारे में है, सरल शब्दों में
+        
+        2. **प्रमुख कानूनी बिंदु**
+           - महत्वपूर्ण अधिकार, दायित्व या प्रतिबंध
+           - उल्लिखित कोई समय सीमा
+           - संबंधित कानून या धाराएं
+        
+        3. **कार्य आइटम** (यदि कोई हो)
+           - पाठक को क्या करना चाहिए या किस बात का ध्यान रखना चाहिए
+        
+        भाषा को गैर-वकीलों के लिए सुलभ रखें।
 
         पाठ: {chunk}
         """,
         
         'kn': f"""
-        ಈ ಕಾನೂನು ದಾಖಲೆಯ ಪಠ್ಯವನ್ನು ಕನ್ನಡದಲ್ಲಿ ಸಾರಾಂಶಗೊಳಿಸಿ.
+        ಈ ಕಾನೂನು ದಾಖಲೆಯ ಭಾಗವನ್ನು ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ಸರಳ ಭಾಷೆಯಲ್ಲಿ ಸ್ಪಷ್ಟ ಸಾರಾಂಶವನ್ನು ಒದಗಿಸಿ.
         
         ಒದಗಿಸಿ:
-        1. **ಸರಳ ಸಾರಾಂಶ** - ಸರಳ ಪದಗಳಲ್ಲಿ ಸ್ಪಷ್ಟವಾಗಿ ವಿವರಿಸಿ
-        2. **ಮುಖ್ಯ ಅಂಶಗಳು** - ಪ್ರಮುಖ ಕಾನೂನುಗಳು, ಹಕ್ಕುಗಳು, ಕರ್ತವ್ಯಗಳು ಅಥವಾ ದಂಡಗಳು
+        1. **ಸರಳ ಭಾಷೆ ಸಾರಾಂಶ** (2-3 ವಾಕ್ಯಗಳು)
+           - ಈ ದಾಖಲೆ ಯಾವುದರ ಬಗ್ಗೆ, ಸರಳ ಪದಗಳಲ್ಲಿ
+        
+        2. **ಪ್ರಮುಖ ಕಾನೂನು ಅಂಶಗಳು**
+           - ಪ್ರಮುಖ ಹಕ್ಕುಗಳು, ಕಟ್ಟುಪಾಡುಗಳು ಅಥವಾ ನಿರ್ಬಂಧಗಳು
+           - ಉಲ್ಲೇಖಿಸಿದ ಯಾವುದೇ ಕಾಲಮಿತಿಗಳು
+           - ಸಂಬಂಧಿತ ಕಾನೂನುಗಳು ಅಥವಾ ವಿಭಾಗಗಳು
+        
+        3. **ಕ್ರಿಯಾ ಅಂಶಗಳು** (ಯಾವುದಾದರೂ ಇದ್ದರೆ)
+           - ಓದುಗರು ಏನು ಮಾಡಬೇಕು ಅಥವಾ ಗಮನಿಸಬೇಕು
+        
+        ವಕೀಲರಲ್ಲದವರಿಗೆ ಭಾಷೆಯನ್ನು ಸುಲಭವಾಗಿಸಿ.
 
         ಪಠ್ಯ: {chunk}
         """
@@ -188,7 +219,9 @@ def summarize_chunk(chunk, language_code='en'):
     try:
         prompt = get_summary_prompt(language_code, chunk)
         response = gemini_model.generate_content(prompt)
-        return response.text.strip()
+        clean_text = re.sub(r'#+\s*', '', response.text)  # removes ### or #### etc.
+        return clean_text.strip()
+
     except Exception as e:
         logger.error(f"Error summarizing chunk: {e}")
         return f"Summary unavailable: {str(e)}"
@@ -261,24 +294,6 @@ def summarize_api(request):
         
         final_summary = "\n\n---\n\n".join(summaries)
 
-        # Store in database if available
-        if db:
-            try:
-                user_id = getattr(request.user, 'uid', 'anonymous') if hasattr(request, 'user') else 'anonymous'
-                summary_doc = {
-                    "user_id": user_id,
-                    "filename": document.name,
-                    "summary": final_summary,
-                    "language": target_language,
-                    "language_name": SUPPORTED_LANGUAGES.get(target_language, target_language),
-                    "chunks_processed": len(chunks),
-                    "file_type": ext,
-                    "created_at": datetime.utcnow()
-                }
-                db["summaries"].insert_one(summary_doc)
-            except Exception as e:
-                logger.error(f"Failed to save to database: {e}")
-
         return JsonResponse({
             "status": "success",
             "summary": final_summary,
@@ -315,8 +330,7 @@ def get_supported_languages(request):
 def health_check(request):
     """Check API health status."""
     dependencies = {
-        "gemini_model": gemini_model is not None,
-        "db": db is not None
+        "gemini_model": gemini_model is not None
     }
     
     return JsonResponse({

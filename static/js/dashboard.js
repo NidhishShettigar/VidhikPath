@@ -166,49 +166,6 @@ function toggleVoiceRecording() {
   }
 }
 
-// // Process uploaded document for summarization
-// function processDocument(file) {
-//   const formData = new FormData();
-//   formData.append("document", file);
-
-//   // Show loading state on upload area
-//   const uploadArea = document.getElementById("uploadArea");
-//   const originalContent = uploadArea.innerHTML;
-//   uploadArea.innerHTML = '<div class="loading"></div><p>Processing document...</p>';
-
-//   fetch("/api/summarize/", {
-//     method: "POST",
-//     headers: {
-//       "X-CSRFToken": getCookie("csrftoken"),
-//     },
-//     body: formData,
-//   })
-//     .then((response) => response.json())
-//     .then((data) => {
-//       // Restore upload area content
-//       uploadArea.innerHTML = originalContent;
-
-//       if (data.summary) {
-//         // Display summary result
-//         const summaryResult = document.getElementById("summaryResult");
-//         const summaryContent = document.getElementById("summaryContent");
-
-//         summaryContent.textContent = data.summary;
-//         summaryResult.style.display = "block";
-
-//         showNotification("Document summarized successfully!", "success");
-//       } else {
-//         showNotification("Error processing document", "error");
-//       }
-//     })
-//     .catch((error) => {
-//       uploadArea.innerHTML = originalContent;
-//       console.error("Error:", error);
-//       showNotification("Error processing document", "error");
-//     });
-// }
-
-
 // Switch between dashboard features
 function switchFeature(feature) {
   const features = document.querySelectorAll(".feature");
