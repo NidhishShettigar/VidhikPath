@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
-    <!-- Added back arrow and restructured nav layout -->
     <div class="top-nav">
         <div class="nav-left">
             <a href="{% url 'dashboard' %}" class="back-arrow">←</a>
@@ -28,7 +27,6 @@
         </a>
     </div>
 
-    <!-- Public Forum -->
     <div class="feature-content" id="forumContent">
         <div class="forum-container">
             <!-- Create Post Section -->
@@ -73,13 +71,15 @@
                     </div>
 
                     <div class="post-content" id="postContent{{ post.id }}">
+                        {% if post.content %}
                         <p>{{ post.content|linebreaks }}</p>
+                        {% endif %}
                         {% if post.image %}
-                        <img src="/media/{{ post.image }}" alt="Post image" class="post-image" onclick="openImageModal(this.src)">
+                        <img src="{{ post.image }}" alt="Post image" class="post-image" onclick="openImageModal('{{ post.image }}')">
                         {% endif %}
                     </div>
 
-                    <!-- Edit Post Section (Hidden by default) -->
+                    <!-- Edit Post Section -->
                     <div class="edit-post-section" id="editSection{{ post.id }}" style="display: none;">
                         <textarea id="editText{{ post.id }}" maxlength="5000" oninput="updateCharCount(this, 'editCharCount{{ post.id }}')">{{ post.content }}</textarea>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
@@ -94,7 +94,10 @@
                     </div>
 
                     <div class="post-actions">
-                        <button class="action-btn like-btn {% if user.firebase_uid in post.likes %}liked{% endif %}" onclick="likePost('{{ post.id }}')">
+                        <!-- FIXED: Pass event to likePost function -->
+                        <button class="action-btn like-btn {% if user.firebase_uid in post.likes %}liked{% endif %}" 
+                                onclick="likePost('{{ post.id }}', event)" 
+                                data-post-id="{{ post.id }}">
                             👍 <span class="like-count">{{ post.likes|length }}</span>
                         </button>
                         <button class="action-btn reply-btn" onclick="toggleReply('{{ post.id }}')">
@@ -122,86 +125,117 @@
                         </div>
                     </div>
 
+                    <!-- FIXED: Nested replies with proper structure -->
                     <div class="replies" id="replies{{ post.id }}">
                         {% for reply in post.replies %}
-                        <div class="reply" data-reply-id="{{ reply.reply_id }}">
-                            <div class="reply-header">
-                                <strong>{{ reply.user.name }}:</strong>
-                                <small>{{ reply.created_at|date:"M d, H:i" }}</small>
+                        <div class="reply" data-reply-id="{{ reply.reply_id }}" style="border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
+                            <div class="reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <div>
+                                    <strong>{{ reply.user.name }}:</strong>
+                                    <small style="color: #999; margin-left: 10px;">{{ reply.created_at|date:"M d, H:i" }}</small>
+                                </div>
                                 {% if reply.firebase_uid == user.firebase_uid %}
                                 <div class="reply-options">
-                                    <button class="reply-edit-btn" onclick="editReply('{{ post.id }}', '{{ reply.reply_id }}')">Edit</button>
-                                    <button class="reply-delete-btn" onclick="confirmDeleteReply('{{ post.id }}', '{{ reply.reply_id }}')">Delete</button>
+                                    <button class="reply-edit-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-right: 5px;" onclick="editReply('{{ post.id }}', '{{ reply.reply_id }}', null)">Edit</button>
+                                    <button class="reply-delete-btn" style="background: none; border: none; color: #f44336; cursor: pointer; font-size: 12px;" onclick="confirmDeleteReply('{{ post.id }}', '{{ reply.reply_id }}', null)">Delete</button>
                                 </div>
                                 {% endif %}
                             </div>
-                            <div class="reply-content" id="replyContent{{ reply.reply_id }}">
+                            <div class="reply-content" id="replyContent{{ reply.reply_id }}" style="margin-bottom: 10px;">
                                 {{ reply.content|linebreaks }}
                             </div>
-                            <!-- Edit Reply Section (Hidden by default) -->
+                            
+                            <!-- Edit Reply Section -->
                             <div class="edit-reply-section" id="editReplySection{{ reply.reply_id }}" style="display: none;">
-                                <textarea id="editReplyText{{ reply.reply_id }}" maxlength="1000" oninput="updateCharCount(this, 'editReplyCharCount{{ reply.reply_id }}')">{{ reply.content }}</textarea>
+                                <textarea id="editReplyText{{ reply.reply_id }}" maxlength="1000" style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;" oninput="updateCharCount(this, 'editReplyCharCount{{ reply.reply_id }}')">{{ reply.content }}</textarea>
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
                                     <small style="color: #6B4C36;">
                                         <span id="editReplyCharCount{{ reply.reply_id }}">{{ reply.content|length }}</span>/1000 characters
                                     </small>
                                     <div>
                                         <button class="btn btn-xs btn-secondary" onclick="cancelEditReply('{{ reply.reply_id }}')">Cancel</button>
-                                        <button class="btn btn-xs btn-primary" onclick="saveEditReply('{{ post.id }}', '{{ reply.reply_id }}')">Save</button>
+                                        <button class="btn btn-xs btn-primary" onclick="saveEditReply('{{ post.id }}', '{{ reply.reply_id }}', null)">Save</button>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Nested Reply Button -->
-                            <button class="nested-reply-btn" onclick="toggleNestedReply('{{ post.id }}', '{{ reply.reply_id }}')">↳ Reply</button>
                             
-                            <!-- Nested Reply Section -->
-                            <div class="nested-reply-section" id="nestedReplySection{{ reply.reply_id }}" style="display: none;">
+                            <button class="nested-reply-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-top: 5px;" onclick="toggleNestedReply('{{ post.id }}', '{{ reply.reply_id }}')">↳ Reply</button>
+                            
+                            <!-- Nested Reply Input Section -->
+                            <div class="nested-reply-section" id="nestedReplySection{{ reply.reply_id }}" style="display: none; margin-top: 10px;">
                                 <textarea 
                                     placeholder="Reply to {{ reply.user.name }}..." 
                                     id="nestedReplyText{{ reply.reply_id }}"
                                     maxlength="1000"
+                                    style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;"
                                     oninput="updateCharCount(this, 'nestedReplyCharCount{{ reply.reply_id }}')"
                                 ></textarea>
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
                                     <small style="color: #6B4C36;">
                                         <span id="nestedReplyCharCount{{ reply.reply_id }}">0</span>/1000 characters
                                     </small>
-                                    <button class="btn btn-xs btn-primary" onclick="submitNestedReply('{{ post.id }}', '{{ reply.reply_id }}')">
+                                    <button class="btn btn-xs btn-primary" onclick="submitNestedReply('{{ post.id }}', '{{ reply.reply_id }}', 1)">
                                         Reply
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- Nested Replies -->
+                            <!-- Nested Replies Container -->
                             <div class="nested-replies" id="nestedReplies{{ reply.reply_id }}">
                                 {% for nested_reply in reply.nested_replies %}
-                                <div class="nested-reply" data-nested-reply-id="{{ nested_reply.reply_id }}">
-                                    <div class="nested-reply-header">
-                                        <strong>{{ nested_reply.user.name }}:</strong>
-                                        <small>{{ nested_reply.created_at|date:"M d, H:i" }}</small>
+                                <div class="nested-reply" data-reply-id="{{ nested_reply.reply_id }}" style="margin-left: 30px; border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
+                                    <div class="nested-reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <div>
+                                            <strong>{{ nested_reply.user.name }}:</strong>
+                                            <small style="color: #999; margin-left: 10px;">{{ nested_reply.created_at|date:"M d, H:i" }}</small>
+                                        </div>
                                         {% if nested_reply.firebase_uid == user.firebase_uid %}
                                         <div class="nested-reply-options">
-                                            <button class="nested-reply-edit-btn" onclick="editNestedReply('{{ nested_reply.reply_id }}')">Edit</button>
-                                            <button class="nested-reply-delete-btn" onclick="deleteNestedReply('{{ post.id }}', '{{ reply.reply_id }}', '{{ nested_reply.reply_id }}')">Delete</button>
+                                            <button class="nested-reply-edit-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-right: 5px;" onclick="editReply('{{ post.id }}', '{{ nested_reply.reply_id }}', '{{ reply.reply_id }}')">Edit</button>
+                                            <button class="nested-reply-delete-btn" style="background: none; border: none; color: #f44336; cursor: pointer; font-size: 12px;" onclick="confirmDeleteReply('{{ post.id }}', '{{ nested_reply.reply_id }}', '{{ reply.reply_id }}')">Delete</button>
                                         </div>
                                         {% endif %}
                                     </div>
-                                    <div class="nested-reply-content" id="nestedReplyContent{{ nested_reply.reply_id }}">
+                                    <div class="nested-reply-content" id="replyContent{{ nested_reply.reply_id }}" style="margin-bottom: 10px;">
                                         {{ nested_reply.content|linebreaks }}
                                     </div>
+                                    
                                     <!-- Edit Nested Reply Section -->
-                                    <div class="edit-nested-reply-section" id="editNestedReplySection{{ nested_reply.reply_id }}" style="display: none;">
-                                        <textarea id="editNestedReplyText{{ nested_reply.reply_id }}" maxlength="1000">{{ nested_reply.content }}</textarea>
+                                    <div class="edit-reply-section" id="editReplySection{{ nested_reply.reply_id }}" style="display: none;">
+                                        <textarea id="editReplyText{{ nested_reply.reply_id }}" maxlength="1000" style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;" oninput="updateCharCount(this, 'editReplyCharCount{{ nested_reply.reply_id }}')">{{ nested_reply.content }}</textarea>
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
                                             <small style="color: #6B4C36;">
-                                                <span id="editNestedReplyCharCount{{ nested_reply.reply_id }}">{{ nested_reply.content|length }}</span>/1000 characters
+                                                <span id="editReplyCharCount{{ nested_reply.reply_id }}">{{ nested_reply.content|length }}</span>/1000 characters
                                             </small>
                                             <div>
-                                                <button class="btn btn-xs btn-secondary" onclick="cancelEditNestedReply('{{ nested_reply.reply_id }}')">Cancel</button>
-                                                <button class="btn btn-xs btn-primary" onclick="saveEditNestedReply('{{ post.id }}', '{{ reply.reply_id }}', '{{ nested_reply.reply_id }}')">Save</button>
+                                                <button class="btn btn-xs btn-secondary" onclick="cancelEditReply('{{ nested_reply.reply_id }}')">Cancel</button>
+                                                <button class="btn btn-xs btn-primary" onclick="saveEditReply('{{ post.id }}', '{{ nested_reply.reply_id }}', '{{ reply.reply_id }}')">Save</button>
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Allow infinite nesting -->
+                                    <button class="nested-reply-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-top: 5px;" onclick="toggleNestedReply('{{ post.id }}', '{{ nested_reply.reply_id }}')">↳ Reply</button>
+                                    
+                                    <div class="nested-reply-section" id="nestedReplySection{{ nested_reply.reply_id }}" style="display: none; margin-top: 10px;">
+                                        <textarea 
+                                            placeholder="Reply to {{ nested_reply.user.name }}..." 
+                                            id="nestedReplyText{{ nested_reply.reply_id }}"
+                                            maxlength="1000"
+                                            style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;"
+                                            oninput="updateCharCount(this, 'nestedReplyCharCount{{ nested_reply.reply_id }}')"
+                                        ></textarea>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                            <small style="color: #6B4C36;">
+                                                <span id="nestedReplyCharCount{{ nested_reply.reply_id }}">0</span>/1000 characters
+                                            </small>
+                                            <button class="btn btn-xs btn-primary" onclick="submitNestedReply('{{ post.id }}', '{{ nested_reply.reply_id }}', 2)">
+                                                Reply
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="nested-replies" id="nestedReplies{{ nested_reply.reply_id }}"></div>
                                 </div>
                                 {% endfor %}
                             </div>
@@ -217,17 +251,10 @@
                 </div>
                 {% endfor %}
             </div>
-
-            <!-- Load More Button for pagination -->
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="btn btn-secondary" id="loadMoreBtn" style="display: none;" onclick="loadMorePosts()">
-                    Load More Posts
-                </button>
-            </div>
         </div>
     </div>
 
-    <!-- Image Modal for post images -->
+    <!-- Image Modal -->
     <div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); cursor: pointer;" onclick="closeImageModal()">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%;">
             <img id="modalImage" style="width: 100%; height: auto; border-radius: 8px;">
@@ -247,7 +274,6 @@
         </div>
     </div>
     
-    <!-- Fixed the script src to use forum.js instead of connector.js -->
     <script src="{% static 'js/forum.js' %}"></script>
 
 </body>

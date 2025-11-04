@@ -17,14 +17,17 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) * 2);
-  max-width: 500px;
-  width: 85%;
-  max-height: 70vh;
-  overflow-y: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  width: auto;              /* fit to content width */
+  max-width: 400px;         /* still limits max width */
+  height: auto;             /* fit to content height */
+  max-height: 80vh;         /* prevent overflow on small screens */
+  overflow-y: auto;         /* enable scroll if content exceeds max-height */
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
   position: relative;
   animation: slideIn 0.4s ease-out;
+  padding: 1rem;            /* optional: keep a bit of spacing inside */
 }
+
 
 .modal-header {
   display: flex;
@@ -75,44 +78,6 @@
   grid-template-columns: auto 1fr;
   gap: 2rem;
   margin-bottom: 0.5rem;
-}
-
-.profile-photo-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.profile-photo,
-.profile-photo-placeholder {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 3px solid var(--border);
-  object-fit: cover;
-}
-
-.profile-photo-placeholder {
-  background: var(--primary);
-  color: var(--primary-foreground);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.profile-photo-section input[type="file"] {
-  width: 100%;
-  max-width: 200px;
-  padding: 0.5rem;
-  background: var(--input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--foreground);
-  font-size: 0.875rem;
-  cursor: pointer;
 }
 
 .profile-info {

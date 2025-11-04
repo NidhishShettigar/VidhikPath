@@ -48,6 +48,25 @@ except Exception as e:
     index = None
     id_mapping = []
 
+# Language configurations
+LANGUAGE_CONFIG = {
+    'english': {
+        'name': 'English',
+        'code': 'en-US',
+        'instruction': 'Respond in English.'
+    },
+    'hindi': {
+        'name': 'हिन्दी',
+        'code': 'hi-IN',
+        'instruction': 'कृपया हिन्दी में जवाब दें। सभी कानूनी जानकारी हिन्दी में प्रदान करें।'
+    },
+    'kannada': {
+        'name': 'ಕನ್ನಡ',
+        'code': 'kn-IN',
+        'instruction': 'ದಯವಿಟ್ಟು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ। ಎಲ್ಲಾ ಕಾನೂನು ಮಾಹಿತಿಯನ್ನು ಕನ್ನಡದಲ್ಲಿ ನೀಡಿ।'
+    }
+}
+
 def get_embedding(text: str):
     """Generate embeddings using sentence-transformers (matches indexing model)"""
     if not text or not text.strip():
@@ -125,6 +144,19 @@ def is_legal_query(text: str) -> bool:
     words = text_lower.split() 
     return any(word in LEGAL_KEYWORDS for word in words)
 
+def format_chat_history(history: list, language: str) -> str:
+    """Format chat history for context"""
+    if not history:
+        return ""
+    
+    formatted = "\n\nPrevious Conversation:\n"
+    for msg in history[-5:]:  # Only use last 5 messages for context
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        formatted += f"{role.capitalize()}: {content}\n"
+    
+    return formatted
+
 @csrf_exempt
 @firebase_login_required
 def chat_api(request):
@@ -132,7 +164,8 @@ def chat_api(request):
         try:
             data = json.loads(request.body)
             message = data.get('message', '').strip()
-            language = data.get('language', 'english')
+            language = data.get('language', 'english').lower()
+            chat_history = data.get('history', [])  # Get chat history from client
 
             if not message:
                 return JsonResponse({
@@ -141,6 +174,10 @@ def chat_api(request):
                     'context': [],
                     'language': language
                 }, status=400)
+
+            # Validate language
+            if language not in LANGUAGE_CONFIG:
+                language = 'english'
 
             # Simple preprocessing (no SpaCy needed - saves 500MB RAM and latency)
             processed_message = message.lower().strip()
@@ -159,11 +196,21 @@ def chat_api(request):
             else:
                 rag_context = "No relevant Bharatiya Nyaya Sanhita (BNS) sections found."
 
-            # Build prompt for Gemini
+            # Get language instruction
+            lang_instruction = LANGUAGE_CONFIG[language]['instruction']
+
+            # Format chat history for context
+            history_context = format_chat_history(chat_history, language)
+
+            # Build prompt for Gemini with language instruction and chat history
             user_input = (
-                f"User Question: {message}\n\n"
+                f"{history_context}\n\n"
+                f"Current User Question: {message}\n\n"
                 f"Relevant BNS 2023 Context:\n{rag_context}\n\n"
-                f"Provide a detailed answer based on the Bharatiya Nyaya Sanhita 2023 (Indian Penal Code replacement)."
+                f"IMPORTANT LANGUAGE INSTRUCTION: {lang_instruction}\n\n"
+                f"Provide a detailed answer based on the Bharatiya Nyaya Sanhita 2023 (Indian Penal Code replacement). "
+                f"Make sure to respond ONLY in {LANGUAGE_CONFIG[language]['name']} language. "
+                f"Consider the previous conversation context when answering."
             )
 
             gemini_prompt = system_prompt + "\n\n" + user_input
@@ -190,21 +237,21 @@ def chat_api(request):
 
                 # Handle response
                 if not response.candidates:
-                    gemini_response = "Unable to generate a response. Please rephrase your question."
+                    gemini_response = get_error_message(language, "no_response")
                     logger.warning("No candidates in Gemini response")
                 elif response.candidates[0].finish_reason == 2:
-                    gemini_response = "This query requires legal context. Please provide more details."
+                    gemini_response = get_error_message(language, "need_details")
                     logger.warning("Response blocked by safety filters despite BLOCK_NONE")
                 else:
                     try:
                         gemini_response = response.text
                     except ValueError as e:
                         logger.error(f"Error extracting response text: {e}")
-                        gemini_response = "Unable to generate a response. Please try rephrasing."
+                        gemini_response = get_error_message(language, "rephrase")
                         
             except Exception as e:
                 logger.error(f"Gemini API error: {e}")
-                gemini_response = "An error occurred while processing your request. Please try again."
+                gemini_response = get_error_message(language, "error")
 
             # Return JSON response with top 5 most relevant sections
             return JsonResponse({
@@ -225,9 +272,35 @@ def chat_api(request):
             logger.error(f"Unexpected error in chat_api: {e}")
             return JsonResponse({
                 'error': str(e),
-                'response': 'An unexpected error occurred. Please try again.',
+                'response': get_error_message(language if 'language' in locals() else 'english', 'error'),
                 'context': [],
                 'language': language if 'language' in locals() else 'english'
             }, status=500)
     
     return JsonResponse({'error': 'Only POST method allowed'}, status=405)
+
+def get_error_message(language: str, error_type: str) -> str:
+    """Get error messages in the appropriate language"""
+    messages = {
+        'english': {
+            'no_response': 'Unable to generate a response. Please rephrase your question.',
+            'need_details': 'This query requires legal context. Please provide more details.',
+            'rephrase': 'Unable to generate a response. Please try rephrasing.',
+            'error': 'An error occurred while processing your request. Please try again.'
+        },
+        'hindi': {
+            'no_response': 'प्रतिक्रिया उत्पन्न करने में असमर्थ। कृपया अपने प्रश्न को दोबारा लिखें।',
+            'need_details': 'इस प्रश्न के लिए कानूनी संदर्भ की आवश्यकता है। कृपया अधिक विवरण प्रदान करें।',
+            'rephrase': 'प्रतिक्रिया उत्पन्न करने में असमर्थ। कृपया दोबारा प्रयास करें।',
+            'error': 'आपके अनुरोध को संसाधित करते समय एक त्रुटि हुई। कृपया पुनः प्रयास करें।'
+        },
+        'kannada': {
+            'no_response': 'ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಮರುಹೊಂದಿಸಿ.',
+            'need_details': 'ಈ ಪ್ರಶ್ನೆಗೆ ಕಾನೂನು ಸಂದರ್ಭ ಅಗತ್ಯವಿದೆ. ದಯವಿಟ್ಟು ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನೀಡಿ.',
+            'rephrase': 'ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+            'error': 'ನಿಮ್ಮ ವಿನಂತಿಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.'
+        }
+    }
+    
+    lang_messages = messages.get(language, messages['english'])
+    return lang_messages.get(error_type, lang_messages['error'])

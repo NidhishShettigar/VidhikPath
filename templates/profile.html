@@ -22,14 +22,6 @@
             <form id="profileForm" method="POST" enctype="multipart/form-data" action="{% url 'profile' %}">
                 {% csrf_token %}
                 <div class="profile-section">
-                    <div class="profile-photo-section">
-                        {% if user.userprofile.profile_photo %}
-                            <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile" class="profile-photo">
-                        {% else %}
-                            <div class="profile-photo-placeholder">{{ user.first_name.0|upper }}</div>
-                        {% endif %}
-                        <input type="file" name="profile_photo" class="form-control mt-2">
-                    </div>
                     <div class="profile-info">
                         <div class="form-group">
                             <label>Name</label>
