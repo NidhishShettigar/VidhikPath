@@ -36,12 +36,17 @@
                     <div class="chat-header-left">
                         <h3>VidhikAI - Legal Assistant</h3>
                     </div>
-                    <div class="language-selector">
-                        <select id="languageSelect" title="Select Language">
-                            <option value="english">🇬🇧 English</option>
-                            <option value="hindi">🇮🇳 हिन्दी (Hindi)</option>
-                            <option value="kannada">🇮🇳 ಕನ್ನಡ (Kannada)</option>
-                        </select>
+                    <div class="chat-header-controls">
+                        <div class="language-selector">
+                            <select id="languageSelect" title="Select Language">
+                                <option value="english">🇬🇧 English</option>
+                                <option value="hindi">🇮🇳 हिन्दी (Hindi)</option>
+                                <option value="kannada">🇮🇳 ಕನ್ನಡ (Kannada)</option>
+                            </select>
+                        </div>
+                        <button class="clear-chat-btn" onclick="clearChatHistory()" title="Clear chat history" style="color: white; background: #dc3545;">
+                            <span>🗑️</span> Clear Chat
+                        </button>
                     </div>
                 </div>
 
@@ -54,9 +59,9 @@
 
                 <div class="chat-input-container">
                     <div class="input-group">
-                        <input type="text" id="chatInput" placeholder="Ask your legal question...">
-                        <button class="voice-btn" id="voiceBtn">Voice (English)</button>
-                        <button class="send-btn" id="sendBtn">Send</button>
+                        <input type="text" id="chatInput" placeholder="Ask your legal question..." autocomplete="off">
+                        <button class="voice-btn" id="voiceBtn" type="button">🎤 Voice</button>
+                        <button class="send-btn" id="sendBtn" type="button">Send ➤</button>
                     </div>
                 </div>
             </div>
@@ -65,6 +70,6 @@
 </div>
 
 <!-- Chatbot JavaScript -->
-<script src="{% static 'js/chatbot.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{% static 'js/chatbot.js' %}"></script>
 {% endblock %}

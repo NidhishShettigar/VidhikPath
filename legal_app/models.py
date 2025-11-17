@@ -149,11 +149,15 @@ class ForumPost:
     def get_by_id(post_id):
         """Get a post by its ID"""
         try:
-            if isinstance(post_id, str):
-                post_id = ObjectId(post_id)
-            return ForumPost.collection.find_one({"_id": post_id})
+            post_id = ObjectId(post_id)
+            post = ForumPost.collection.find_one({"_id": post_id})
+            if post:
+                post['id'] = str(post['_id'])  # ✅ Add this line
+                del post['_id']               # ✅ Remove MongoDB _id (optional, cleaner)
+            return post
         except Exception:
             return None
+
     
     @staticmethod
     def get_all_with_user_info(limit=20, skip=0):
@@ -165,6 +169,9 @@ class ForumPost:
         
         # Populate user info for each post
         for post in posts:
+            # ✅ CRITICAL FIX: Add 'id' field for template usage
+            post['id'] = str(post['_id'])
+            
             user = User.find_by_firebase_uid(post['firebase_uid'])
             post['user'] = {
                 'name': user.get('name', 'Unknown User') if user else 'Unknown User',
@@ -178,12 +185,20 @@ class ForumPost:
                     'name': reply_user.get('name', 'Unknown User') if reply_user else 'Unknown User'
                 }
                 
-                # Populate user info for nested replies
-                for nested_reply in reply.get('nested_replies', []):
-                    nested_user = User.find_by_firebase_uid(nested_reply['firebase_uid'])
-                    nested_reply['user'] = {
-                        'name': nested_user.get('name', 'Unknown User') if nested_user else 'Unknown User'
-                    }
+                # Populate user info for nested replies recursively
+                def populate_nested_replies(nested_replies):
+                    for nested_reply in nested_replies:
+                        nested_user = User.find_by_firebase_uid(nested_reply['firebase_uid'])
+                        nested_reply['user'] = {
+                            'name': nested_user.get('name', 'Unknown User') if nested_user else 'Unknown User'
+                        }
+                        # Recursively populate deeper nested replies
+                        if nested_reply.get('nested_replies'):
+                            populate_nested_replies(nested_reply['nested_replies'])
+                
+                # Populate all levels of nested replies
+                if reply.get('nested_replies'):
+                    populate_nested_replies(reply['nested_replies'])
         
         return posts
     

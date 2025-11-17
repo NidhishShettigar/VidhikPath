@@ -191,7 +191,7 @@ def chat_api(request):
                     f"**BNS Section {sec['Section']}** - {sec['Section_name']}\n"
                     f"Chapter: {sec.get('Chapter', 'N/A')} - {sec.get('Chapter_name', '')}\n"
                     f"Description: {sec['Description']}"
-                    for sec in bns_results if isinstance(sec, dict) and sec.get('Section')
+                    for sec in bns_results if isinstance(sec, dict) and sec.get('Section') 
                 ])
             else:
                 rag_context = "No relevant Bharatiya Nyaya Sanhita (BNS) sections found."

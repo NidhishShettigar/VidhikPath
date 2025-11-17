@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
+    <!-- Add hidden element to store current user's Firebase UID -->
+    <div data-user-firebase-uid="{{ user.firebase_uid }}" style="display: none;"></div>
+
     <div class="top-nav">
         <div class="nav-left">
             <a href="{% url 'dashboard' %}" class="back-arrow">←</a>
@@ -58,7 +61,8 @@
             <!-- Forum Posts -->
             <div class="forum-posts" id="forumPosts">
                 {% for post in posts %}
-                <div class="forum-post" data-post-id="{{ post.id }}">
+                <!-- Add data-firebase-uid to post element for ownership checking -->
+                <div class="forum-post" data-post-id="{{ post.id }}" data-firebase-uid="{{ post.firebase_uid }}">
                     <div class="post-header">
                         <div class="post-user">{{ post.user.name }}</div>
                         <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
@@ -94,10 +98,10 @@
                     </div>
 
                     <div class="post-actions">
-                        <!-- FIXED: Pass event to likePost function -->
+                        <!-- CRITICAL FIX: Added data-post-id attribute to the button itself -->
                         <button class="action-btn like-btn {% if user.firebase_uid in post.likes %}liked{% endif %}" 
-                                onclick="likePost('{{ post.id }}', event)" 
-                                data-post-id="{{ post.id }}">
+                            onclick="likePost('{{ post.id }}')" 
+                            data-post-id="{{ post.id }}">
                             👍 <span class="like-count">{{ post.likes|length }}</span>
                         </button>
                         <button class="action-btn reply-btn" onclick="toggleReply('{{ post.id }}')">
@@ -125,10 +129,10 @@
                         </div>
                     </div>
 
-                    <!-- FIXED: Nested replies with proper structure -->
+                    <!-- Add data-firebase-uid to replies for ownership checking -->
                     <div class="replies" id="replies{{ post.id }}">
                         {% for reply in post.replies %}
-                        <div class="reply" data-reply-id="{{ reply.reply_id }}" style="border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
+                        <div class="reply" data-reply-id="{{ reply.reply_id }}" data-firebase-uid="{{ reply.firebase_uid }}" style="border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
                             <div class="reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                 <div>
                                     <strong>{{ reply.user.name }}:</strong>
@@ -183,7 +187,7 @@
                             <!-- Nested Replies Container -->
                             <div class="nested-replies" id="nestedReplies{{ reply.reply_id }}">
                                 {% for nested_reply in reply.nested_replies %}
-                                <div class="nested-reply" data-reply-id="{{ nested_reply.reply_id }}" style="margin-left: 30px; border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
+                                <div class="nested-reply" data-reply-id="{{ nested_reply.reply_id }}" data-firebase-uid="{{ nested_reply.firebase_uid }}" style="margin-left: 30px; border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
                                     <div class="nested-reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                         <div>
                                             <strong>{{ nested_reply.user.name }}:</strong>
