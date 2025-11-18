@@ -11,6 +11,8 @@ from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import google.generativeai as genai
 import json
 import logging
+import re
+from typing import List, Dict, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -18,57 +20,111 @@ logger = logging.getLogger(__name__)
 with open("legal_app/prompts/system_prompt.txt", "r", encoding="utf-8") as f:
     system_prompt = f.read()
 
-# Load keywords from file once at startup
+# Load keywords
 with open("legal_app/prompts/legal_keywords.txt", "r", encoding="utf-8") as f:
     LEGAL_KEYWORDS = set(line.strip().lower() for line in f if line.strip())
 
 # Configure Gemini API
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
-# Load MongoDB collection
+# Load MongoDB collections
 bns_collection = db["bns"]
+ipc_collection = db["ipc"]
 
-# Load efficient embedding model (matches indexing model)
+# Use SAME model as indexing (CRITICAL!)
+MODEL_NAME = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+
 try:
-    embedding_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-    embedding_model.max_seq_length = 256
-    logger.info("Embedding model loaded successfully")
+    embedding_model = SentenceTransformer(MODEL_NAME)
+    embedding_model.max_seq_length = 512
+    logger.info(f"Embedding model loaded: {MODEL_NAME}")
 except Exception as e:
     logger.error(f"Failed to load embedding model: {e}")
     embedding_model = None
 
-# Load FAISS index + mapping
+# Load FAISS index
 try:
-    index = faiss.read_index("bns_index.faiss")
-    with open("bns_id_mapping.json", "r", encoding="utf-8") as f:
+    index = faiss.read_index("legal_combined_index.faiss")
+    with open("legal_id_mapping.json", "r", encoding="utf-8") as f:
         id_mapping = json.load(f)
-    logger.info(f"FAISS index loaded: {index.ntotal} vectors, dimension: {index.d}")
+    with open("legal_metadata.json", "r", encoding="utf-8") as f:
+        metadata_list = json.load(f)
+    logger.info(f"FAISS index loaded: {index.ntotal} vectors")
 except Exception as e:
     logger.error(f"Failed to load FAISS index: {e}")
     index = None
     id_mapping = []
+    metadata_list = []
 
-# Language configurations
-LANGUAGE_CONFIG = {
-    'english': {
-        'name': 'English',
-        'code': 'en-US',
-        'instruction': 'Respond in English.'
-    },
-    'hindi': {
-        'name': 'हिन्दी',
-        'code': 'hi-IN',
-        'instruction': 'कृपया हिन्दी में जवाब दें। सभी कानूनी जानकारी हिन्दी में प्रदान करें।'
-    },
-    'kannada': {
-        'name': 'ಕನ್ನಡ',
-        'code': 'kn-IN',
-        'instruction': 'ದಯವಿಟ್ಟು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ। ಎಲ್ಲಾ ಕಾನೂನು ಮಾಹಿತಿಯನ್ನು ಕನ್ನಡದಲ್ಲಿ ನೀಡಿ।'
-    }
+# Legal term normalization (MUST match indexing!)
+LEGAL_TERM_MAPPING = {
+    'ipc': 'indian penal code',
+    'bns': 'bharatiya nyaya sanhita',
+    'sec': 'section',
+    'sub-sec': 'subsection',
+    'cr.p.c': 'criminal procedure code',
+    'bnss': 'bharatiya nagarik suraksha sanhita',
+    'crpc': 'criminal procedure code',
+    'offence': 'offense',
+    'offences': 'offenses',
 }
 
-def get_embedding(text: str):
-    """Generate embeddings using sentence-transformers (matches indexing model)"""
+# Query expansion terms for better retrieval
+QUERY_EXPANSION = {
+    'murder': ['murder', 'killing', 'homicide', 'death'],
+    'theft': ['theft', 'stealing', 'larceny', 'robbery'],
+    'rape': ['rape', 'sexual assault', 'sexual violence'],
+    'kidnapping': ['kidnapping', 'abduction', 'taking away'],
+    'fraud': ['fraud', 'cheating', 'deception', 'dishonesty'],
+    'assault': ['assault', 'violence', 'battery', 'attack'],
+}
+
+def advanced_query_preprocessing(query: str) -> str:
+    """
+    Advanced query preprocessing with legal context
+    """
+    if not query or not isinstance(query, str):
+        return ""
+    
+    # Convert to lowercase
+    query = query.lower()
+    
+    # Normalize legal terms
+    for abbr, full in LEGAL_TERM_MAPPING.items():
+        query = re.sub(r'\b' + re.escape(abbr) + r'\b', full, query)
+    
+    # Normalize section references
+    query = re.sub(r'\bsec\.?\s*(\d+)', r'section \1', query)
+    query = re.sub(r'\bsection\s*\.?\s*(\d+)', r'section \1', query)
+    
+    # Remove extra whitespace
+    query = ' '.join(query.split())
+    
+    # Remove special characters
+    query = re.sub(r'[^\w\s\-\.\,\;\:\(\)\[\]/]', ' ', query)
+    
+    return query.strip()
+
+def expand_query(query: str) -> str:
+    """
+    Expand query with synonyms for better retrieval
+    """
+    expanded_terms = []
+    words = query.lower().split()
+    
+    for word in words:
+        if word in QUERY_EXPANSION:
+            expanded_terms.extend(QUERY_EXPANSION[word])
+        else:
+            expanded_terms.append(word)
+    
+    # Combine original query with expanded terms
+    return query + " " + " ".join(set(expanded_terms))
+
+def get_embedding(text: str) -> np.ndarray:
+    """
+    Generate embeddings (MUST match indexing model!)
+    """
     if not text or not text.strip():
         logger.warning("Empty text provided for embedding")
         return None
@@ -88,8 +144,10 @@ def get_embedding(text: str):
         logger.error(f"Error generating embedding: {e}")
         return None
 
-def search_faiss(query: str, top_k: int = 20):
-    """Search FAISS index with comprehensive error handling"""
+def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
+    """
+    Advanced retrieval with query expansion and reranking
+    """
     if index is None:
         logger.error("FAISS index not loaded")
         return []
@@ -99,63 +157,145 @@ def search_faiss(query: str, top_k: int = 20):
         return []
     
     try:
-        query_vec = get_embedding(query)
+        # Step 1: Preprocess query
+        processed_query = advanced_query_preprocessing(query)
+        logger.info(f"Original query: {query}")
+        logger.info(f"Processed query: {processed_query}")
+        
+        # Step 2: Expand query
+        expanded_query = expand_query(processed_query)
+        logger.info(f"Expanded query: {expanded_query}")
+        
+        # Step 3: Generate embedding
+        query_vec = get_embedding(expanded_query)
         
         if query_vec is None:
             logger.error("Failed to generate query embedding")
             return []
         
-        # Verify dimensions match
-        if query_vec.shape[1] != index.d:
-            logger.error(f"Dimension mismatch: query {query_vec.shape[1]} vs index {index.d}")
-            logger.error("Please regenerate FAISS index with matching model")
-            return []
+        # Step 4: Search FAISS (retrieve more for reranking)
+        search_k = top_k * 2  # Retrieve 2x for reranking
+        distances, indices = index.search(query_vec, search_k)
         
-        distances, indices = index.search(query_vec, top_k)
-        
+        # Step 5: Fetch documents and prepare results
         results = []
-        for idx in indices[0]:
-            if idx != -1 and idx < len(id_mapping):
-                doc_id = id_mapping[idx]
-                try:
+        seen_sections = set()  # Avoid duplicates
+        
+        for dist, idx in zip(distances[0], indices[0]):
+            if idx == -1 or idx >= len(metadata_list):
+                continue
+            
+            meta = metadata_list[idx]
+            doc_id = meta["id"]
+            source = meta["source"]
+            section = meta.get("section", "")
+            
+            # Create unique key to avoid duplicates
+            unique_key = f"{source}_{section}"
+            if unique_key in seen_sections:
+                continue
+            seen_sections.add(unique_key)
+            
+            try:
+                # Fetch full document
+                if source == "bns":
                     doc = bns_collection.find_one({"_id": ObjectId(doc_id)})
                     if doc:
                         results.append({
-                            "Section": doc.get("Section", ""),
-                            "Section_name": doc.get("Section_name", ""),
-                            "Description": doc.get("Description", ""),
-                            "Chapter": doc.get("Chapter", ""),
-                            "Chapter_name": doc.get("Chapter_name", "")
+                            "source": "BNS",
+                            "section": doc.get("Section", ""),
+                            "section_name": doc.get("Section_name", ""),
+                            "description": doc.get("Description", ""),
+                            "chapter": doc.get("Chapter", ""),
+                            "chapter_name": doc.get("Chapter_name", ""),
+                            "similarity": float(dist)
                         })
-                except Exception as e:
-                    logger.error(f"Error fetching document {doc_id}: {e}")
-                    continue
+                else:  # ipc
+                    doc = ipc_collection.find_one({"_id": ObjectId(doc_id)})
+                    if doc:
+                        results.append({
+                            "source": "IPC",
+                            "section": doc.get("Section", ""),
+                            "section_name": doc.get("section_title", ""),
+                            "description": doc.get("section_desc", ""),
+                            "chapter": doc.get("chapter", ""),
+                            "chapter_name": doc.get("chapter_title", ""),
+                            "similarity": float(dist)
+                        })
+            except Exception as e:
+                logger.error(f"Error fetching document {doc_id}: {e}")
+                continue
+            
+            # Stop when we have enough results
+            if len(results) >= top_k:
+                break
         
-        logger.info(f"Found {len(results)} relevant BNS sections for query")
-        return results
+        logger.info(f"Retrieved {len(results)} relevant sections")
+        
+        # Step 6: Simple reranking based on similarity scores
+        results.sort(key=lambda x: x['similarity'], reverse=True)
+        
+        return results[:top_k]
         
     except Exception as e:
-        logger.error(f"Error in FAISS search: {e}")
+        logger.error(f"Error in retrieval: {e}")
         return []
 
-def is_legal_query(text: str) -> bool:
-    """Check if the query contains any legal-related keyword."""
-    text_lower = text.lower()
-    words = text_lower.split() 
-    return any(word in LEGAL_KEYWORDS for word in words)
+def format_context_for_llm(sections: List[Dict]) -> str:
+    """
+    Format retrieved sections for LLM with clear structure
+    """
+    if not sections:
+        return "No relevant legal sections found in the database."
+    
+    context_parts = []
+    
+    for i, sec in enumerate(sections, 1):
+        source = sec.get('source', 'UNKNOWN')
+        section_num = sec.get('section', 'N/A')
+        section_name = sec.get('section_name', 'N/A')
+        description = sec.get('description', 'N/A')
+        chapter = sec.get('chapter', '')
+        chapter_name = sec.get('chapter_name', '')
+        
+        section_text = f"""
+### {i}. [{source}] Section {section_num}: {section_name}
+**Chapter:** {chapter} - {chapter_name}
+**Details:** {description[:500]}...
+**Relevance Score:** {sec.get('similarity', 0):.3f}
+"""
+        context_parts.append(section_text)
+    
+    return "\n".join(context_parts)
 
-def format_chat_history(history: list, language: str) -> str:
+def format_chat_history(history: list) -> str:
     """Format chat history for context"""
     if not history:
         return ""
     
-    formatted = "\n\nPrevious Conversation:\n"
-    for msg in history[-5:]:  # Only use last 5 messages for context
+    formatted = "\n\n### Previous Conversation:\n"
+    for msg in history[-5:]:  # Last 5 messages
         role = msg.get('role', 'user')
         content = msg.get('content', '')
-        formatted += f"{role.capitalize()}: {content}\n"
+        formatted += f"**{role.capitalize()}:** {content}\n"
     
     return formatted
+
+# Language configurations
+LANGUAGE_CONFIG = {
+    'english': {
+        'name': 'English',
+        'instruction': 'Respond in clear, professional English.'
+    },
+    'hindi': {
+        'name': 'हिन्दी',
+        'instruction': 'कृपया स्पष्ट और व्यावसायिक हिन्दी में जवाब दें। सभी कानूनी जानकारी हिन्दी में प्रदान करें।'
+    },
+    'kannada': {
+        'name': 'ಕನ್ನಡ',
+        'instruction': 'ದಯವಿಟ್ಟು ಸ್ಪಷ್ಟ ಮತ್ತು ವೃತ್ತಿಪರ ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ। ಎಲ್ಲಾ ಕಾನೂನು ಮಾಹಿತಿಯನ್ನು ಕನ್ನಡದಲ್ಲಿ ನೀಡಿ।'
+    }
+}
 
 @csrf_exempt
 @firebase_login_required
@@ -165,7 +305,7 @@ def chat_api(request):
             data = json.loads(request.body)
             message = data.get('message', '').strip()
             language = data.get('language', 'english').lower()
-            chat_history = data.get('history', [])  # Get chat history from client
+            chat_history = data.get('history', [])
 
             if not message:
                 return JsonResponse({
@@ -179,51 +319,53 @@ def chat_api(request):
             if language not in LANGUAGE_CONFIG:
                 language = 'english'
 
-            # Simple preprocessing (no SpaCy needed - saves 500MB RAM and latency)
-            processed_message = message.lower().strip()
-
-            # Search FAISS for relevant BNS sections
-            bns_results = search_faiss(processed_message, top_k=20)
-
-            # Prepare RAG context with BNS schema fields
-            if bns_results:
-                rag_context = "\n\n".join([
-                    f"**BNS Section {sec['Section']}** - {sec['Section_name']}\n"
-                    f"Chapter: {sec.get('Chapter', 'N/A')} - {sec.get('Chapter_name', '')}\n"
-                    f"Description: {sec['Description']}"
-                    for sec in bns_results if isinstance(sec, dict) and sec.get('Section') 
-                ])
-            else:
-                rag_context = "No relevant Bharatiya Nyaya Sanhita (BNS) sections found."
-
-            # Get language instruction
+            # Step 1: Retrieve relevant sections
+            relevant_sections = retrieve_relevant_sections(message, top_k=20)
+            
+            # Step 2: Format context
+            rag_context = format_context_for_llm(relevant_sections)
+            
+            # Step 3: Format chat history
+            history_context = format_chat_history(chat_history)
+            
+            # Step 4: Get language instruction
             lang_instruction = LANGUAGE_CONFIG[language]['instruction']
+            
+            # Step 5: Build enhanced prompt
+            user_input = f"""
+{history_context}
 
-            # Format chat history for context
-            history_context = format_chat_history(chat_history, language)
+### Current User Question:
+{message}
 
-            # Build prompt for Gemini with language instruction and chat history
-            user_input = (
-                f"{history_context}\n\n"
-                f"Current User Question: {message}\n\n"
-                f"Relevant BNS 2023 Context:\n{rag_context}\n\n"
-                f"IMPORTANT LANGUAGE INSTRUCTION: {lang_instruction}\n\n"
-                f"Provide a detailed answer based on the Bharatiya Nyaya Sanhita 2023 (Indian Penal Code replacement). "
-                f"Make sure to respond ONLY in {LANGUAGE_CONFIG[language]['name']} language. "
-                f"Consider the previous conversation context when answering."
-            )
+### Relevant Legal Sections (BNS 2023 & IPC):
+{rag_context}
+
+### LANGUAGE INSTRUCTION:
+{lang_instruction}
+
+### INSTRUCTIONS:
+1. Answer based ONLY on the provided legal sections above
+2. Cite specific section numbers (e.g., "According to BNS Section 302...")
+3. If multiple sections are relevant, explain each one
+4. If the sections don't fully answer the question, say so
+5. Use {LANGUAGE_CONFIG[language]['name']} language exclusively
+6. Consider the previous conversation context
+7. Be precise, professional, and helpful
+"""
 
             gemini_prompt = system_prompt + "\n\n" + user_input
 
-            # Call Gemini API with safety settings disabled for legal content
+            # Step 6: Call Gemini with enhanced configuration
             try:
                 gemini_model = genai.GenerativeModel(
-                    "models/gemini-2.5-flash",
+                    "models/gemini-2.0-flash",  # Latest and best
                     generation_config={
-                        "temperature": 0.2,
-                        "top_p": 0.8,
+                        "temperature": 0.3,  # Slightly higher for better explanations
+                        "top_p": 0.85,
                         "top_k": 40,
-                        "max_output_tokens": 1024
+                        "max_output_tokens": 2048,  # Longer responses
+                        "candidate_count": 1,
                     },
                     safety_settings={
                         HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
@@ -241,7 +383,7 @@ def chat_api(request):
                     logger.warning("No candidates in Gemini response")
                 elif response.candidates[0].finish_reason == 2:
                     gemini_response = get_error_message(language, "need_details")
-                    logger.warning("Response blocked by safety filters despite BLOCK_NONE")
+                    logger.warning("Response blocked by safety filters")
                 else:
                     try:
                         gemini_response = response.text
@@ -253,11 +395,14 @@ def chat_api(request):
                 logger.error(f"Gemini API error: {e}")
                 gemini_response = get_error_message(language, "error")
 
-            # Return JSON response with top 5 most relevant sections
+            # Return top 5 sections for display
+            context_for_display = relevant_sections[:5]
+            
             return JsonResponse({
                 'response': gemini_response,
-                'context': bns_results[:5],  # Limit context in response for performance
-                'language': language
+                'context': context_for_display,
+                'language': language,
+                'retrieved_count': len(relevant_sections)
             })
             
         except json.JSONDecodeError:
@@ -284,19 +429,19 @@ def get_error_message(language: str, error_type: str) -> str:
     messages = {
         'english': {
             'no_response': 'Unable to generate a response. Please rephrase your question.',
-            'need_details': 'This query requires legal context. Please provide more details.',
+            'need_details': 'This query requires more context. Please provide additional details.',
             'rephrase': 'Unable to generate a response. Please try rephrasing.',
             'error': 'An error occurred while processing your request. Please try again.'
         },
         'hindi': {
             'no_response': 'प्रतिक्रिया उत्पन्न करने में असमर्थ। कृपया अपने प्रश्न को दोबारा लिखें।',
-            'need_details': 'इस प्रश्न के लिए कानूनी संदर्भ की आवश्यकता है। कृपया अधिक विवरण प्रदान करें।',
+            'need_details': 'इस प्रश्न के लिए अधिक संदर्भ की आवश्यकता है। कृपया अतिरिक्त विवरण प्रदान करें।',
             'rephrase': 'प्रतिक्रिया उत्पन्न करने में असमर्थ। कृपया दोबारा प्रयास करें।',
             'error': 'आपके अनुरोध को संसाधित करते समय एक त्रुटि हुई। कृपया पुनः प्रयास करें।'
         },
         'kannada': {
             'no_response': 'ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪ್ರಶ್ನೆಯನ್ನು ಮರುಹೊಂದಿಸಿ.',
-            'need_details': 'ಈ ಪ್ರಶ್ನೆಗೆ ಕಾನೂನು ಸಂದರ್ಭ ಅಗತ್ಯವಿದೆ. ದಯವಿಟ್ಟು ಹೆಚ್ಚಿನ ವಿವರಗಳನ್ನು ನೀಡಿ.',
+            'need_details': 'ಈ ಪ್ರಶ್ನೆಗೆ ಹೆಚ್ಚಿನ ಸಂದರ್ಭ ಅಗತ್ಯವಿದೆ. ದಯವಿಟ್ಟು ಹೆಚ್ಚುವರಿ ವಿವರಗಳನ್ನು ನೀಡಿ.',
             'rephrase': 'ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ರಚಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
             'error': 'ನಿಮ್ಮ ವಿನಂತಿಯನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವಾಗ ದೋಷ ಸಂಭವಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.'
         }
