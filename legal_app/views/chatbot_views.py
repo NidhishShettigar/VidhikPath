@@ -13,6 +13,8 @@ import json
 import logging
 import re
 from typing import List, Dict, Tuple
+from textblob import TextBlob  # For spell correction
+from spellchecker import SpellChecker  # Alternative spell checker
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,9 @@ except Exception as e:
     logger.error(f"Failed to load embedding model: {e}")
     embedding_model = None
 
+# Initialize spell checker
+spell = SpellChecker()
+
 # Load FAISS index
 try:
     index = faiss.read_index("legal_combined_index.faiss")
@@ -69,6 +74,14 @@ LEGAL_TERM_MAPPING = {
     'offences': 'offenses',
 }
 
+# Legal terms that should NOT be spell-corrected
+LEGAL_PROTECTED_TERMS = {
+    'bns', 'ipc', 'crpc', 'bnss', 'bharatiya', 'nyaya', 'sanhita', 
+    'penal', 'cognizable', 'bailable', 'compoundable', 'imprisonment',
+    'theft', 'murder', 'assault', 'rape', 'kidnapping', 'fraud',
+    'dacoity', 'culpable', 'homicide', 'defamation', 'extortion'
+}
+
 # Query expansion terms for better retrieval
 QUERY_EXPANSION = {
     'murder': ['murder', 'killing', 'homicide', 'death'],
@@ -79,28 +92,85 @@ QUERY_EXPANSION = {
     'assault': ['assault', 'violence', 'battery', 'attack'],
 }
 
+def correct_spelling(text: str) -> str:
+    """
+    Advanced spell correction with legal term protection
+    """
+    if not text or not isinstance(text, str):
+        return ""
+    
+    try:
+        words = text.split()
+        corrected_words = []
+        
+        for word in words:
+            # Remove punctuation for checking
+            clean_word = re.sub(r'[^\w\s]', '', word.lower())
+            
+            # Skip if it's a legal term or number
+            if (clean_word in LEGAL_PROTECTED_TERMS or 
+                clean_word.isdigit() or 
+                len(clean_word) <= 2):
+                corrected_words.append(word)
+                continue
+            
+            # Check if word is misspelled
+            misspelled = spell.unknown([clean_word])
+            
+            if misspelled:
+                # Get correction
+                correction = spell.correction(clean_word)
+                
+                # Only apply if correction is confident (not None)
+                if correction and correction != clean_word:
+                    # Preserve original capitalization
+                    if word[0].isupper():
+                        correction = correction.capitalize()
+                    corrected_words.append(correction)
+                    logger.info(f"Corrected '{word}' to '{correction}'")
+                else:
+                    corrected_words.append(word)
+            else:
+                corrected_words.append(word)
+        
+        corrected_text = ' '.join(corrected_words)
+        
+        # Alternative: Use TextBlob for more aggressive correction
+        # blob = TextBlob(text)
+        # corrected_text = str(blob.correct())
+        
+        return corrected_text
+        
+    except Exception as e:
+        logger.error(f"Spell correction error: {e}")
+        return text  # Return original if correction fails
+
 def advanced_query_preprocessing(query: str) -> str:
     """
-    Advanced query preprocessing with legal context
+    Advanced query preprocessing with spell correction and legal context
     """
     if not query or not isinstance(query, str):
         return ""
     
-    # Convert to lowercase
+    # Step 1: Correct spelling FIRST
+    query = correct_spelling(query)
+    logger.info(f"After spell correction: {query}")
+    
+    # Step 2: Convert to lowercase
     query = query.lower()
     
-    # Normalize legal terms
+    # Step 3: Normalize legal terms
     for abbr, full in LEGAL_TERM_MAPPING.items():
         query = re.sub(r'\b' + re.escape(abbr) + r'\b', full, query)
     
-    # Normalize section references
+    # Step 4: Normalize section references
     query = re.sub(r'\bsec\.?\s*(\d+)', r'section \1', query)
     query = re.sub(r'\bsection\s*\.?\s*(\d+)', r'section \1', query)
     
-    # Remove extra whitespace
+    # Step 5: Remove extra whitespace
     query = ' '.join(query.split())
     
-    # Remove special characters
+    # Step 6: Remove special characters (keep important ones)
     query = re.sub(r'[^\w\s\-\.\,\;\:\(\)\[\]/]', ' ', query)
     
     return query.strip()
@@ -146,7 +216,7 @@ def get_embedding(text: str) -> np.ndarray:
 
 def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
     """
-    Advanced retrieval with query expansion and reranking
+    Advanced retrieval with spell correction, query expansion and reranking
     """
     if index is None:
         logger.error("FAISS index not loaded")
@@ -157,7 +227,7 @@ def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
         return []
     
     try:
-        # Step 1: Preprocess query
+        # Step 1: Preprocess query (includes spell correction)
         processed_query = advanced_query_preprocessing(query)
         logger.info(f"Original query: {query}")
         logger.info(f"Processed query: {processed_query}")
@@ -269,16 +339,22 @@ def format_context_for_llm(sections: List[Dict]) -> str:
     return "\n".join(context_parts)
 
 def format_chat_history(history: list) -> str:
-    """Format chat history for context"""
+    """
+    Enhanced chat history formatting with better context preservation
+    """
     if not history:
         return ""
     
+    # Take more messages for better context (last 10 instead of 5)
     formatted = "\n\n### Previous Conversation:\n"
-    for msg in history[-5:]:  # Last 5 messages
+    recent_history = history[-10:] if len(history) > 10 else history
+    
+    for msg in recent_history:
         role = msg.get('role', 'user')
         content = msg.get('content', '')
-        formatted += f"**{role.capitalize()}:** {content}\n"
+        formatted += f"\n**{role.capitalize()}:** {content}\n"
     
+    formatted += "\n---\n"
     return formatted
 
 # Language configurations
@@ -319,19 +395,19 @@ def chat_api(request):
             if language not in LANGUAGE_CONFIG:
                 language = 'english'
 
-            # Step 1: Retrieve relevant sections
+            # Step 1: Retrieve relevant sections (with spell correction)
             relevant_sections = retrieve_relevant_sections(message, top_k=20)
             
             # Step 2: Format context
             rag_context = format_context_for_llm(relevant_sections)
             
-            # Step 3: Format chat history
+            # Step 3: Format chat history (enhanced for better context)
             history_context = format_chat_history(chat_history)
             
             # Step 4: Get language instruction
             lang_instruction = LANGUAGE_CONFIG[language]['instruction']
             
-            # Step 5: Build enhanced prompt
+            # Step 5: Build enhanced prompt with explicit context awareness
             user_input = f"""
 {history_context}
 
@@ -344,14 +420,27 @@ def chat_api(request):
 ### LANGUAGE INSTRUCTION:
 {lang_instruction}
 
-### INSTRUCTIONS:
-1. Answer based ONLY on the provided legal sections above
-2. Cite specific section numbers (e.g., "According to BNS Section 302...")
-3. If multiple sections are relevant, explain each one
-4. If the sections don't fully answer the question, say so
-5. Use {LANGUAGE_CONFIG[language]['name']} language exclusively
-6. Consider the previous conversation context
-7. Be precise, professional, and helpful
+### CRITICAL INSTRUCTIONS FOR CONTEXT AWARENESS:
+-3. **If current user question is greeting just respond that greet dont provide any ipc and bns sections 
+-2. **If there is now related ipc and bns dont tell any statement like this I cannot provide a definition of "divorce" based on the provided sections to user 
+-1. **If user asking the defination of some legal word like bns, ipc, divorce etc provide its defination 
+0. **If user question is legal like how to file divorce or how to file case or complaint or etc answer that question and dont provide any bns and ipc sections
+1. **Analyze the conversation history carefully** - If the current question refers to previous topics (e.g., "example", "more details", "explain that"), you MUST connect it to the previous context
+2. **If the user asks for "example", "more", "explain that", etc.**, refer back to what was discussed earlier in the conversation
+3. **Answer based on the provided legal sections above**
+4. **Cite specific section numbers** (e.g., "According to BNS Section 302...")
+5. **If multiple sections are relevant**, explain each one
+6. **If the sections don't fully answer the question**, say so clearly
+7. **Use {LANGUAGE_CONFIG[language]['name']} language exclusively** for the entire response
+8. **Be precise, professional, and helpful**
+9. **When the user's question seems vague** (like "example", "more info"), look at the previous messages to understand what they're referring to
+
+### EXAMPLE OF GOOD CONTEXT AWARENESS:
+User: "What is BNS?"
+Assistant: "BNS stands for Bharatiya Nyaya Sanhita 2023..."
+
+User: "example"
+Assistant: "Based on our previous discussion about BNS, here's an example: [provides example related to BNS]..."
 """
 
             gemini_prompt = system_prompt + "\n\n" + user_input
@@ -359,12 +448,12 @@ def chat_api(request):
             # Step 6: Call Gemini with enhanced configuration
             try:
                 gemini_model = genai.GenerativeModel(
-                    "models/gemini-2.0-flash",  # Latest and best
+                    "models/gemini-2.0-flash",
                     generation_config={
-                        "temperature": 0.3,  # Slightly higher for better explanations
-                        "top_p": 0.85,
+                        "temperature": 0.4,  # Balanced for context + creativity
+                        "top_p": 0.9,
                         "top_k": 40,
-                        "max_output_tokens": 2048,  # Longer responses
+                        "max_output_tokens": 2048,
                         "candidate_count": 1,
                     },
                     safety_settings={
@@ -402,7 +491,8 @@ def chat_api(request):
                 'response': gemini_response,
                 'context': context_for_display,
                 'language': language,
-                'retrieved_count': len(relevant_sections)
+                'retrieved_count': len(relevant_sections),
+                'corrected_query': correct_spelling(message)  # Show corrected query
             })
             
         except json.JSONDecodeError:

@@ -1,4 +1,3 @@
-
 // Search lawyers by location and type
 function getCookie(name) {
     let cookieValue = null;
@@ -6,7 +5,6 @@ function getCookie(name) {
         const cookies = document.cookie.split(";");
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) === (name + "=")) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
@@ -19,6 +17,11 @@ function getCookie(name) {
 function searchLawyers() {
   const location = document.getElementById("locationInput").value;
   const type = document.getElementById("typeInput").value;
+
+  if (!location.trim()) {
+    showNotification("Please enter a location", "error");
+    return;
+  }
 
   fetch("/api/find-lawyers/", {
     method: "POST",
@@ -34,12 +37,51 @@ function searchLawyers() {
   })
     .then((response) => response.json())
     .then((data) => {
-      displayLawyers(data.lawyers);
+      if (data.error) {
+        showNotification(data.error, "error");
+        return;
+      }
+      displayLawyers(data.lawyers || []);
+      if (data.lawyers && data.lawyers.length > 0) {
+        showNotification(`Found ${data.lawyers.length} lawyers`, "success");
+      } else {
+        showNotification("No lawyers found matching your criteria", "info");
+      }
     })
     .catch((error) => {
       console.error("Error:", error);
       showNotification("Error searching lawyers", "error");
     });
+}
+
+// Helper function to get city from LocationIQ API
+async function getCityFromLocationIQ(lat, lng) {
+    const API_KEY = "pk.7ec65c5c3bb595eec965903be71432a1";
+    const url = `https://us1.locationiq.com/v1/reverse.php?key=${API_KEY}&lat=${lat}&lon=${lng}&format=json`;
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data && data.address) {
+            const city = (
+                data.address.city ||
+                data.address.town ||
+                data.address.village ||
+                data.address.suburb ||
+                data.address.municipality ||
+                data.address.county ||
+                data.address.state_district ||
+                data.address.state ||
+                "Unknown"
+            );
+            
+            return city;
+        }
+    } catch (error) {
+        console.error("LocationIQ error:", error);
+    }
+    return null;
 }
 
 // Use current geolocation to find lawyers nearby
@@ -49,15 +91,33 @@ function useCurrentLocation() {
     return;
   }
 
+  showNotification("Getting your location...", "info");
+
   navigator.geolocation.getCurrentPosition(
-    (position) => {
+    async (position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
+      const type = document.getElementById("typeInput")?.value || "";
 
-      // Show info notification while searching
-      showNotification("Using current location...", "info");
+      showNotification("Detecting your city...", "info");
 
-      // Request lawyers nearby using lat/lng
+      // Use LocationIQ to get accurate city name
+      const detectedCity = await getCityFromLocationIQ(lat, lng);
+
+      if (!detectedCity || detectedCity === "Unknown") {
+        showNotification("Could not detect city automatically. Please enter manually.", "error");
+        return;
+      }
+
+      showNotification(`Detected location: ${detectedCity}`, "success");
+
+      // Update location input with detected city
+      const locationInput = document.getElementById("locationInput");
+      if (locationInput) {
+        locationInput.value = detectedCity;
+      }
+
+      // Send detected city to backend to search lawyers
       fetch("/api/find-lawyers/", {
         method: "POST",
         headers: {
@@ -65,22 +125,63 @@ function useCurrentLocation() {
           "X-CSRFToken": getCookie("csrftoken"),
         },
         body: JSON.stringify({
+          location: detectedCity,
+          lawyer_type: type,
+          use_current_location: true,
           latitude: lat,
           longitude: lng,
-          use_current_location: true,
         }),
       })
         .then((response) => response.json())
         .then((data) => {
-          displayLawyers(data.lawyers);
+          if (data.error) {
+            showNotification(data.error, "error");
+            return;
+          }
+
+          if (data.lawyers && data.lawyers.length > 0) {
+            displayLawyers(data.lawyers);
+            showNotification(
+              `Found ${data.lawyers.length} lawyers in ${detectedCity}`,
+              "success"
+            );
+          } else {
+            displayLawyers([]);
+            showNotification(
+              `No lawyers found in ${detectedCity}`,
+              "info"
+            );
+          }
         })
         .catch((error) => {
           console.error("Error:", error);
-          showNotification("Error finding nearby lawyers", "error");
+          showNotification("Error finding lawyers in your area", "error");
         });
     },
+
+    // Geolocation errors
     (error) => {
-      showNotification("Error getting location: " + error.message, "error");
+      let errorMsg = "Error getting location: ";
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMsg += "Please allow location access in your browser";
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMsg += "Location information unavailable";
+          break;
+        case error.TIMEOUT:
+          errorMsg += "Location request timed out";
+          break;
+        default:
+          errorMsg += error.message;
+      }
+      showNotification(errorMsg, "error");
+    },
+
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
     }
   );
 }
@@ -89,7 +190,7 @@ function useCurrentLocation() {
 function displayLawyers(lawyers) {
   const resultsContainer = document.getElementById("lawyersResults");
 
-  if (lawyers.length === 0) {
+  if (!lawyers || lawyers.length === 0) {
     resultsContainer.innerHTML = '<p class="no-results">No lawyers found matching your criteria.</p>';
     return;
   }
@@ -99,28 +200,28 @@ function displayLawyers(lawyers) {
       (lawyer) => `
         <div class="lawyer-card">
             <div class="lawyer-header">
-                <div class="lawyer-name">${lawyer.name}</div>
-                <div class="lawyer-type">${lawyer.lawyer_type}</div>
+                <div class="lawyer-name">${lawyer.name || 'N/A'}</div>
+                <div class="lawyer-type">${lawyer.lawyer_type || 'N/A'}</div>
             </div>
             
             <div class="lawyer-details">
                 <div class="lawyer-detail">
-                    <span>Location:</span> ${lawyer.location}
+                    <span>Location:</span> ${lawyer.location || 'N/A'}
                 </div>
                 <div class="lawyer-detail">
-                    <span>Experience:</span> ${lawyer.experience} years
+                    <span>Experience:</span> ${lawyer.experience || 0} years
                 </div>
                 <div class="lawyer-detail">
-                    <span>Email:</span> ${lawyer.email}
+                    <span>Email:</span> ${lawyer.email || 'N/A'}
                 </div>
                 <div class="lawyer-detail">
-                    <span>languages_spoken:</span> ${lawyer.languages_spoken}
+                    <span>Languages:</span> ${Array.isArray(lawyer.languages_spoken) ? 
+                      lawyer.languages_spoken.join(', ') : 
+                      (lawyer.languages_spoken || 'N/A')}
                 </div>
-            </div>
-            
-            <div class="lawyer-actions">
-                <button class="btn btn-primary btn-sm" onclick="contactLawyer('${lawyer.email}')">Contact</button>
-                <button class="btn btn-secondary btn-sm" onclick="viewProfile('${lawyer.email}')">View Profile</button>
+                <div class="lawyer-detail">
+                    <span>Contact:</span> ${lawyer.phone || 'N/A'}
+                </div>
             </div>
         </div>
     `
@@ -140,7 +241,6 @@ function viewProfile(email) {
 
 // Simple notification function
 function showNotification(message, type = "info") {
-
     if (type === "error") {
         alert("Error: " + message);
     } else if (type === "success") {

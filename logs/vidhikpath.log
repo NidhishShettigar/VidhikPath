@@ -448,3 +448,361 @@ Original query: what is the punishment for theft
 Processed query: what is the punishment for theft
 Expanded query: what is the punishment for theft what is the larceny for robbery stealing theft punishment
 Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Original query: i love you
+Processed query: i love you
+Expanded query: i love you i love you
+Retrieved 20 relevant sections
+Original query: someone came and ragged me
+Processed query: someone came and ragged me
+Expanded query: someone came and ragged me came and ragged me someone
+Retrieved 20 relevant sections
+Original query: how to become lawyer
+Processed query: how to become lawyer
+Expanded query: how to become lawyer how to lawyer become
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Original query: some one hiit you withh caar
+Processed query: some one hiit you withh caar
+Expanded query: some one hiit you withh caar withh caar you one some hiit
+Retrieved 20 relevant sections
+Original query: yaro obbana kole madida
+Processed query: yaro obbana kole madida
+Expanded query: yaro obbana kole madida kole madida yaro obbana
+Retrieved 20 relevant sections
+Original query: kannada dalli utthara kodu
+Processed query: kannada dalli utthara kodu
+Expanded query: kannada dalli utthara kodu kannada dalli kodu utthara
+Retrieved 20 relevant sections
+Original query: eega kodu
+Processed query: eega kodu
+Expanded query: eega kodu kodu eega
+Retrieved 20 relevant sections
+Original query: bns endare enu
+Processed query: bharatiya nyaya sanhita endare enu
+Expanded query: bharatiya nyaya sanhita endare enu nyaya enu endare bharatiya sanhita
+Retrieved 20 relevant sections
+Original query: udarane kodu
+Processed query: udarane kodu
+Expanded query: udarane kodu kodu udarane
+Retrieved 20 relevant sections
+Original query: ninnadu oota aitha
+Processed query: ninnadu oota aitha
+Expanded query: ninnadu oota aitha aitha ninnadu oota
+Retrieved 20 relevant sections
+Original query: nanu ninnannu kollutthene
+Processed query: nanu ninnannu kollutthene
+Expanded query: nanu ninnannu kollutthene kollutthene ninnannu nanu
+Retrieved 20 relevant sections
+Original query: vivaravagi uttharisu
+Processed query: vivaravagi uttharisu
+Expanded query: vivaravagi uttharisu uttharisu vivaravagi
+Retrieved 20 relevant sections
+Original query: Good morning
+Processed query: good morning
+Expanded query: good morning good morning
+Retrieved 20 relevant sections
+Original query: is repe iis aa craim
+Processed query: is repe iis aa craim
+Expanded query: is repe iis aa craim repe aa craim iis is
+Retrieved 20 relevant sections
+Processed chunk 1/1
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+After spell correction: hi
+Original query: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Corrected 'morming' to 'morning'
+After spell correction: good morning
+Original query: good morming
+Processed query: good morning
+Expanded query: good morning morning good
+Retrieved 20 relevant sections
+Corrected 'morming' to 'morning'
+After spell correction: what is ipc
+Original query: what is ipc
+Processed query: what is indian penal code
+Expanded query: what is indian penal code indian code penal what is
+Retrieved 20 relevant sections
+After spell correction: example
+Original query: example
+Processed query: example
+Expanded query: example example
+Retrieved 20 relevant sections
+Corrected 'vns' to 'vans'
+After spell correction: difference between efficiency and vans
+Original query: difference between efficiency and vns
+Processed query: difference between efficiency and vans
+Expanded query: difference between efficiency and vans efficiency and vans between difference
+Retrieved 20 relevant sections
+Corrected 'vns' to 'vans'
+After spell correction: difference between BNS and IPC
+Original query: difference between BNS and IPC
+Processed query: difference between bharatiya nyaya sanhita and indian penal code
+Expanded query: difference between bharatiya nyaya sanhita and indian penal code sanhita bharatiya and indian code penal between difference nyaya
+Retrieved 20 relevant sections
+After spell correction: i kill you
+Original query: i kill you
+Processed query: i kill you
+Expanded query: i kill you you kill i
+Retrieved 20 relevant sections
+Corrected 'hau' to 'had'
+Corrected 'daivorse' to 'divorce'
+After spell correction: had two fail divorce
+Original query: hau two fail daivorse
+Processed query: had two fail divorce
+Expanded query: had two fail divorce divorce two had fail
+Retrieved 20 relevant sections
+Corrected 'hau' to 'had'
+Corrected 'daivorse' to 'divorce'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Corrected 'mornoning' to 'morning'
+After spell correction: hey good morning
+Original query: hey good mornoning
+Processed query: hey good morning
+Expanded query: hey good morning good hey morning
+Retrieved 20 relevant sections
+Corrected 'mornoning' to 'morning'
+Corrected 'hau' to 'had'
+Corrected 'daivorse' to 'divorce'
+After spell correction: had two fail divorce
+Original query: hau two fail daivorse
+Processed query: had two fail divorce
+Expanded query: had two fail divorce had fail divorce two
+Retrieved 20 relevant sections
+Corrected 'hau' to 'had'
+Corrected 'daivorse' to 'divorce'
+Corrected 'hau' to 'had'
+After spell correction: had two fail complaint
+Original query: hau two fail complaint
+Processed query: had two fail complaint
+Expanded query: had two fail complaint had fail complaint two
+Retrieved 20 relevant sections
+Corrected 'hau' to 'had'
+Corrected 'divorcw' to 'divorce'
+After spell correction: steps to file divorce
+Original query: steps to file divorcw
+Processed query: steps to file divorce
+Expanded query: steps to file divorce file divorce steps to
+Retrieved 20 relevant sections
+Corrected 'divorcw' to 'divorce'
+After spell correction: what is divorce
+Original query: what is divorce
+Processed query: what is divorce
+Expanded query: what is divorce divorce what is
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Corrected 'divorcew' to 'divorce'
+After spell correction: how to file divorce
+Original query: how to file divorcew
+Processed query: how to file divorce
+Expanded query: how to file divorce file to divorce how
+Retrieved 20 relevant sections
+Corrected 'divorcew' to 'divorce'
+After spell correction: what is divorce
+Original query: what is divorce
+Processed query: what is divorce
+Expanded query: what is divorce is what divorce
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+After spell correction: good morning
+Original query: good morning
+Processed query: good morning
+Expanded query: good morning morning good
+Retrieved 20 relevant sections
+After spell correction: how was your day
+Original query: how was your day
+Processed query: how was your day
+Expanded query: how was your day day your was how
+Retrieved 20 relevant sections
+After spell correction: hey babe
+Original query: hey babe
+Processed query: hey babe
+Expanded query: hey babe hey babe
+Retrieved 20 relevant sections
+After spell correction: how to kill someone
+Original query: how to kill someone
+Processed query: how to kill someone
+Expanded query: how to kill someone to kill someone how
+Retrieved 20 relevant sections
+After spell correction: sorry\
+Original query: sorry\
+Processed query: sorry
+Expanded query: sorry sorry
+Retrieved 20 relevant sections
+Corrected 'hitted' to 'fitted'
+Corrected 'raud' to 'raid'
+After spell correction: some one in road fitted mw with raid what too do now
+Original query: some one in road hitted mw with raud what too do now
+Processed query: some one in road fitted mw with raid what too do now
+Expanded query: some one in road fitted mw with raid what too do now do some too now raid mw one in with what road fitted
+Retrieved 20 relevant sections
+Corrected 'hitted' to 'fitted'
+Corrected 'raud' to 'raid'
+After spell correction: tell me the steps i can do
+Original query: tell me the steps i can do
+Processed query: tell me the steps i can do
+Expanded query: tell me the steps i can do tell steps the i me do can
+Retrieved 20 relevant sections
+Corrected 'benifits' to 'benefits'
+After spell correction: what are the punishment that guy gets and benefits i get
+Original query: what are the punishment that guy gets and benifits i get
+Processed query: what are the punishment that guy gets and benefits i get
+Expanded query: what are the punishment that guy gets and benefits i get gets get benefits the i punishment and that what are guy
+Retrieved 20 relevant sections
+Corrected 'benifits' to 'benefits'
+After spell correction: thank you
+Original query: thank you
+Processed query: thank you
+Expanded query: thank you you thank
+Retrieved 20 relevant sections
+Corrected 'Kisi' to 'Kiss'
+Corrected 'Mujhe' to 'Much'
+Corrected 'kya' to 'ya'
+Corrected 'karna' to 'karma'
+Corrected 'chahie' to 'change'
+After spell correction: Kiss Ne Much Mara ya karma change ab
+Original query: Kisi Ne Mujhe Mara kya karna chahie ab
+Processed query: kiss ne much mara ya karma change ab
+Expanded query: kiss ne much mara ya karma change ab ne mara ya karma ab kiss change much
+Retrieved 20 relevant sections
+Corrected 'Kisi' to 'Kiss'
+Corrected 'Mujhe' to 'Much'
+Corrected 'kya' to 'ya'
+Corrected 'karna' to 'karma'
+Corrected 'chahie' to 'change'
+Corrected 'Kisi' to 'Kiss'
+Corrected 'Mujhe' to 'Much'
+Corrected 'Kya' to 'Ya'
+Corrected 'kar' to 'car'
+Corrected 'sakta' to 'santa'
+After spell correction: Kiss Ne Much Mara Ab Main Ya car santa hun
+Original query: Kisi Ne Mujhe Mara Ab Main Kya kar sakta hun
+Processed query: kiss ne much mara ab main ya car santa hun
+Expanded query: kiss ne much mara ab main ya car santa hun hun ne ab mara ya main kiss car santa much
+Retrieved 20 relevant sections
+Corrected 'Kisi' to 'Kiss'
+Corrected 'Mujhe' to 'Much'
+Corrected 'Kya' to 'Ya'
+Corrected 'kar' to 'car'
+Corrected 'sakta' to 'santa'
+Corrected 'Mujhe' to 'Much'
+Corrected 'kya' to 'ya'
+Corrected 'kar' to 'car'
+Corrected 'sakta' to 'santa'
+After spell correction: Much Idea de do ya car santa hun main
+Original query: Mujhe Idea de do kya kar sakta hun main
+Processed query: much idea de do ya car santa hun main
+Expanded query: much idea de do ya car santa hun main hun car ya main idea de santa do much
+Retrieved 20 relevant sections
+Corrected 'Mujhe' to 'Much'
+Corrected 'kya' to 'ya'
+Corrected 'kar' to 'car'
+Corrected 'sakta' to 'santa'
+After spell correction: suggestion Day by suggestion
+Original query: suggestion Day by suggestion
+Processed query: suggestion day by suggestion
+Expanded query: suggestion day by suggestion day suggestion by
+Retrieved 20 relevant sections
+Corrected 'kya' to 'ya'
+Corrected 'sakta' to 'santa'
+After spell correction: ya steps Le santa hun main
+Original query: kya steps Le sakta hun main
+Processed query: ya steps le santa hun main
+Expanded query: ya steps le santa hun main hun steps ya le main santa
+Retrieved 20 relevant sections
+Corrected 'kya' to 'ya'
+Corrected 'sakta' to 'santa'
+Corrected 'matlab' to 'atlas'
+Corrected 'kya' to 'ya'
+Corrected 'hai' to 'had'
+After spell correction: BNS ka atlas ya had
+Original query: BNS ka matlab kya hai
+Processed query: bharatiya nyaya sanhita ka atlas ya had
+Expanded query: bharatiya nyaya sanhita ka atlas ya had nyaya ya sanhita ka bharatiya had atlas
+Retrieved 20 relevant sections
+Corrected 'matlab' to 'atlas'
+Corrected 'kya' to 'ya'
+Corrected 'hai' to 'had'
+Corrected 'BSNL' to 'Bank'
+After spell correction: Bank
+Original query: BSNL
+Processed query: bank
+Expanded query: bank bank
+Retrieved 20 relevant sections
+Corrected 'BSNL' to 'Bank'
+After spell correction: BNS endarenu
+Original query: BNS endarenu
+Processed query: bharatiya nyaya sanhita endarenu
+Expanded query: bharatiya nyaya sanhita endarenu sanhita nyaya bharatiya endarenu
+Retrieved 20 relevant sections
+After spell correction: BNS endarenu
+Original query: BNS endarenu
+Processed query: bharatiya nyaya sanhita endarenu
+Expanded query: bharatiya nyaya sanhita endarenu sanhita nyaya bharatiya endarenu
+Retrieved 20 relevant sections
+After spell correction: BNS endarenu
+Original query: BNS endarenu
+Processed query: bharatiya nyaya sanhita endarenu
+Expanded query: bharatiya nyaya sanhita endarenu sanhita nyaya bharatiya endarenu
+Retrieved 20 relevant sections
+After spell correction: someone fitted me what should I do now
+Original query: someone fitted me what should I do now
+Processed query: someone fitted me what should i do now
+Expanded query: someone fitted me what should i do now should now i me someone do what fitted
+Retrieved 20 relevant sections
+Corrected 'matlab' to 'atlas'
+Corrected 'kya' to 'ya'
+Corrected 'hai' to 'had'
+After spell correction: IPC ka atlas ya had
+Original query: IPC ka matlab kya hai
+Processed query: indian penal code ka atlas ya had
+Expanded query: indian penal code ka atlas ya had indian ya penal ka code had atlas
+Retrieved 20 relevant sections
+Corrected 'matlab' to 'atlas'
+Corrected 'kya' to 'ya'
+Corrected 'hai' to 'had'
+After spell correction: IPC endarenu
+Original query: IPC endarenu
+Processed query: indian penal code endarenu
+Expanded query: indian penal code endarenu penal indian endarenu code
+Retrieved 20 relevant sections
+Corrected 'Kaise' to 'Raise'
+Corrected 'kar' to 'car'
+Corrected 'sakte' to 'sake'
+Corrected 'hain' to 'hair'
+After spell correction: divorce Raise file car sake hair
+Original query: divorce Kaise file kar sakte hain
+Processed query: divorce raise file car sake hair
+Expanded query: divorce raise file car sake hair car raise divorce sake hair file
+Retrieved 20 relevant sections
+Corrected 'Kaise' to 'Raise'
+Corrected 'kar' to 'car'
+Corrected 'sakte' to 'sake'
+Corrected 'hain' to 'hair'
+After spell correction: dhanyvad dhanyvad
+Original query: dhanyvad dhanyvad
+Processed query: dhanyvad dhanyvad
+Expanded query: dhanyvad dhanyvad dhanyvad
+Retrieved 20 relevant sections
+Processed chunk 1/2
+Processed chunk 2/2
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
