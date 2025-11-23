@@ -383,3 +383,68 @@ Original query: how to find diabetes gay
 Processed query: how to find diabetes gay
 Expanded query: how to find diabetes gay find gay to how diabetes
 Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Processed chunk 1/1
+Original query: nanage obba odeda enu madabeku
+Processed query: nanage obba odeda enu madabeku
+Expanded query: nanage obba odeda enu madabeku obba nanage odeda madabeku enu
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Original query: i want kill you
+Processed query: i want kill you
+Expanded query: i want kill you kill want i you
+Retrieved 20 relevant sections
+Original query: what  is sy
+Processed query: what is sy
+Expanded query: what is sy sy is what
+Retrieved 20 relevant sections
+Gemini API error: 403 Your API key was reported as leaked. Please use another API key.
+Original query: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 403 Your API key was reported as leaked. Please use another API key.
+Original query: how is
+Processed query: how is
+Expanded query: how is is how
+Retrieved 20 relevant sections
+Gemini API error: 403 Your API key was reported as leaked. Please use another API key.
+Original query: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 403 Your API key was reported as leaked. Please use another API key.
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Error summarizing chunk: 403 Your API key was reported as leaked. Please use another API key.
+Processed chunk 1/1
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Original query: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Original query: what are the possible punishment for rapist
+Processed query: what are the possible punishment for rapist
+Expanded query: what are the possible punishment for rapist what the are for rapist possible punishment
+Retrieved 20 relevant sections
+Original query: what are the possible bns
+Processed query: what are the possible bharatiya nyaya sanhita
+Expanded query: what are the possible bharatiya nyaya sanhita what nyaya the are sanhita possible bharatiya
+Retrieved 20 relevant sections
+Original query: for the previous question
+Processed query: for the previous question
+Expanded query: for the previous question the question for previous
+Retrieved 20 relevant sections
+Original query: some one hiit you withh caar
+Processed query: some one hiit you withh caar
+Expanded query: some one hiit you withh caar withh some one hiit caar you
+Retrieved 20 relevant sections
+Original query: what is the punishment for theft
+Processed query: what is the punishment for theft
+Expanded query: what is the punishment for theft what is the larceny for robbery stealing theft punishment
+Retrieved 20 relevant sections
