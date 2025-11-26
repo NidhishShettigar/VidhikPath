@@ -806,3 +806,85 @@ Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base
 FAISS index loaded: 933 vectors
 Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
 FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+After spell correction: WHAT IS BNS
+Original query: WHAT IS BNS
+Processed query: what is bharatiya nyaya sanhita
+Expanded query: what is bharatiya nyaya sanhita bharatiya nyaya sanhita is what
+Retrieved 20 relevant sections
+Processed chunk 1/1
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Corrected 'dentraze' to 'denitrate'
+After spell correction: can you help me with my project denitrate
+Original query: can you help me with my project dentraze
+Processed query: can you help me with my project denitrate
+Expanded query: can you help me with my project denitrate with you me denitrate project help my can
+Retrieved 20 relevant sections
+Corrected 'dentraze' to 'denitrate'
+After spell correction: it is a smart ai based dental platform
+Original query: it is a smart ai based dental platform
+Processed query: it is a smart ai based dental platform
+Expanded query: it is a smart ai based dental platform ai platform based smart it dental a is
+Retrieved 20 relevant sections
+After spell correction: what is section 156?
+Original query: what is section 156?
+Processed query: what is section 156
+Expanded query: what is section 156 what section 156 is
+Retrieved 20 relevant sections
+After spell correction: how can i become a lawyer what educational background is required?
+Original query: how can i become a lawyer what educational background is required?
+Processed query: how can i become a lawyer what educational background is required
+Expanded query: how can i become a lawyer what educational background is required i educational become lawyer background required how what a is can
+Retrieved 20 relevant sections
+After spell correction: what sort of queries can i ask?
+Original query: what sort of queries can i ask?
+Processed query: what sort of queries can i ask
+Expanded query: what sort of queries can i ask i queries of sort ask what can
+Retrieved 20 relevant sections
+After spell correction: /can you talk about porn
+Original query: /can you talk about porn
+Processed query: /can you talk about porn
+Expanded query: /can you talk about porn talk about you porn /can
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Corrected 'likith' to 'lilith'
+After spell correction: lilith raped me what to do
+Original query: likith raped me what to do
+Processed query: lilith raped me what to do
+Expanded query: lilith raped me what to do me to raped what do lilith
+Retrieved 20 relevant sections
+Corrected 'likith' to 'lilith'
+After spell correction: what complaint i can file against him
+Original query: what complaint i can file against him
+Processed query: what complaint i can file against him
+Expanded query: what complaint i can file against him him i complaint against what file can
+Retrieved 20 relevant sections
+Processed chunk 1/1
+Processed chunk 1/1
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Processed chunk 1/1
+After spell correction: Hi hi
+Original query: Hi hi
+Processed query: hi hi
+Expanded query: hi hi hi
+Retrieved 20 relevant sections
+After spell correction: What is bns
+Original query: What is bns
+Processed query: what is bharatiya nyaya sanhita
+Expanded query: what is bharatiya nyaya sanhita nyaya what sanhita is bharatiya
+Retrieved 20 relevant sections
+Corrected 'AYUSH' to 'Push'
+Corrected 'COMMITED' to 'Committed'
+After spell correction: Push Committed RAPE WHAT SHOULD A GIRL CAN DO
+Original query: AYUSH COMMITED RAPE WHAT SHOULD A GIRL CAN DO
+Processed query: push committed rape what should a girl can do
+Expanded query: push committed rape what should a girl can do do sexual violence what can committed push a rape girl should sexual assault
+Retrieved 20 relevant sections
+Corrected 'AYUSH' to 'Push'
+Corrected 'COMMITED' to 'Committed'

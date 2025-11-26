@@ -25,9 +25,6 @@ def get_location_from_coordinates(latitude, longitude):
             
             # Extract city/district information
             city = (address.get('city') or 
-                   address.get('town') or 
-                   address.get('village') or 
-                   address.get('municipality') or
                    address.get('district'))
             
             state = address.get('state', '')
