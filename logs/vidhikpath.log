@@ -888,3 +888,363 @@ Expanded query: push committed rape what should a girl can do do sexual violence
 Retrieved 20 relevant sections
 Corrected 'AYUSH' to 'Push'
 Corrected 'COMMITED' to 'Committed'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Processed chunk 1/1
+Processed chunk 1/2
+Processed chunk 2/2
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Processed chunk 1/2
+Processed chunk 2/2
+Processed chunk 1/1
+Processed chunk 1/1
+After spell correction: hi
+Original query: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Retrieved 20 relevant sections
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Retrieved 20 relevant sections
+Retrieved 20 relevant sections
+Retrieved 20 relevant sections
+Retrieved 20 relevant sections
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Retrieved 20 relevant sections
+Retrieved 20 relevant sections
+Corrected 'nanu' to 'anu'
+Corrected 'enu' to 'end'
+Retrieved 20 relevant sections
+Corrected 'nanu' to 'anu'
+Corrected 'enu' to 'end'
+Corrected 'nanage' to 'manage'
+Corrected 'obba' to 'abba'
+Corrected 'odeda' to 'odea'
+After spell correction: manage abba odea
+Original query: nanage obba odeda
+Processed query: manage abba odea
+Expanded query: manage abba odea manage abba odea
+Retrieved 20 relevant sections
+Corrected 'nanage' to 'manage'
+Corrected 'obba' to 'abba'
+Corrected 'odeda' to 'odea'
+Corrected 'endare' to 'endure'
+Corrected 'enu' to 'end'
+After spell correction: ipc endure end
+Original query: ipc endare enu
+Processed query: indian penal code endure end
+Expanded query: indian penal code endure end penal endure indian code end
+Retrieved 20 relevant sections
+Corrected 'endare' to 'endure'
+Corrected 'enu' to 'end'
+Corrected 'nanage' to 'manage'
+Corrected 'obba' to 'abba'
+Corrected 'oddeda' to 'added'
+Corrected 'nanu' to 'anu'
+Corrected 'eega' to 'mega'
+Corrected 'enu' to 'end'
+After spell correction: manage abba added anu mega end madabeku
+Original query: nanage obba oddeda nanu eega enu madabeku
+Processed query: manage abba added anu mega end madabeku
+Expanded query: manage abba added anu mega end madabeku mega manage madabeku added abba anu end
+Retrieved 20 relevant sections
+Corrected 'nanage' to 'manage'
+Corrected 'obba' to 'abba'
+Corrected 'oddeda' to 'added'
+Corrected 'nanu' to 'anu'
+Corrected 'eega' to 'mega'
+Corrected 'enu' to 'end'
+Corrected 'hitted' to 'fitted'
+After spell correction: someone fitted me what should i do now
+Original query: someone hitted me what should i do now
+Processed query: someone fitted me what should i do now
+Expanded query: someone fitted me what should i do now do should me someone now fitted i what
+Retrieved 20 relevant sections
+Corrected 'hitted' to 'fitted'
+Corrected 'hitted' to 'fitted'
+After spell correction: someone fitted me what should i do now
+Original query: someone hitted me what should i do now
+Processed query: someone fitted me what should i do now
+Expanded query: someone fitted me what should i do now do should me someone now fitted i what
+Retrieved 20 relevant sections
+Corrected 'hitted' to 'fitted'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Corrected 'kisi' to 'kiss'
+After spell correction: kiss ne mujkho mara
+Original query: kisi ne mujkho mara
+Processed query: kiss ne mujkho mara
+Expanded query: kiss ne mujkho mara ne mujkho mara kiss
+Retrieved 20 relevant sections
+Corrected 'kisi' to 'kiss'
+Corrected 'kisi' to 'kiss'
+After spell correction: kiss ne mujkho mara
+Original query: kisi ne mujkho mara
+Processed query: kiss ne mujkho mara
+Expanded query: kiss ne mujkho mara ne mujkho mara kiss
+Retrieved 20 relevant sections
+Corrected 'kisi' to 'kiss'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: kn
+Translated query (en): hello
+After spell correction: hello
+Processed query: hello
+Expanded query: hello hello
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): One punched my car.
+After spell correction: One punched my car.
+Processed query: one punched my car.
+Expanded query: one punched my car. my one car. punched
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): What complaint should I make against him now?
+After spell correction: What complaint should I make against him now?
+Processed query: what complaint should i make against him now
+Expanded query: what complaint should i make against him now complaint him should now what i make against
+Retrieved 20 relevant sections
+Detected language: kn
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: kn
+Translated query (en): What complaint should I make against him now?
+After spell correction: What complaint should I make against him now?
+Processed query: what complaint should i make against him now
+Expanded query: what complaint should i make against him now should against make him now what complaint i
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): What complaint should I make against him now?
+After spell correction: What complaint should I make against him now?
+Processed query: what complaint should i make against him now
+Expanded query: what complaint should i make against him now should against make him now what complaint i
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: et
+Translation: 'complaint koduva steps helu' -> 'complaint kodova steps helu'
+Original query (et): complaint koduva steps helu
+Translated query (en): complaint kodova steps helu
+Corrected 'kodova' to 'cordova'
+Corrected 'helu' to 'help'
+After spell correction: complaint cordova steps help
+Processed query: complaint cordova steps help
+Expanded query: complaint cordova steps help complaint cordova help steps
+Retrieved 20 relevant sections
+Detected language: et
+Translation: 'complaint koduva steps helu' -> 'complaint kodova steps helu'
+Detected language: en
+Text already in English, skipping translation
+Original query (english): how to file divorce
+Translated query (en): how to file divorce
+After spell correction: how to file divorce
+Processed query: how to file divorce
+Expanded query: how to file divorce how divorce to file
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: kn
+Translated query (en): What complaint should I make against him now? translate this in english
+After spell correction: What complaint should I make against him now? translate this in english
+Processed query: what complaint should i make against him now  translate this in english
+Expanded query: what complaint should i make against him now  translate this in english should in against this make him now translate what complaint english i
+Retrieved 20 relevant sections
+Detected language: kn
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: en
+Text already in English, skipping translation
+Original query (english): how to file divorce
+Translated query (en): how to file divorce
+After spell correction: how to file divorce
+Processed query: how to file divorce
+Expanded query: how to file divorce file divorce how to
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): how to file divorce
+Translated query (en): how to file divorce
+After spell correction: how to file divorce
+Processed query: how to file divorce
+Expanded query: how to file divorce file divorce how to
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): which ipc section comes under divorce
+Translated query (en): which ipc section comes under divorce
+After spell correction: which ipc section comes under divorce
+Processed query: which indian penal code section comes under divorce
+Expanded query: which indian penal code section comes under divorce code penal under divorce which comes indian section
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what ipc and bns section comes under rape
+Translated query (en): what ipc and bns section comes under rape
+After spell correction: what ipc and bns section comes under rape
+Processed query: what indian penal code and bharatiya nyaya sanhita section comes under rape
+Expanded query: what indian penal code and bharatiya nyaya sanhita section comes under rape code penal rape under sexual assault sanhita comes and nyaya bharatiya what sexual violence indian section
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what ipc and bns section comes under rape
+Translated query (en): what ipc and bns section comes under rape
+After spell correction: what ipc and bns section comes under rape
+Processed query: what indian penal code and bharatiya nyaya sanhita section comes under rape
+Expanded query: what indian penal code and bharatiya nyaya sanhita section comes under rape code penal rape under sexual assault sanhita comes and nyaya bharatiya what sexual violence indian section
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what ipc and bns section comes under rape
+Translated query (en): what ipc and bns section comes under rape
+After spell correction: what ipc and bns section comes under rape
+Processed query: what indian penal code and bharatiya nyaya sanhita section comes under rape
+Expanded query: what indian penal code and bharatiya nyaya sanhita section comes under rape code penal rape under sexual assault sanhita comes and nyaya bharatiya what sexual violence indian section
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: kn
+Translated query (en): Which sections of the Indian Penal Code (IPC) and Indian Penal Code (BNS) cover rape?
+After spell correction: Which sections of the Indian Penal Code (IPC) and Indian Penal Code (BNS) cover rape?
+Processed query: which sections of the indian penal code (indian penal code) and indian penal code (bharatiya nyaya sanhita) cover rape
+Expanded query: which sections of the indian penal code (indian penal code) and indian penal code (bharatiya nyaya sanhita) cover rape (indian code penal sanhita) rape sexual assault cover which sections code) and nyaya of (bharatiya sexual violence indian the
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): Which sections of the Indian Penal Code (IPC) and Indian Penal Code (BNS) cover rape?
+After spell correction: Which sections of the Indian Penal Code (IPC) and Indian Penal Code (BNS) cover rape?
+Processed query: which sections of the indian penal code (indian penal code) and indian penal code (bharatiya nyaya sanhita) cover rape
+Expanded query: which sections of the indian penal code (indian penal code) and indian penal code (bharatiya nyaya sanhita) cover rape (indian code penal sanhita) rape sexual assault cover which sections code) and nyaya of (bharatiya sexual violence indian the
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: so
+Translation: 'obbanu nanage odeda nanu eega enu madabeku' -> 'obbanu nanage odeda nanu eega enu madabeku'
+Original query (so): obbanu nanage odeda nanu eega enu madabeku
+Translated query (en): obbanu nanage odeda nanu eega enu madabeku
+Corrected 'nanage' to 'manage'
+Corrected 'odeda' to 'odea'
+Corrected 'nanu' to 'anu'
+Corrected 'eega' to 'mega'
+Corrected 'enu' to 'end'
+After spell correction: obbanu manage odea anu mega end madabeku
+Processed query: obbanu manage odea anu mega end madabeku
+Expanded query: obbanu manage odea anu mega end madabeku odea manage mega anu obbanu end madabeku
+Retrieved 20 relevant sections
+Detected language: hr
+Translation: 'obbanu nanage odeda nanu eega enu madabeku' -> 'obbanu nanage oda nana eega enu madabeka'
+Detected language: fr
+Translation: 'yavudu a sections' -> 'yavudu has sections'
+Original query (fr): yavudu a sections
+Translated query (en): yavudu has sections
+After spell correction: yavudu has sections
+Processed query: yavudu has sections
+Expanded query: yavudu has sections has sections yavudu
+Retrieved 20 relevant sections
+Detected language: fr
+Translation: 'yavudu a sections' -> 'yavudu has sections'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: hr
+Translation: 'obbanu nanage odeda nanu avana mele hege complaint kodabeku' -> 'obbanu nanage odeda nanu avana mele hege complaint kodabeku'
+Original query (hr): obbanu nanage odeda nanu avana mele hege complaint kodabeku
+Translated query (en): obbanu nanage odeda nanu avana mele hege complaint kodabeku
+Corrected 'nanage' to 'manage'
+Corrected 'odeda' to 'odea'
+Corrected 'nanu' to 'anu'
+Corrected 'avana' to 'havana'
+Corrected 'mele' to 'male'
+Corrected 'hege' to 'here'
+After spell correction: obbanu manage odea anu havana male here complaint kodabeku
+Processed query: obbanu manage odea anu havana male here complaint kodabeku
+Expanded query: obbanu manage odea anu havana male here complaint kodabeku complaint male havana here manage odea obbanu kodabeku anu
+Retrieved 20 relevant sections
+Detected language: hr
+Translation: 'obbanu nanage odeda nanu avana mele hege complaint kodabeku' -> 'obbanu nanage odeda nanu avana mele hege complaint kodabeku'
+Detected language: hr
+Translation: 'obbanu nanage odeda nanu avana mele hege complaint kodabeku' -> 'obbanu nanage odeda nanu avana mele hege complaint kodabeku'
+Original query (hr): obbanu nanage odeda nanu avana mele hege complaint kodabeku
+Translated query (en): obbanu nanage odeda nanu avana mele hege complaint kodabeku
+Corrected 'nanage' to 'manage'
+Corrected 'odeda' to 'odea'
+Corrected 'nanu' to 'anu'
+Corrected 'avana' to 'havana'
+Corrected 'mele' to 'male'
+Corrected 'hege' to 'here'
+After spell correction: obbanu manage odea anu havana male here complaint kodabeku
+Processed query: obbanu manage odea anu havana male here complaint kodabeku
+Expanded query: obbanu manage odea anu havana male here complaint kodabeku complaint male havana here manage odea obbanu kodabeku anu
+Retrieved 20 relevant sections
+Detected language: hr
+Translation: 'obbanu nanage odeda nanu avana mele hege complaint kodabeku' -> 'obbanu nanage odeda nanu avana mele hege complaint kodabeku'
+Detected language: hr
+Translation: 'obbanu nanage odeda nanu avana mele hege complaint kodabeku' -> 'obbanu nanage odeda nanu avana mele hege complaint kodabeku'
+Original query (hr): obbanu nanage odeda nanu avana mele hege complaint kodabeku
+Translated query (en): obbanu nanage odeda nanu avana mele hege complaint kodabeku
+Corrected 'nanage' to 'manage'
+Corrected 'odeda' to 'odea'
+Corrected 'nanu' to 'anu'
+Corrected 'avana' to 'havana'
+Corrected 'mele' to 'male'
+Corrected 'hege' to 'here'
+After spell correction: obbanu manage odea anu havana male here complaint kodabeku
+Processed query: obbanu manage odea anu havana male here complaint kodabeku
+Expanded query: obbanu manage odea anu havana male here complaint kodabeku complaint male havana here manage odea obbanu kodabeku anu
+Retrieved 20 relevant sections
+Detected language: hr
+Translation: 'obbanu nanage odeda nanu avana mele hege complaint kodabeku' -> 'obbanu nanage odeda nanu avana mele hege complaint kodabeku'
+Detected language: id
+Translation: 'yava section galu avana mele hakabahudu' -> 'yava section galu avana mele hakabahudu'
+Original query (id): yava section galu avana mele hakabahudu
+Translated query (en): yava section galu avana mele hakabahudu
+Corrected 'yava' to 'lava'
+Corrected 'galu' to 'gal'
+Corrected 'avana' to 'havana'
+Corrected 'mele' to 'male'
+After spell correction: lava section gal havana male hakabahudu
+Processed query: lava section gal havana male hakabahudu
+Expanded query: lava section gal havana male hakabahudu hakabahudu male havana section lava gal
+Retrieved 20 relevant sections
+Detected language: id
+Translation: 'yava section galu avana mele hakabahudu' -> 'yava section galu avana mele hakabahudu'
+Detected language: kn
+Translated query (en): One hit me. How can I complain about him?
+After spell correction: One hit me. How can I complain about him?
+Processed query: one hit me. how can i complain about him
+Expanded query: one hit me. how can i complain about him one can about how hit complain him i me.
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: en
+Text already in English, skipping translation
+Original query (english): thank you
+Translated query (en): thank you
+After spell correction: thank you
+Processed query: thank you
+Expanded query: thank you thank you
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation

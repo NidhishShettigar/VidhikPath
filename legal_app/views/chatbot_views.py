@@ -13,8 +13,10 @@ import json
 import logging
 import re
 from typing import List, Dict, Tuple
-from textblob import TextBlob  # For spell correction
-from spellchecker import SpellChecker  # Alternative spell checker
+from textblob import TextBlob
+from spellchecker import SpellChecker
+from deep_translator import GoogleTranslator
+from langdetect import detect
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ except Exception as e:
     logger.error(f"Failed to load embedding model: {e}")
     embedding_model = None
 
-# Initialize spell checker
+# Initialize spell checker and translator
 spell = SpellChecker()
 
 # Load FAISS index
@@ -92,6 +94,62 @@ QUERY_EXPANSION = {
     'assault': ['assault', 'violence', 'battery', 'attack'],
 }
 
+def detect_language(text: str) -> str:
+    """
+    Detect the language of input text
+    """
+    try:
+        detected_lang = detect(text)   # returns 'en', 'hi', 'kn', etc.
+        logger.info(f"Detected language: {detected_lang}")
+        return detected_lang
+    except Exception as e:
+        logger.error(f"Language detection error: {e}")
+        return 'en'  # Default to English
+
+def translate_to_english(text: str, source_lang: str = None) -> Dict[str, str]:
+    """
+    Translate text to English for better embedding retrieval
+    Returns dict with original and translated text
+    """
+    if not text or not isinstance(text, str):
+        return {"original": "", "translated": "", "language": "unknown"}
+    
+    try:
+        # Detect language if not provided
+        if source_lang is None:
+            source_lang = detect_language(text)
+        
+        # If already in English, return as-is
+        if source_lang == 'en':
+            logger.info("Text already in English, skipping translation")
+            return {
+                "original": text,
+                "translated": text,
+                "language": "english"
+            }
+        
+        # Translate to English
+
+        translated_text = GoogleTranslator(source=source_lang, target='en').translate(text)
+
+        
+        logger.info(f"Translation: '{text}' -> '{translated_text}'")
+        
+        return {
+            "original": text,
+            "translated": translated_text,
+            "language": source_lang
+        }
+        
+    except Exception as e:
+        logger.error(f"Translation error: {e}")
+        # Return original text if translation fails
+        return {
+            "original": text,
+            "translated": text,
+            "language": "unknown"
+        }
+
 def correct_spelling(text: str) -> str:
     """
     Advanced spell correction with legal term protection
@@ -134,25 +192,21 @@ def correct_spelling(text: str) -> str:
                 corrected_words.append(word)
         
         corrected_text = ' '.join(corrected_words)
-        
-        # Alternative: Use TextBlob for more aggressive correction
-        # blob = TextBlob(text)
-        # corrected_text = str(blob.correct())
-        
         return corrected_text
         
     except Exception as e:
         logger.error(f"Spell correction error: {e}")
-        return text  # Return original if correction fails
+        return text
 
 def advanced_query_preprocessing(query: str) -> str:
     """
     Advanced query preprocessing with spell correction and legal context
+    NOTE: This now expects English text (after translation)
     """
     if not query or not isinstance(query, str):
         return ""
     
-    # Step 1: Correct spelling FIRST
+    # Step 1: Correct spelling
     query = correct_spelling(query)
     logger.info(f"After spell correction: {query}")
     
@@ -216,7 +270,7 @@ def get_embedding(text: str) -> np.ndarray:
 
 def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
     """
-    Advanced retrieval with spell correction, query expansion and reranking
+    Advanced retrieval with TRANSLATION -> spell correction -> query expansion
     """
     if index is None:
         logger.error("FAISS index not loaded")
@@ -227,9 +281,17 @@ def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
         return []
     
     try:
-        # Step 1: Preprocess query (includes spell correction)
-        processed_query = advanced_query_preprocessing(query)
-        logger.info(f"Original query: {query}")
+        # STEP 0: TRANSLATE TO ENGLISH FIRST (NEW!)
+        translation_result = translate_to_english(query)
+        original_query = translation_result["original"]
+        english_query = translation_result["translated"]
+        detected_language = translation_result["language"]
+        
+        logger.info(f"Original query ({detected_language}): {original_query}")
+        logger.info(f"Translated query (en): {english_query}")
+        
+        # Step 1: Preprocess TRANSLATED query (includes spell correction)
+        processed_query = advanced_query_preprocessing(english_query)
         logger.info(f"Processed query: {processed_query}")
         
         # Step 2: Expand query
@@ -244,12 +306,12 @@ def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
             return []
         
         # Step 4: Search FAISS (retrieve more for reranking)
-        search_k = top_k * 2  # Retrieve 2x for reranking
+        search_k = top_k * 2
         distances, indices = index.search(query_vec, search_k)
         
         # Step 5: Fetch documents and prepare results
         results = []
-        seen_sections = set()  # Avoid duplicates
+        seen_sections = set()
         
         for dist, idx in zip(distances[0], indices[0]):
             if idx == -1 or idx >= len(metadata_list):
@@ -260,14 +322,12 @@ def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
             source = meta["source"]
             section = meta.get("section", "")
             
-            # Create unique key to avoid duplicates
             unique_key = f"{source}_{section}"
             if unique_key in seen_sections:
                 continue
             seen_sections.add(unique_key)
             
             try:
-                # Fetch full document
                 if source == "bns":
                     doc = bns_collection.find_one({"_id": ObjectId(doc_id)})
                     if doc:
@@ -280,7 +340,7 @@ def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
                             "chapter_name": doc.get("Chapter_name", ""),
                             "similarity": float(dist)
                         })
-                else:  # ipc
+                else:
                     doc = ipc_collection.find_one({"_id": ObjectId(doc_id)})
                     if doc:
                         results.append({
@@ -296,13 +356,12 @@ def retrieve_relevant_sections(query: str, top_k: int = 20) -> List[Dict]:
                 logger.error(f"Error fetching document {doc_id}: {e}")
                 continue
             
-            # Stop when we have enough results
             if len(results) >= top_k:
                 break
         
         logger.info(f"Retrieved {len(results)} relevant sections")
         
-        # Step 6: Simple reranking based on similarity scores
+        # Step 6: Reranking based on similarity
         results.sort(key=lambda x: x['similarity'], reverse=True)
         
         return results[:top_k]
@@ -345,7 +404,6 @@ def format_chat_history(history: list) -> str:
     if not history:
         return ""
     
-    # Take more messages for better context (last 10 instead of 5)
     formatted = "\n\n### Previous Conversation:\n"
     recent_history = history[-10:] if len(history) > 10 else history
     
@@ -395,19 +453,19 @@ def chat_api(request):
             if language not in LANGUAGE_CONFIG:
                 language = 'english'
 
-            # Step 1: Retrieve relevant sections (with spell correction)
+            # Step 1: Retrieve relevant sections (NOW WITH TRANSLATION!)
             relevant_sections = retrieve_relevant_sections(message, top_k=20)
             
             # Step 2: Format context
             rag_context = format_context_for_llm(relevant_sections)
             
-            # Step 3: Format chat history (enhanced for better context)
+            # Step 3: Format chat history
             history_context = format_chat_history(chat_history)
             
             # Step 4: Get language instruction
             lang_instruction = LANGUAGE_CONFIG[language]['instruction']
             
-            # Step 5: Build enhanced prompt with explicit context awareness
+            # Step 5: Build enhanced prompt
             user_input = f"""
 {history_context}
 
@@ -420,10 +478,11 @@ def chat_api(request):
 ### LANGUAGE INSTRUCTION:
 {lang_instruction}
 
-### CRITICAL INSTRUCTIONS FOR CONTEXT AWARENESS:
--3. **If current user question is greeting just respond that greet dont provide any ipc and bns sections 
--2. **If there is now related ipc and bns dont tell any statement like this I cannot provide a definition of "divorce" based on the provided sections to user 
--1. **If user asking the defination of some legal word like bns, ipc, divorce etc provide its defination 
+### CRITICAL INSTRUCTIONS FOR CONTEXT AWARENESS :
+-4. **If current user question is greeting just respond that greet dont provide any ipc and bns sections 
+-3. **If there is no related ipc and bns dont tell any statement like this I cannot provide a definition of "divorce" based on the provided sections to user 
+-2. **If there is no related ipc and bns not found dont say i didn't find related ipc and bns section instead answer you know about that query and provide related ipc and bns section you know which is related to user query 
+0-1. **If user asking the defination of some legal word like bns, ipc, divorce etc provide its defination  
 0. **If user question is legal like how to file divorce or how to file case or complaint or etc answer that question and dont provide any bns and ipc sections
 1. **Analyze the conversation history carefully** - If the current question refers to previous topics (e.g., "example", "more details", "explain that"), you MUST connect it to the previous context
 2. **If the user asks for "example", "more", "explain that", etc.**, refer back to what was discussed earlier in the conversation
@@ -435,6 +494,58 @@ def chat_api(request):
 8. **Be precise, professional, and helpful**
 9. **When the user's question seems vague** (like "example", "more info"), look at the previous messages to understand what they're referring to
 
+ಸಂದರ್ಭ ಜ್ಞಾನಕ್ಕಾಗಿ ಅತಿ ಮಹತ್ವದ ಸೂಚನೆಗಳು :
+
+-4. ಯಾವಾಗಲೂ  ಬಳಕೆದಾರರು ಶುಭಾಶಯ ಕೇಳಿದರೆ (ಹಲೋ, ಹಾಯ್, ನಮಸ್ಕಾರ) ಯಾವುದೇ IPC ಅಥವಾ BNS ಸೆಕ್ಷನ್ ಕೊಡಬೇಡಿ. ಕೇವಲ ಶುಭಾಶಯಕ್ಕೆ ಉತ್ತರ ನೀಡಿ.
+-3. ಯಾವುದೇ ಸಂಬಂಧಿತ IPC/BNS ಇಲ್ಲದಿದ್ದರೂ “ನಾನು ಇದಕ್ಕೆ ಸಂಬಂಧಿಸಿದ IPC, BNS ಸಿಗಲಿಲ್ಲ” ಎಂದು ಹೇಳಬೇಡಿ.
+-2. ಯಾವುದೇ ಸಂಬಂಧಿತ IPC/BNS ಇಲ್ಲದಿದ್ದರೂ, ಬಳಕೆದಾರರ ಪ್ರಶ್ನೆಗೆ ಸಾಮಾನ್ಯವಾಗಿ ತಿಳಿದಿರುವ ಕಾನೂನಿನ ಆಧಾರದ ಮೇಲೆ ಉತ್ತರ ನೀಡಿ, ಮತ್ತು ನಿಮಗೆ ತಿಳಿದಿರುವ ಸಂಬಂಧಿತ IPC/BNS ಅನ್ನು ಮಾತ್ರ ನೀಡಿ.
+-1. ಬಳಕೆದಾರರು BNS, IPC, Divorce (ವಿಚ್ಛೇದನ) ಮುಂತಾದ ಕಾನೂನು ಪದಗಳ ವ್ಯಾಖ್ಯಾನ ಕೇಳಿದರೆ, ಅದರ ವ್ಯಾಖ್ಯಾನವನ್ನು ಮಾತ್ರ ನೀಡಿ.
+0. ಬಳಕೆದಾರರು “ಹೇಗೆ ಕೇಸ್ ಹಾಕಬೇಕು, ಹೇಗೆ ದೂರು ಕೊಡಬೇಕು, ವಿಚ್ಛೇದನ ಹೇಗೆ ಕೇಳಬೇಕು” ಇತ್ಯಾದಿ ಪ್ರಾಯೋಗಿಕ ಪ್ರಶ್ನೆ ಕೇಳಿದರೆ, ಕೇವಲ ವಿವರ ನೀಡಿ — IPC/BNS ಸೆಕ್ಷನ್ ಕೊಡಬೇಡಿ.
+
+1.ಸಂವಾದದ ಇತಿಹಾಸವನ್ನು ಜಾಗ್ರತೆಯಿಂದ ವಿಶ್ಲೇಷಿಸಿ ಬಳಕೆದಾರರು ಹಿಂದಿನ ವಿಷಯಕ್ಕೆ ಸಂಬಂಧಿಸಿದಂತೆ “example”, “explain that” ಎಂದಿದ್ದರೆ, ಹಿಂದಿನ ಸಂಧರ್ಭಕ್ಕೆ ಸಂಪರ್ಕ ಮಾಡಬೇಕು.
+
+2.ಬಳಕೆದಾರರು “ಉದಾಹರಣೆ”, “ಇನ್ನಷ್ಟು ಹೇಳಿ”, “ಅದನ್ನು ವಿವರಿಸಿ” ಎಂದರೆ — ಹಿಂದಿನ ವಿಷಯವನ್ನು ಆಧರಿಸಿ ಉತ್ತರ ಕೊಡು.
+
+3.ಲಭ್ಯವಿರುವ ಕಾನೂನು ಸೆಕ್ಷನ್ ಆಧರಿಸಿ ಉತ್ತರಿಸಬೇಕು.
+
+4.ಸ್ಪಷ್ಟವಾದ ಸೆಕ್ಷನ್ ಸಂಖ್ಯೆಗಳನ್ನೇ ಬಳಸಿ (ಉದಾ: BNS ಸೆಕ್ಷನ್ 302…).
+
+5.ಅನೇಕ ಸೆಕ್ಷನ್‌ಗಳು ಸಂಬಂಧಿಸಿದರೆ ಅವುಗಳನ್ನೆಲ್ಲಾ ವಿವರಿಸಬೇಕು.
+
+6.ಸೆಕ್ಷನ್‌ಗಳು ಪ್ರಶ್ನೆಗೆ ಸಂಪೂರ್ಣ ಉತ್ತರ ಕೊಡದಿದ್ದರೆ, ಅದನ್ನೂ ಸ್ಪಷ್ಟವಾಗಿ ತಿಳಿಸಬೇಕು.
+
+7.ಉಪಯೋಗಿಸಿರುವ {LANGUAGE_CONFIG[language]['name']} ಭಾಷೆಯಲ್ಲಿ ಮಾತ್ರ ಪೂರ್ಣ ಉತ್ತರ ಕೊಡಬೇಕು.
+
+8.ಸೂಕ್ಷ್ಮ, ವೃತ್ತಿಪರ ಮತ್ತು ಸಹಾಯಕವಾಗಿರಬೇಕು.
+
+9.ಬಳಕೆದಾರರ ಪ್ರಶ್ನೆ ಸ್ಪಷ್ಟವಾಗಿರದಿದ್ದರೆ (“more info”, “example”), ಹಿಂದಿನ ಸಂದೇಶಗಳನ್ನು ನೋಡಿ ಸಂಧರ್ಭವನ್ನು ಹುಡುಕಿ.
+
+Hindi Translation 🇮🇳
+संदर्भ समझने के लिए महत्वपूर्ण निर्देश :
+
+-4. अगर उपयोगकर्ता केवल अभिवादन (Hello, Hi, Namaste) करता है, तो कोई IPC या BNS सेक्शन न दें — सिर्फ अभिवादन का जवाब दें।
+-3. अगर किसी प्रश्न के लिए संबंधित IPC/BNS नहीं मिलता, तो “मुझे सेक्शन नहीं मिला” जैसी लाइन न कहें।
+-2. अगर संबंधित IPC/BNS न मिले, तब भी उपयोगकर्ता के प्रश्न का सामान्य कानूनी ज्ञान के आधार पर उत्तर दें, और आपको पता हो तो संबंधित IPC/BNS भी बताएं।
+-1. अगर उपयोगकर्ता BNS, IPC, Divorce (तलाक) जैसे कानूनी शब्दों की परिभाषा पूछता है, तो केवल उसकी परिभाषा दें।
+0. अगर उपयोगकर्ता व्यावहारिक प्रश्न पूछता है जैसे “केस कैसे करें”, “शिकायत कैसे दें”, “तलाक कैसे फाइल करें” — तो केवल प्रक्रिया बताएं, कोई IPC/BNS सेक्शन न दें।
+
+1.वार्तालाप के इतिहास का ध्यान से विश्लेषण करें — अगर उपयोगकर्ता “example”, “explain that” कहता है, तो पिछले संदर्भ से जोड़कर जवाब दें।
+
+2.अगर उपयोगकर्ता “उदाहरण”, “और बताओ”, “समझाओ” कहता है, तो पिछले विषय से संबंधित उत्तर दें।
+
+3.दिए गए कानूनी सेक्शनों के आधार पर ही उत्तर दें।
+
+4.विशिष्ट सेक्शन नंबर का उपयोग करें (जैसे BNS सेक्शन 302…).
+
+5.अगर कई सेक्शन लागू होते हैं, तो सभी को समझाएँ।
+
+6.अगर दिए गए सेक्शन प्रश्न को पूरी तरह कवर नहीं करते, तो स्पष्ट रूप से बता दें।
+
+7.पूरा उत्तर केवल {LANGUAGE_CONFIG[language]['name']} भाषा में दें।
+
+8.उत्तर सटीक, प्रोफेशनल और सहायक होना चाहिए।
+
+9.अगर प्रश्न अस्पष्ट हो (“example”, “more info”), तो पिछले संदेशों को देखकर संदर्भ समझें।
 ### EXAMPLE OF GOOD CONTEXT AWARENESS:
 User: "What is BNS?"
 Assistant: "BNS stands for Bharatiya Nyaya Sanhita 2023..."
@@ -445,12 +556,12 @@ Assistant: "Based on our previous discussion about BNS, here's an example: [prov
 
             gemini_prompt = system_prompt + "\n\n" + user_input
 
-            # Step 6: Call Gemini with enhanced configuration
+            # Step 6: Call Gemini
             try:
                 gemini_model = genai.GenerativeModel(
                     "models/gemini-2.0-flash",
                     generation_config={
-                        "temperature": 0.4,  # Balanced for context + creativity
+                        "temperature": 0.4,
                         "top_p": 0.9,
                         "top_k": 40,
                         "max_output_tokens": 2048,
@@ -466,7 +577,6 @@ Assistant: "Based on our previous discussion about BNS, here's an example: [prov
                 
                 response = gemini_model.generate_content(gemini_prompt)
 
-                # Handle response
                 if not response.candidates:
                     gemini_response = get_error_message(language, "no_response")
                     logger.warning("No candidates in Gemini response")
@@ -484,15 +594,21 @@ Assistant: "Based on our previous discussion about BNS, here's an example: [prov
                 logger.error(f"Gemini API error: {e}")
                 gemini_response = get_error_message(language, "error")
 
-            # Return top 5 sections for display
             context_for_display = relevant_sections[:5]
+            
+            # Get translation info for debugging
+            translation_info = translate_to_english(message)
             
             return JsonResponse({
                 'response': gemini_response,
                 'context': context_for_display,
                 'language': language,
                 'retrieved_count': len(relevant_sections),
-                'corrected_query': correct_spelling(message)  # Show corrected query
+                'translation_info': {
+                    'original': translation_info['original'],
+                    'translated': translation_info['translated'],
+                    'detected_language': translation_info['language']
+                }
             })
             
         except json.JSONDecodeError:

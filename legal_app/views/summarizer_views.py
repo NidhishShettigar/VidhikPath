@@ -152,7 +152,11 @@ def get_summary_prompt(language_code, chunk):
     """Get language-specific prompts for summarization."""
     prompts = {
         'en': f"""
+        IF : UPLODED DOCUMENT IS NOT LEGAL THEN JUST TELL 'SORRY THIS IS NOT LEGAL DOCUMENT SO I CAN'T SUMMERIZE' 
+        
+        ELSE DO THIS:
         Analyze this legal document excerpt and provide a clear summary in simple language.
+        
         
         Provide:
         1. **Plain Language Summary** (2-3 sentences)
@@ -172,6 +176,10 @@ def get_summary_prompt(language_code, chunk):
         """,
         
         'hi': f"""
+        अगर : अपलोड किया गया दस्तावेज़ कानूनी नहीं है, तो सिर्फ इतना कहें:
+        "सॉरी, यह कानूनी दस्तावेज़ नहीं है, इसलिए मैं इसका सारांश नहीं बना सकता।"
+        
+        अगर नहीं है तो यह करो :
         इस कानूनी दस्तावेज़ अंश का विश्लेषण करें और सरल भाषा में स्पष्ट सारांश प्रदान करें।
         
         प्रदान करें:
@@ -192,6 +200,10 @@ def get_summary_prompt(language_code, chunk):
         """,
         
         'kn': f"""
+        ಒಂದು ವೇಳೆ : ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ದಾಖಲೆ ಕಾನೂನು ಸಂಬಂಧಿತದಲ್ಲದಿದ್ದರೆ, ಈ ವಾಕ್ಯವನ್ನು ಮಾತ್ರ ಹೇಳಿ:
+        "ಕ್ಷಮಿಸಿ, ಇದು ಕಾನೂನು ಸಂಬಂಧಿತ ದಾಖಲೆ ಅಲ್ಲ, ಆದ್ದರಿಂದ ನಾನು ಇದರ ಸಾರಾಂಶವನ್ನು ನೀಡಲು ಸಾಧ್ಯವಿಲ್ಲ."
+        
+        ಇಲ್ಲದಿದ್ದರೆ ಇದನ್ನು ಮಾಡು :
         ಈ ಕಾನೂನು ದಾಖಲೆಯ ಭಾಗವನ್ನು ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ಸರಳ ಭಾಷೆಯಲ್ಲಿ ಸ್ಪಷ್ಟ ಸಾರಾಂಶವನ್ನು ಒದಗಿಸಿ.
         
         ಒದಗಿಸಿ:
