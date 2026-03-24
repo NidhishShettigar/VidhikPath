@@ -1248,3 +1248,1316 @@ Expanded query: thank you thank you
 Retrieved 20 relevant sections
 Detected language: en
 Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what is BNS
+Translated query (en): what is BNS
+After spell correction: what is BNS
+Processed query: what is bharatiya nyaya sanhita
+Expanded query: what is bharatiya nyaya sanhita what sanhita bharatiya nyaya is
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: it
+Translation: 'diverse file manager' -> 'different file managers'
+Original query (it): diverse file manager
+Translated query (en): different file managers
+After spell correction: different file managers
+Processed query: different file managers
+Expanded query: different file managers different file managers
+Retrieved 20 relevant sections
+Detected language: it
+Translation: 'diverse file manager' -> 'different file managers'
+Detected language: en
+Text already in English, skipping translation
+Original query (english): BNS with IPC
+Translated query (en): BNS with IPC
+After spell correction: BNS with IPC
+Processed query: bharatiya nyaya sanhita with indian penal code
+Expanded query: bharatiya nyaya sanhita with indian penal code with sanhita bharatiya nyaya indian penal code
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: sw
+Translation: 'Kisi Ne Mujhko Mara kya karun' -> 'Kisi Ne Mujhko Mara kya karun'
+Original query (sw): Kisi Ne Mujhko Mara kya karun
+Translated query (en): Kisi Ne Mujhko Mara kya karun
+Corrected 'Kisi' to 'Kiss'
+Corrected 'Mujhko' to 'Mujik'
+Corrected 'kya' to 'ya'
+Corrected 'karun' to 'karen'
+After spell correction: Kiss Ne Mujik Mara ya karen
+Processed query: kiss ne mujik mara ya karen
+Expanded query: kiss ne mujik mara ya karen kiss mujik karen ya ne mara
+Retrieved 20 relevant sections
+Detected language: sw
+Translation: 'Kisi Ne Mujhko Mara kya karun' -> 'Kisi Ne Mujhko Mara kya karun'
+Detected language: hr
+Translation: 'uski steps batao' -> 'narrow steps batao'
+Original query (hr): uski steps batao
+Translated query (en): narrow steps batao
+Corrected 'batao' to 'data'
+After spell correction: narrow steps data
+Processed query: narrow steps data
+Expanded query: narrow steps data steps narrow data
+Retrieved 20 relevant sections
+Detected language: hr
+Translation: 'uski steps batao' -> 'narrow steps batao'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Image saved to: forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20251128_053841.png, Absolute URL: http://127.0.0.1:8000/media/forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20251128_053841.png
+Detected language: hr
+Translation: 'nanage obbba odeda avana mele yava case hakabahudu' -> 'nanage obbba odeda avana mele yava case hakabahudu'
+Original query (hr): nanage obbba odeda avana mele yava case hakabahudu
+Translated query (en): nanage obbba odeda avana mele yava case hakabahudu
+Corrected 'nanage' to 'manage'
+Corrected 'obbba' to 'bobby'
+Corrected 'odeda' to 'odea'
+Corrected 'avana' to 'havana'
+Corrected 'mele' to 'male'
+Corrected 'yava' to 'lava'
+After spell correction: manage bobby odea havana male lava case hakabahudu
+Processed query: manage bobby odea havana male lava case hakabahudu
+Expanded query: manage bobby odea havana male lava case hakabahudu male bobby lava hakabahudu case havana odea manage
+Retrieved 20 relevant sections
+Detected language: hr
+Translation: 'nanage obbba odeda avana mele yava case hakabahudu' -> 'nanage obbba odeda avana mele yava case hakabahudu'
+Detected language: so
+Translation: 'nanage obbba odeda avana mele yava case hakabahudu' -> 'nanage obbba odeda avana mele yava case hakahahudu'
+Original query (so): nanage obbba odeda avana mele yava case hakabahudu
+Translated query (en): nanage obbba odeda avana mele yava case hakahahudu
+Corrected 'nanage' to 'manage'
+Corrected 'obbba' to 'bobby'
+Corrected 'odeda' to 'odea'
+Corrected 'avana' to 'havana'
+Corrected 'mele' to 'male'
+Corrected 'yava' to 'lava'
+After spell correction: manage bobby odea havana male lava case hakahahudu
+Processed query: manage bobby odea havana male lava case hakahahudu
+Expanded query: manage bobby odea havana male lava case hakahahudu male bobby hakahahudu lava case havana odea manage
+Retrieved 20 relevant sections
+Detected language: hr
+Translation: 'nanage obbba odeda avana mele yava case hakabahudu' -> 'nanage obbba odeda avana mele yava case hakabahudu'
+Detected language: hr
+Translation: 'nanage obbba odeda avana mele yava case hakabahudu' -> 'nanage obbba odeda avana mele yava case hakabahudu'
+Original query (hr): nanage obbba odeda avana mele yava case hakabahudu
+Translated query (en): nanage obbba odeda avana mele yava case hakabahudu
+Corrected 'nanage' to 'manage'
+Corrected 'obbba' to 'bobby'
+Corrected 'odeda' to 'odea'
+Corrected 'avana' to 'havana'
+Corrected 'mele' to 'male'
+Corrected 'yava' to 'lava'
+After spell correction: manage bobby odea havana male lava case hakabahudu
+Processed query: manage bobby odea havana male lava case hakabahudu
+Expanded query: manage bobby odea havana male lava case hakabahudu male bobby lava hakabahudu case havana odea manage
+Retrieved 20 relevant sections
+Detected language: so
+Translation: 'nanage obbba odeda avana mele yava case hakabahudu' -> 'nanage obbba odeda avana mele yava case hakahahudu'
+Detected language: kn
+Translated query (en): If someone hits me, what case can be filed against him?
+After spell correction: If someone hits me, what case can be filed against him?
+Processed query: if someone hits me, what case can be filed against him
+Expanded query: if someone hits me, what case can be filed against him someone me, him filed if hits be case what can against
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): Someone is sending me threatening messages, what should I do?
+After spell correction: Someone is sending me threatening messages, what should I do?
+Processed query: someone is sending me threatening messages, what should i do
+Expanded query: someone is sending me threatening messages, what should i do someone sending messages, me i threatening do should what is
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): They have not done anything to me, but I am afraid. What should I do now?
+After spell correction: They have not done anything to me, but I am afraid. What should I do now?
+Processed query: they have not done anything to me, but i am afraid. what should i do now
+Expanded query: they have not done anything to me, but i am afraid. what should i do now afraid. anything to me, am they i have should not but do what done now
+Retrieved 20 relevant sections
+Detected language: kn
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what is bns
+Translated query (en): what is bns
+After spell correction: what is bns
+Processed query: what is bharatiya nyaya sanhita
+Expanded query: what is bharatiya nyaya sanhita nyaya what is bharatiya sanhita
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant the warrant without enter home my police can a
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 29.580224571s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 29
+}
+]
+Detected language: en
+Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 57.892979041s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 57
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 50.594224327s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 50
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 50.348771418s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 50
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 12.016955719s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 12
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 57.893054019s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 57
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 3.163100491s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 3
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+Please retry in 31.189956551s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 31
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-2.0-flash
+Please retry in 15.859877489s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count"
+  quota_id: "GenerateContentInputTokensPerModelPerMinute-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+}
+, retry_delay {
+  seconds: 15
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant a police warrant can home without the enter my
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant a police warrant can home without the enter my
+Retrieved 20 relevant sections
+Response blocked by safety filters
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant a police warrant can home without the enter my
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant a police warrant can home without the enter my
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant a police warrant can home without the enter my
+Retrieved 20 relevant sections
+Response blocked by safety filters
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant a police warrant can home without the enter my
+Retrieved 20 relevant sections
+Response blocked by safety filters
+Detected language: en
+Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant warrant police enter without can home a my the
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant warrant police enter without can home a my the
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What is the minimum time required to file for a divorce in India?
+Translated query (en): What is the minimum time required to file for a divorce in India?
+After spell correction: What is the minimum time required to file for a divorce in India?
+Processed query: what is the minimum time required to file for a divorce in india
+Expanded query: what is the minimum time required to file for a divorce in india minimum time for what is divorce file to india a in the required
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What is the minimum time required to file for a divorce in India?
+Translated query (en): What is the minimum time required to file for a divorce in India?
+After spell correction: What is the minimum time required to file for a divorce in India?
+Processed query: what is the minimum time required to file for a divorce in india
+Expanded query: what is the minimum time required to file for a divorce in india minimum time for what is divorce file to india a in the required
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What is the minimum time required to file for a divorce in India?
+Translated query (en): What is the minimum time required to file for a divorce in India?
+After spell correction: What is the minimum time required to file for a divorce in India?
+Processed query: what is the minimum time required to file for a divorce in india
+Expanded query: what is the minimum time required to file for a divorce in india minimum time for what is divorce file to india a in the required
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What is the minimum time required to file for a divorce in India?
+Translated query (en): What is the minimum time required to file for a divorce in India?
+After spell correction: What is the minimum time required to file for a divorce in India?
+Processed query: what is the minimum time required to file for a divorce in india
+Expanded query: what is the minimum time required to file for a divorce in india minimum time for what is divorce file to india a in the required
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What can I do if my landlord refuses to return my security deposit?
+Translated query (en): What can I do if my landlord refuses to return my security deposit?
+After spell correction: What can I do if my landlord refuses to return my security deposit?
+Processed query: what can i do if my landlord refuses to return my security deposit
+Expanded query: what can i do if my landlord refuses to return my security deposit i if landlord return what deposit to can security refuses my do
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What can I do if my landlord refuses to return my security deposit?
+Translated query (en): What can I do if my landlord refuses to return my security deposit?
+After spell correction: What can I do if my landlord refuses to return my security deposit?
+Processed query: what can i do if my landlord refuses to return my security deposit
+Expanded query: what can i do if my landlord refuses to return my security deposit i if landlord return what deposit to can security refuses my do
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What can I do if my landlord refuses to return my security deposit?
+Translated query (en): What can I do if my landlord refuses to return my security deposit?
+After spell correction: What can I do if my landlord refuses to return my security deposit?
+Processed query: what can i do if my landlord refuses to return my security deposit
+Expanded query: what can i do if my landlord refuses to return my security deposit i if landlord return what deposit to can security refuses my do
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: hi
+Translated query (en): Can the police enter my house without a warrant?
+After spell correction: Can the police enter my house without a warrant?
+Processed query: can the police enter my house without a warrant
+Expanded query: can the police enter my house without a warrant warrant police enter without can a my the house
+Retrieved 20 relevant sections
+Response blocked by safety filters
+Detected language: hi
+Detected language: hi
+Translated query (en): Can the police enter my house without a warrant?
+After spell correction: Can the police enter my house without a warrant?
+Processed query: can the police enter my house without a warrant
+Expanded query: can the police enter my house without a warrant warrant police enter without can a my the house
+Retrieved 20 relevant sections
+Response blocked by safety filters
+Detected language: hi
+Detected language: kn
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant warrant police enter without can home a my the
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant warrant police enter without can home a my the
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: kn
+Translated query (en): What is the minimum period required for divorce?
+After spell correction: What is the minimum period required for divorce?
+Processed query: what is the minimum period required for divorce
+Expanded query: what is the minimum period required for divorce period minimum for what is divorce the required
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 9.558931775s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 9
+}
+]
+Detected language: kn
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: kn
+Translated query (en): What is the minimum period required for divorce?
+After spell correction: What is the minimum period required for divorce?
+Processed query: what is the minimum period required for divorce
+Expanded query: what is the minimum period required for divorce what period is for required the divorce minimum
+Retrieved 20 relevant sections
+Detected language: kn
+Detected language: hi
+Translated query (en): What is the minimum period for divorce in India?
+After spell correction: What is the minimum period for divorce in India?
+Processed query: what is the minimum period for divorce in india
+Expanded query: what is the minimum period for divorce in india what period is for india the divorce minimum in
+Retrieved 20 relevant sections
+Detected language: hi
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant warrant can my without police home the enter a
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What is the minimum time required to file for a divorce in India?
+Translated query (en): What is the minimum time required to file for a divorce in India?
+After spell correction: What is the minimum time required to file for a divorce in India?
+Processed query: what is the minimum time required to file for a divorce in india
+Expanded query: what is the minimum time required to file for a divorce in india what a is for file required india the to divorce minimum in time
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): What can I do if my landlord refuses to return my security deposit?
+Translated query (en): What can I do if my landlord refuses to return my security deposit?
+After spell correction: What can I do if my landlord refuses to return my security deposit?
+Processed query: what can i do if my landlord refuses to return my security deposit
+Expanded query: what can i do if my landlord refuses to return my security deposit what can i my security deposit landlord do to refuses if return
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Processed chunk 1/1
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Processed chunk 1/2
+Processed chunk 2/2
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant the a my can police enter without home warrant
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): Can the police enter my home without a warrant?
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant the a my can police enter without home warrant
+Retrieved 20 relevant sections
+Detected language: en
+Text already in English, skipping translation
+Detected language: hi
+Translated query (en): Can the police enter my house without a warrant?
+After spell correction: Can the police enter my house without a warrant?
+Processed query: can the police enter my house without a warrant
+Expanded query: can the police enter my house without a warrant the a my can police enter without house warrant
+Retrieved 20 relevant sections
+Detected language: hi
+Detected language: hi
+Translated query (en): Can the police enter my house without a warrant?
+After spell correction: Can the police enter my house without a warrant?
+Processed query: can the police enter my house without a warrant
+Expanded query: can the police enter my house without a warrant the a my can police enter without house warrant
+Retrieved 20 relevant sections
+Detected language: hi
+Detected language: hi
+Translated query (en): What is the minimum period for divorce in India?
+After spell correction: What is the minimum period for divorce in India?
+Processed query: what is the minimum period for divorce in india
+Expanded query: what is the minimum period for divorce in india is the what minimum for in divorce period india
+Retrieved 20 relevant sections
+Detected language: hi
+Detected language: kn
+Translated query (en): Can the police enter my home without a warrant?
+After spell correction: Can the police enter my home without a warrant?
+Processed query: can the police enter my home without a warrant
+Expanded query: can the police enter my home without a warrant the a my can police enter without home warrant
+Retrieved 20 relevant sections
+Detected language: kn
+Processed chunk 1/1
+Processed chunk 1/1
+Processed chunk 1/2
+Error summarizing chunk: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 24.21222777s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 24
+}
+]
+Processed chunk 2/2
+Detected language: en
+Text already in English, skipping translation
+Original query (english): can you suggest information about dowry harassment and alimony
+Translated query (en): can you suggest information about dowry harassment and alimony
+After spell correction: can you suggest information about dowry harassment and alimony
+Processed query: can you suggest information about dowry harassment and alimony
+Expanded query: can you suggest information about dowry harassment and alimony about dowry and can alimony you information harassment suggest
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 41.3849999s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 41
+}
+]
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): can you suggest information about dowry harassment and alimony\
+Translated query (en): can you suggest information about dowry harassment and alimony\
+After spell correction: can you suggest information about dowry harassment and alimony\
+Processed query: can you suggest information about dowry harassment and alimony
+Expanded query: can you suggest information about dowry harassment and alimony about dowry and can alimony you information harassment suggest
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 9.87265423s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 9
+}
+]
+Detected language: en
+Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what is bns
+Translated query (en): what is bns
+After spell correction: what is bns
+Processed query: what is bharatiya nyaya sanhita
+Expanded query: what is bharatiya nyaya sanhita is what sanhita nyaya bharatiya
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 17.675660776s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 17
+}
+]
+Detected language: en
+Text already in English, skipping translation
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what is bns
+Translated query (en): what is bns
+After spell correction: what is bns
+Processed query: what is bharatiya nyaya sanhita
+Expanded query: what is bharatiya nyaya sanhita is what sanhita nyaya bharatiya
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 54.4324098s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 54
+}
+]
+Detected language: en
+Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 8.125681823s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 8
+}
+]
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: en
+Text already in English, skipping translation
+Original query (english): what is bns
+Translated query (en): what is bns
+After spell correction: what is bns
+Processed query: what is bharatiya nyaya sanhita
+Expanded query: what is bharatiya nyaya sanhita is bharatiya what sanhita nyaya
+Retrieved 20 relevant sections
+Gemini API error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/usage?tab=rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash
+Please retry in 30.875751573s. [links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.5-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 20
+}
+, retry_delay {
+  seconds: 30
+}
+]
+Detected language: en
+Text already in English, skipping translation
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Missing required dependency: No module named 'cv2'
+Missing required dependency: No module named 'cv2'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Missing required dependency: No module named 'cv2'
+Missing required dependency: No module named 'cv2'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Missing required dependency: No module named 'pytesseract'
+Missing required dependency: No module named 'pytesseract'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Missing required dependency: No module named 'pdf2image'
+Missing required dependency: No module named 'pdf2image'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Original query (sw): hi
+Translated query (en): hi
+After spell correction: hi
+Processed query: hi
+Expanded query: hi hi
+Retrieved 20 relevant sections
+Detected language: sw
+Translation: 'hi' -> 'hi'
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors

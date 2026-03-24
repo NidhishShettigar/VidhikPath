@@ -559,7 +559,7 @@ Assistant: "Based on our previous discussion about BNS, here's an example: [prov
             # Step 6: Call Gemini
             try:
                 gemini_model = genai.GenerativeModel(
-                    "models/gemini-2.0-flash",
+                    "models/gemini-2.5-flash",
                     generation_config={
                         "temperature": 0.4,
                         "top_p": 0.9,
