@@ -2561,3 +2561,15 @@ Detected language: sw
 Translation: 'hi' -> 'hi'
 Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
 FAISS index loaded: 933 vectors
+Embedding model loaded: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+FAISS index loaded: 933 vectors
+Detected language: ca
+Translation: 'ipc 300' -> 'ipc 300'
+Original query (ca): ipc 300
+Translated query (en): ipc 300
+After spell correction: ipc 300
+Processed query: indian penal code 300
+Expanded query: indian penal code 300 code penal indian 300
+Retrieved 20 relevant sections
+Detected language: ca
+Translation: 'ipc 300' -> 'ipc 300'
