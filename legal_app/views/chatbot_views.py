@@ -17,6 +17,18 @@ from textblob import TextBlob
 from spellchecker import SpellChecker
 from deep_translator import GoogleTranslator
 from langdetect import detect
+from django.http import JsonResponse
+from django.conf import settings
+
+def chat_view(request):
+
+    # Check OpenAI key
+    if not settings.OPENAI_API_KEY:
+        return JsonResponse({"error": "AI service not configured"})
+
+    # Check Gemini key (optional but good)
+    if not settings.GEMINI_API_KEY:
+        return JsonResponse({"error": "Gemini service not configured"})
 
 logger = logging.getLogger(__name__)
 
