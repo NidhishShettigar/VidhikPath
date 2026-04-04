@@ -2573,3 +2573,23 @@ Expanded query: indian penal code 300 code penal indian 300
 Retrieved 20 relevant sections
 Detected language: ca
 Translation: 'ipc 300' -> 'ipc 300'
+Error in summarize_api: tesseract is not installed or it's not in your PATH. See README file for more information.
+Error in summarize_api: tesseract is not installed or it's not in your PATH. See README file for more information.
+Error in summarize_api: tesseract is not installed or it's not in your PATH. See README file for more information.
+BNS text search failed (text index may not exist): text index required for $text query, full error: {'ok': 0.0, 'errmsg': 'text index required for $text query', 'code': 27, 'codeName': 'IndexNotFound', '$clusterTime': {'clusterTime': Timestamp(1775242879, 5), 'signature': {'hash': b'\xdb\xd5\xed\xd9\xb2\x91\xb66I\xdf\xbc3\x8fd\xf6?\x80\xe0+\x1f', 'keyId': 7566291379664453637}}, 'operationTime': Timestamp(1775242879, 5)}
+IPC text search failed: text index required for $text query, full error: {'ok': 0.0, 'errmsg': 'text index required for $text query', 'code': 27, 'codeName': 'IndexNotFound', '$clusterTime': {'clusterTime': Timestamp(1775242879, 8), 'signature': {'hash': b'\xdb\xd5\xed\xd9\xb2\x91\xb66I\xdf\xbc3\x8fd\xf6?\x80\xe0+\x1f', 'keyId': 7566291379664453637}}, 'operationTime': Timestamp(1775242879, 8)}
+Retrieved 9 relevant sections
+Response blocked by safety filters
+Retrieved 3 relevant sections
+Error in Gemini-based retrieval: Unterminated string starting at: line 2 column 3 (char 4)
+Retrieved 0 relevant sections
+Error in summarize_api: tesseract is not installed or it's not in your PATH. See README file for more information.
+Error in summarize_api: tesseract is not installed or it's not in your PATH. See README file for more information.
+Processed chunk 1/1
+Processed chunk 1/1
+Image saved to: forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20260403_201205.jpeg, Absolute URL: http://127.0.0.1:8000/media/forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20260403_201205.jpeg
+Image saved to: forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20260403_201250.png, Absolute URL: http://127.0.0.1:8000/media/forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20260403_201250.png
+Image saved to: forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20260403_201348.jpeg, Absolute URL: http://127.0.0.1:8000/media/forum_posts/UOBJHZ0qGTZiDDncXnvc8uCTsP52_20260403_201348.jpeg
+Error in Gemini-based retrieval: Expecting property name enclosed in double quotes: line 2 column 41 (char 42)
+Retrieved 0 relevant sections
+Processed chunk 1/1

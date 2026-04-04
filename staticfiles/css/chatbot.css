@@ -1,0 +1,219 @@
+.chatbot-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  /* Reduced height slightly to accommodate browser UI on desktop */
+  height: calc(101vh - 190px);
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 2);
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  background: var(--secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  /* Updated header gradient with modern colors */
+  background: linear-gradient(135deg, var(--foreground) 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.language-selector select {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  min-width: 120px;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--background);
+}
+
+.message {
+  max-width: 80%;
+  padding: 1rem 1.5rem;
+  border-radius: calc(var(--radius) * 1.5);
+  animation: fadeIn 0.3s ease-out;
+  position: relative;
+}
+
+.bot-message {
+  align-self: flex-start;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.user-message {
+  align-self: flex-end;
+  /* Updated user message background with modern gradient */
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: var(--primary-foreground);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3);
+}
+
+.message p {
+  margin: 0;
+  line-height: 1.6;
+  color: inherit;
+}
+
+.chat-input-container {
+  padding: 1.5rem 2rem;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+}
+
+.input-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.input-group input {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+.voice-btn,
+.send-btn {
+  padding: 0.875rem 1.25rem;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.voice-btn {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+}
+
+.voice-btn:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+
+.send-btn {
+  /* Updated send button with modern gradient */
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: var(--primary-foreground);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3);
+}
+
+.send-btn:hover {
+  /* Enhanced hover effect */
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* Scrollbar */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: var(--secondary);
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Responsive Design (For Mobile UI) */
+@media (max-width: 768px) {
+  .chatbot-container {
+    /* Set to full width on mobile/tablet and adjust height for better fit */
+    max-width: 100%;
+    margin: 0;
+    height: calc(100vh - 180px); /* Use full viewport height */
+    border-radius: 0; /* Remove rounded corners for full screen feel */
+    border: none;
+  }
+
+  .chat-header {
+    padding: 1rem 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .chat-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .language-selector select {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .chat-messages {
+    padding: 1rem 0.75rem;
+  }
+
+  .message {
+    max-width: 95%; /* Give more space to messages on mobile */
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .chat-input-container {
+    padding: 1rem 1rem;
+  }
+
+  .input-group {
+    /* Keep horizontal layout but allow buttons to take up less width */
+    gap: 0.5rem;
+  }
+
+  /* Make buttons slightly smaller on mobile for better fit */
+  .voice-btn,
+  .send-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+  }
+}

@@ -7,6 +7,11 @@ import tempfile
 from datetime import datetime
 import logging
 import google.generativeai as genai
+import pytesseract
+import os
+
+if os.name == 'nt':  # Windows
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +19,6 @@ logger = logging.getLogger(__name__)
 try:
     import cv2
     import pdfplumber
-    import pytesseract
     from pdf2image import convert_from_path
     import google.generativeai as genai
 except ImportError as e:

@@ -1,0 +1,808 @@
+/* Forum Page Styles - Enhanced with Infinite Nested Reply Support */
+.forum-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Added top navigation styles */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: var(--background);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-arrow {
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.back-arrow:hover {
+  transform: translateX(-3px);
+  color: #667eea;
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  text-decoration: none;
+}
+
+.profile-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.forum-container h3 {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+/* Create Post Section */
+.create-post-section {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 30px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.create-post-section:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.create-post-section textarea {
+  width: 100%;
+  min-height: 120px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  color: #ffffff;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+  resize: vertical;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.create-post-section textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.create-post-section textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-secondary:hover {
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-xs {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+/* Forum Posts */
+.forum-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.forum-post {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.forum-post:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.post-user {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 16px;
+}
+
+.post-time {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+/* Post Options (Edit/Delete buttons) */
+.post-options {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.post-content {
+  margin-bottom: 20px;
+}
+
+.post-content p {
+  color: #ffffff;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Edit Post Section */
+.edit-post-section {
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.edit-post-section textarea {
+  width: 100%;
+  min-height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  color: #ffffff;
+  font-size: 14px;
+  resize: vertical;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.edit-post-section textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.post-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.post-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.edit-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.like-btn.liked {
+  background: rgba(102, 126, 234, 0.3);
+  border-color: #667eea;
+  color: #667eea;
+}
+
+/* Reply Section */
+.reply-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reply-section textarea {
+  width: 100%;
+  min-height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  color: #ffffff;
+  font-size: 14px;
+  resize: vertical;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.reply-section textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.reply-section textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Replies - Base styling */
+.replies {
+  margin-top: 16px;
+  padding-left: 20px;
+  border-left: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+.reply {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.reply:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Enhanced Nested Reply Styling with Infinite Depth Support */
+.reply[data-depth="0"] {
+  border-left: 3px solid rgba(102, 126, 234, 0.6);
+  margin-left: 0;
+}
+
+.reply[data-depth="1"] {
+  border-left: 3px solid rgba(118, 75, 162, 0.6);
+  margin-left: 15px;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 13px;
+}
+
+.reply[data-depth="2"] {
+  border-left: 3px solid rgba(139, 92, 246, 0.6);
+  margin-left: 15px;
+  background: rgba(255, 255, 255, 0.015);
+  font-size: 12px;
+}
+
+.reply[data-depth="3"] {
+  border-left: 3px solid rgba(168, 85, 247, 0.6);
+  margin-left: 15px;
+  background: rgba(255, 255, 255, 0.01);
+  font-size: 11px;
+}
+
+/* For depths 4 and above, use a cycling pattern */
+.reply[data-depth="4"], .reply[data-depth="8"], .reply[data-depth="12"] {
+  border-left: 3px solid rgba(59, 130, 246, 0.6);
+  margin-left: 10px;
+  background: rgba(255, 255, 255, 0.008);
+  font-size: 11px;
+}
+
+.reply[data-depth="5"], .reply[data-depth="9"], .reply[data-depth="13"] {
+  border-left: 3px solid rgba(16, 185, 129, 0.6);
+  margin-left: 10px;
+  background: rgba(255, 255, 255, 0.006);
+  font-size: 10px;
+}
+
+.reply[data-depth="6"], .reply[data-depth="10"], .reply[data-depth="14"] {
+  border-left: 3px solid rgba(245, 158, 11, 0.6);
+  margin-left: 10px;
+  background: rgba(255, 255, 255, 0.004);
+  font-size: 10px;
+}
+
+.reply[data-depth="7"], .reply[data-depth="11"], .reply[data-depth="15"] {
+  border-left: 3px solid rgba(239, 68, 68, 0.6);
+  margin-left: 10px;
+  background: rgba(255, 255, 255, 0.002);
+  font-size: 10px;
+}
+
+/* General styling for very deep replies (16+ levels) */
+.reply[data-depth]:not([data-depth="0"]):not([data-depth="1"]):not([data-depth="2"]):not([data-depth="3"]):not([data-depth="4"]):not([data-depth="5"]):not([data-depth="6"]):not([data-depth="7"]):not([data-depth="8"]):not([data-depth="9"]):not([data-depth="10"]):not([data-depth="11"]):not([data-depth="12"]):not([data-depth="13"]):not([data-depth="14"]):not([data-depth="15"]) {
+  border-left: 2px solid rgba(156, 163, 175, 0.4);
+  margin-left: 8px;
+  background: rgba(255, 255, 255, 0.001);
+  font-size: 9px;
+  padding: 8px;
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.reply-header strong {
+  color: #667eea;
+}
+
+.reply-header small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
+
+/* Reply Options (Edit/Delete buttons for replies) */
+.reply-options {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.reply-edit-btn,
+.reply-delete-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 0.3s ease;
+}
+
+.reply-edit-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.reply-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Edit Reply Section */
+.edit-reply-section {
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.edit-reply-section textarea {
+  width: 100%;
+  min-height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  resize: vertical;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.edit-reply-section textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* Nested Reply Button */
+.nested-reply-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.nested-reply-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #667eea;
+}
+
+/* Nested Reply Section */
+.nested-reply-section {
+  margin-top: 8px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nested-reply-section textarea {
+  width: 100%;
+  min-height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  resize: vertical;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.nested-reply-section textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.nested-reply-section textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Nested Replies Container */
+.nested-replies {
+  margin-top: 12px;
+}
+
+/* Character Count */
+small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
+/* Image Preview */
+#imagePreview {
+  animation: fadeIn 0.3s ease;
+}
+
+#imagePreview img {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+#imagePreview img:hover {
+  border-color: #667eea;
+}
+
+/* Confirmation Modal Styles */
+#confirmModal {
+  backdrop-filter: blur(5px);
+}
+
+#confirmModal > div {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+#confirmModal h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+#confirmModal p {
+  margin: 0 0 20px 0;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Image Modal Enhancement */
+#imageModal {
+  backdrop-filter: blur(8px);
+}
+
+/* Load More Button */
+#loadMoreBtn {
+  margin-top: 30px;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .forum-container {
+    padding: 16px;
+  }
+
+  .top-nav {
+    padding: 1rem 1.5rem;
+  }
+
+  .feature-title {
+    font-size: 1.2rem;
+  }
+
+  .forum-container h3 {
+    font-size: 1.5rem;
+  }
+
+  .create-post-section,
+  .forum-post {
+    padding: 16px;
+  }
+
+  .post-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .action-btn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .post-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .post-options {
+    align-self: flex-end;
+  }
+
+  .reply-header {
+    font-size: 12px;
+  }
+
+  /* Reduce nesting indentation on mobile */
+  .reply[data-depth="1"], .reply[data-depth="2"], .reply[data-depth="3"] {
+    margin-left: 8px;
+  }
+
+  .reply[data-depth="4"], .reply[data-depth="5"], .reply[data-depth="6"], .reply[data-depth="7"],
+  .reply[data-depth="8"], .reply[data-depth="9"], .reply[data-depth="10"], .reply[data-depth="11"],
+  .reply[data-depth="12"], .reply[data-depth="13"], .reply[data-depth="14"], .reply[data-depth="15"] {
+    margin-left: 4px;
+  }
+
+  .nested-replies {
+    padding-left: 8px;
+  }
+
+  .nested-reply-section {
+    padding-left: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-nav {
+    padding: 0.75rem 1rem;
+  }
+
+  .feature-title {
+    font-size: 1rem;
+  }
+
+  .create-post-section,
+  .forum-post {
+    padding: 12px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .btn-xs {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  /* Further reduce nesting on very small screens */
+  .reply[data-depth] {
+    margin-left: 2px !important;
+    font-size: 10px !important;
+  }
+}
+
+/* Empty State Styling */
+.forum-posts > div[style*="text-align: center"] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(10px);
+}
+
+.forum-posts > div[style*="text-align: center"] h4 {
+  color: #667eea !important;
+  margin-bottom: 16px;
+}
+
+.forum-posts > div[style*="text-align: center"] p {
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin-bottom: 8px;
+}
