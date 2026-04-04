@@ -90,3 +90,13 @@
 #                 'success': False,
 #                 'error': str(e)
 #             }
+
+class FirebaseAuth:
+    def __init__(self):
+        pass
+
+    def login(self, *args, **kwargs):
+        return None
+
+    def signup(self, *args, **kwargs):
+        return None
