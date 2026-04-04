@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: vidhikpath
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn vidhikpath.wsgi:application
+    runtime: python-3.11.9
