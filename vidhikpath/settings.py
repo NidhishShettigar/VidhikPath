@@ -88,11 +88,13 @@ FIREBASE_CONFIG = {
 
 # Initialize Firebase Admin SDK
 try:
+    import firebase_admin
+    from firebase_admin import credentials
+    
     cred = credentials.Certificate("firebase-service-account.json")
     firebase_admin.initialize_app(cred)
-    print("Firebase Admin SDK initialized successfully")
 except Exception as e:
-    print(f"Firebase Admin initialization error: {e}")
+    print("Firebase disabled:", e)
 
 # PyreBase4 Configuration for client-side operations (if needed)
 PYREBASE_CONFIG = {
