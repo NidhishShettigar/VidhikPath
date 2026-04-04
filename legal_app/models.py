@@ -8,7 +8,7 @@ from firebase_admin import auth
 
 # === User Model (MongoDB Collection) ===
 class User:
-    collection = db['users']
+    collection = None
 
     @staticmethod
     def create(firebase_uid, email, name, user_type="user", **kwargs):
