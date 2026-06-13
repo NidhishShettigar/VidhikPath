@@ -1,0 +1,11 @@
+# env files
+.env
+__pycache__/
+db.sqlite3
+venv
+.venv/
+logs/*.log
+staticfiles/
+
+firebase-service-account.json 
+.env 

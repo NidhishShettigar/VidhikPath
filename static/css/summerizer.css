@@ -1,0 +1,224 @@
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.profile-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.profile-icon {
+  font-size: 1.25rem;
+  color: var(--foreground);
+}
+
+.feature-content {
+  padding-top: 2rem;
+}
+
+.summarizer-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--secondary);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.language-selector label {
+  font-weight: 500;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.language-selector select {
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  min-width: 150px;
+}
+
+.upload-area {
+  border: 2px dashed var(--border);
+  border-radius: calc(var(--radius) * 1.5);
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--background);
+  transition: all var(--transition-fast);
+  margin-bottom: 2rem;
+}
+
+.upload-area:hover {
+  border-color: var(--ring);
+  background: var(--secondary);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.upload-area p {
+  margin: 0.5rem 0;
+  color: var(--muted-foreground);
+}
+
+.upload-area p strong {
+  color: var(--foreground);
+  font-size: 1.125rem;
+}
+
+.upload-buttons {
+  margin-top: 1.5rem;
+}
+
+.upload-buttons .btn {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.875rem 2rem;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.upload-buttons .btn:hover {
+  background: #e5e5e5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.summary-result {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 1.5);
+  padding: 2rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.summary-result h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-content {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--foreground);
+  line-height: 1.7;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.summary-result .btn {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin: 0 0.25rem;
+}
+
+.summary-result .btn:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .summarizer-container {
+    padding: 1.5rem;
+    margin: 0 1rem;
+  }
+
+  .language-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .language-selector select {
+    width: 100%;
+  }
+
+  .upload-area {
+    padding: 2rem 1rem;
+  }
+
+  .upload-icon {
+    font-size: 2.5rem;
+  }
+
+  .summary-result {
+    padding: 1.5rem;
+  }
+
+  .summary-result .btn {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+}

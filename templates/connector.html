@@ -1,0 +1,55 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Lawyers - VidhikPath</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/connector.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+</head>
+<body>
+    <!-- Added back arrow and restructured nav layout -->
+    <div class="top-nav">
+        <div class="nav-left">
+            <a href="{% url 'dashboard' %}" class="back-arrow">←</a>
+            <h2 class="feature-title">Find Lawyers</h2>
+        </div>
+        <a class="profile-btn" href="{% url 'profile' %}">
+            <div class="profile-avatar">
+                {% if user.userprofile.profile_photo %}
+                    <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+
+    <!-- Lawyer Connector Feature -->
+    <div class="feature-content" id="lawyerContent">
+        <div class="lawyer-connector-container">
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-inputs">
+                    <input type="text" id="locationInput" placeholder="Enter location...">
+                    <input type="text" id="typeInput" placeholder="Lawyer type (optional)...">
+                </div>
+                <div class="search-actions">
+                    <button class="btn btn-primary" onclick="searchLawyers()">Search</button>
+                    <button class="btn btn-secondary" onclick="useCurrentLocation()">Use Current Location</button>
+                </div>
+            </div>
+
+            <div class="lawyers-results" id="lawyersResults">
+                <!-- Lawyers will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/connector.js' %}?v=999"></script>
+</body>
+</html>

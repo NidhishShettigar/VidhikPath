@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}VidhikPath - Welcome{% endblock %}
+
+{% block extra_css %}
+<!-- Landing page styles -->
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<div class="landing-container">
+    <!-- Hammer animation shown initially -->
+    <div class="hammer-animation" id="hammerAnimation">
+        <div class="hammer">
+            <div class="hammer-head"></div>
+            <div class="hammer-handle"></div>
+        </div>
+        <div class="gavel-base"></div>
+    </div>
+    <!-- Content shown after animation -->
+    <div class="welcome-content" id="welcomeContent" style="display: none;">
+        <div class="logo-section">
+            <h1 class="app-title">VidhikPath</h1>
+            <p class="app-slogan">A Legal Support System For Common People</p>
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+            <a href="{% url 'register' %}" class="btn btn-secondary">Register</a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Switch from animation to welcome content after 3 seconds
+setTimeout(() => {
+    document.getElementById('hammerAnimation').style.display = 'none';
+    document.getElementById('welcomeContent').style.display = 'block';
+}, 3000);
+</script>
+{% endblock %}

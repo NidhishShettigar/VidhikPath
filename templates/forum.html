@@ -1,0 +1,284 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Forum - VidhikPath</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forum.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <!-- Add hidden element to store current user's Firebase UID -->
+    <div data-user-firebase-uid="{{ user.firebase_uid }}" style="display: none;"></div>
+
+    <div class="top-nav">
+        <div class="nav-left">
+            <a href="{% url 'dashboard' %}" class="back-arrow">←</a>
+            <h2 class="feature-title">Public Forum</h2>
+        </div>
+        <a class="profile-btn" href="{% url 'profile' %}">
+            <div class="profile-avatar">
+                {% if user.userprofile.profile_photo %}
+                    <img src="{{ user.userprofile.profile_photo.url }}" alt="Profile">
+                {% else %}
+                    <div class="avatar-placeholder">{{ user.first_name.0|upper }}</div>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+
+    <div class="feature-content" id="forumContent">
+        <div class="forum-container">
+            <!-- Create Post Section -->
+            <div class="create-post-section">
+                <textarea 
+                    id="postContent" 
+                    placeholder="Share your thoughts, legal questions, or experiences..."
+                    maxlength="5000"
+                    oninput="updateCharCount(this, 'charCount')"
+                ></textarea>
+                <div class="post-actions">
+                    <input type="file" id="postImage" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                    <button class="btn btn-secondary" onclick="document.getElementById('postImage').click()">
+                        Add Image
+                    </button>
+                    <button class="btn btn-primary" onclick="createPost()" id="createPostBtn">
+                        Post
+                    </button>
+                    <small style="color: #6B4C36; margin-left: auto;">
+                        <span id="charCount">0</span>/5000 characters
+                    </small>
+                </div>
+                <div id="imagePreview" style="margin-top: 10px; display: none;">
+                    <img id="previewImg" style="max-width: 200px; border-radius: 6px; border: 1px solid #E2C9A6;">
+                    <button onclick="removeImagePreview()" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer;">×</button>
+                </div>
+            </div>
+
+            <!-- Forum Posts -->
+            <div class="forum-posts" id="forumPosts">
+                {% for post in posts %}
+                <!-- Add data-firebase-uid to post element for ownership checking -->
+                <div class="forum-post" data-post-id="{{ post.id }}" data-firebase-uid="{{ post.firebase_uid }}">
+                    <div class="post-header">
+                        <div class="post-user">{{ post.user.name }}</div>
+                        <div class="post-time">{{ post.created_at|date:"M d, Y H:i" }}</div>
+                        {% if post.firebase_uid == user.firebase_uid %}
+                        <div class="post-options">
+                            <button class="action-btn edit-btn" onclick="editPost('{{ post.id }}')">Edit</button>
+                            <button class="action-btn delete-btn" onclick="confirmDeletePost('{{ post.id }}')">Delete</button>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="post-content" id="postContent{{ post.id }}">
+                        {% if post.content %}
+                        <p>{{ post.content|linebreaks }}</p>
+                        {% endif %}
+                        {% if post.image %}
+                        <img src="{{ post.image }}" alt="Post image" class="post-image" onclick="openImageModal('{{ post.image }}')">
+                        {% endif %}
+                    </div>
+
+                    <!-- Edit Post Section -->
+                    <div class="edit-post-section" id="editSection{{ post.id }}" style="display: none;">
+                        <textarea id="editText{{ post.id }}" maxlength="5000" oninput="updateCharCount(this, 'editCharCount{{ post.id }}')">{{ post.content }}</textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <small style="color: #6B4C36;">
+                                <span id="editCharCount{{ post.id }}">{{ post.content|length }}</span>/5000 characters
+                            </small>
+                            <div>
+                                <button class="btn btn-sm btn-secondary" onclick="cancelEditPost('{{ post.id }}')">Cancel</button>
+                                <button class="btn btn-sm btn-primary" onclick="saveEditPost('{{ post.id }}')">Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-actions">
+                        <!-- CRITICAL FIX: Added data-post-id attribute to the button itself -->
+                        <button class="action-btn like-btn {% if user.firebase_uid in post.likes %}liked{% endif %}" 
+                            onclick="likePost('{{ post.id }}')" 
+                            data-post-id="{{ post.id }}">
+                            👍 <span class="like-count">{{ post.likes|length }}</span>
+                        </button>
+                        <button class="action-btn reply-btn" onclick="toggleReply('{{ post.id }}')">
+                            💬 Reply
+                        </button>
+                        <button class="action-btn share-btn" onclick="sharePost('{{ post.id }}')">
+                            Share
+                        </button>
+                    </div>
+
+                    <div class="reply-section" id="replySection{{ post.id }}" style="display: none;">
+                        <textarea 
+                            placeholder="Write a respectful reply..." 
+                            id="replyText{{ post.id }}"
+                            maxlength="1000"
+                            oninput="updateCharCount(this, 'replyCharCount{{ post.id }}')"
+                        ></textarea>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                            <small style="color: #6B4C36;">
+                                <span id="replyCharCount{{ post.id }}">0</span>/1000 characters
+                            </small>
+                            <button class="btn btn-sm btn-primary" onclick="submitReply('{{ post.id }}')">
+                                Reply
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add data-firebase-uid to replies for ownership checking -->
+                    <div class="replies" id="replies{{ post.id }}">
+                        {% for reply in post.replies %}
+                        <div class="reply" data-reply-id="{{ reply.reply_id }}" data-firebase-uid="{{ reply.firebase_uid }}" style="border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
+                            <div class="reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <div>
+                                    <strong>{{ reply.user.name }}:</strong>
+                                    <small style="color: #999; margin-left: 10px;">{{ reply.created_at|date:"M d, H:i" }}</small>
+                                </div>
+                                {% if reply.firebase_uid == user.firebase_uid %}
+                                <div class="reply-options">
+                                    <button class="reply-edit-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-right: 5px;" onclick="editReply('{{ post.id }}', '{{ reply.reply_id }}', null)">Edit</button>
+                                    <button class="reply-delete-btn" style="background: none; border: none; color: #f44336; cursor: pointer; font-size: 12px;" onclick="confirmDeleteReply('{{ post.id }}', '{{ reply.reply_id }}', null)">Delete</button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="reply-content" id="replyContent{{ reply.reply_id }}" style="margin-bottom: 10px;">
+                                {{ reply.content|linebreaks }}
+                            </div>
+                            
+                            <!-- Edit Reply Section -->
+                            <div class="edit-reply-section" id="editReplySection{{ reply.reply_id }}" style="display: none;">
+                                <textarea id="editReplyText{{ reply.reply_id }}" maxlength="1000" style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;" oninput="updateCharCount(this, 'editReplyCharCount{{ reply.reply_id }}')">{{ reply.content }}</textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                    <small style="color: #6B4C36;">
+                                        <span id="editReplyCharCount{{ reply.reply_id }}">{{ reply.content|length }}</span>/1000 characters
+                                    </small>
+                                    <div>
+                                        <button class="btn btn-xs btn-secondary" onclick="cancelEditReply('{{ reply.reply_id }}')">Cancel</button>
+                                        <button class="btn btn-xs btn-primary" onclick="saveEditReply('{{ post.id }}', '{{ reply.reply_id }}', null)">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="nested-reply-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-top: 5px;" onclick="toggleNestedReply('{{ post.id }}', '{{ reply.reply_id }}')">↳ Reply</button>
+                            
+                            <!-- Nested Reply Input Section -->
+                            <div class="nested-reply-section" id="nestedReplySection{{ reply.reply_id }}" style="display: none; margin-top: 10px;">
+                                <textarea 
+                                    placeholder="Reply to {{ reply.user.name }}..." 
+                                    id="nestedReplyText{{ reply.reply_id }}"
+                                    maxlength="1000"
+                                    style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;"
+                                    oninput="updateCharCount(this, 'nestedReplyCharCount{{ reply.reply_id }}')"
+                                ></textarea>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                    <small style="color: #6B4C36;">
+                                        <span id="nestedReplyCharCount{{ reply.reply_id }}">0</span>/1000 characters
+                                    </small>
+                                    <button class="btn btn-xs btn-primary" onclick="submitNestedReply('{{ post.id }}', '{{ reply.reply_id }}', 1)">
+                                        Reply
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Nested Replies Container -->
+                            <div class="nested-replies" id="nestedReplies{{ reply.reply_id }}">
+                                {% for nested_reply in reply.nested_replies %}
+                                <div class="nested-reply" data-reply-id="{{ nested_reply.reply_id }}" data-firebase-uid="{{ nested_reply.firebase_uid }}" style="margin-left: 30px; border-left: 2px solid #E2C9A6; padding-left: 15px; margin-top: 10px;">
+                                    <div class="nested-reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <div>
+                                            <strong>{{ nested_reply.user.name }}:</strong>
+                                            <small style="color: #999; margin-left: 10px;">{{ nested_reply.created_at|date:"M d, H:i" }}</small>
+                                        </div>
+                                        {% if nested_reply.firebase_uid == user.firebase_uid %}
+                                        <div class="nested-reply-options">
+                                            <button class="nested-reply-edit-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-right: 5px;" onclick="editReply('{{ post.id }}', '{{ nested_reply.reply_id }}', '{{ reply.reply_id }}')">Edit</button>
+                                            <button class="nested-reply-delete-btn" style="background: none; border: none; color: #f44336; cursor: pointer; font-size: 12px;" onclick="confirmDeleteReply('{{ post.id }}', '{{ nested_reply.reply_id }}', '{{ reply.reply_id }}')">Delete</button>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="nested-reply-content" id="replyContent{{ nested_reply.reply_id }}" style="margin-bottom: 10px;">
+                                        {{ nested_reply.content|linebreaks }}
+                                    </div>
+                                    
+                                    <!-- Edit Nested Reply Section -->
+                                    <div class="edit-reply-section" id="editReplySection{{ nested_reply.reply_id }}" style="display: none;">
+                                        <textarea id="editReplyText{{ nested_reply.reply_id }}" maxlength="1000" style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;" oninput="updateCharCount(this, 'editReplyCharCount{{ nested_reply.reply_id }}')">{{ nested_reply.content }}</textarea>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                            <small style="color: #6B4C36;">
+                                                <span id="editReplyCharCount{{ nested_reply.reply_id }}">{{ nested_reply.content|length }}</span>/1000 characters
+                                            </small>
+                                            <div>
+                                                <button class="btn btn-xs btn-secondary" onclick="cancelEditReply('{{ nested_reply.reply_id }}')">Cancel</button>
+                                                <button class="btn btn-xs btn-primary" onclick="saveEditReply('{{ post.id }}', '{{ nested_reply.reply_id }}', '{{ reply.reply_id }}')">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Allow infinite nesting -->
+                                    <button class="nested-reply-btn" style="background: none; border: none; color: #B96902; cursor: pointer; font-size: 12px; margin-top: 5px;" onclick="toggleNestedReply('{{ post.id }}', '{{ nested_reply.reply_id }}')">↳ Reply</button>
+                                    
+                                    <div class="nested-reply-section" id="nestedReplySection{{ nested_reply.reply_id }}" style="display: none; margin-top: 10px;">
+                                        <textarea 
+                                            placeholder="Reply to {{ nested_reply.user.name }}..." 
+                                            id="nestedReplyText{{ nested_reply.reply_id }}"
+                                            maxlength="1000"
+                                            style="width: 100%; padding: 8px; border: 1px solid #E2C9A6; border-radius: 4px;"
+                                            oninput="updateCharCount(this, 'nestedReplyCharCount{{ nested_reply.reply_id }}')"
+                                        ></textarea>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                                            <small style="color: #6B4C36;">
+                                                <span id="nestedReplyCharCount{{ nested_reply.reply_id }}">0</span>/1000 characters
+                                            </small>
+                                            <button class="btn btn-xs btn-primary" onclick="submitNestedReply('{{ post.id }}', '{{ nested_reply.reply_id }}', 2)">
+                                                Reply
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="nested-replies" id="nestedReplies{{ nested_reply.reply_id }}"></div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align: center; padding: 40px; color: #6B4C36; font-style: italic; background: #FAF6F1; border: 1px dashed #E2C9A6; border-radius: 6px;">
+                    <h4 style="color: #B96902;">Welcome to the VidhikPath Forum!</h4>
+                    <p>This is a space for legal discussions, questions, and knowledge sharing.</p>
+                    <p>Be the first to start a conversation!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); cursor: pointer;" onclick="closeImageModal()">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%;">
+            <img id="modalImage" style="width: 100%; height: auto; border-radius: 8px;">
+            <div style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px;" onclick="closeImageModal()">×</div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" style="display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%;">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <p id="confirmMessage">Are you sure you want to perform this action?</p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn btn-primary" id="confirmAction" onclick="confirmDelete()">Confirm</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{% static 'js/forum.js' %}"></script>
+
+</body>
+</html>
