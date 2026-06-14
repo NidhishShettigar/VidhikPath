@@ -113,17 +113,52 @@ FIREBASE_CONFIG = {
     "measurementId": config("FIREBASE_MEASUREMENT_ID", default=""),
 }
 
-# Firebase Admin init from file path env (if available).
+# Firebase Admin init.
+#
+# Two supported ways to provide credentials on a server like Render where
+# you can't commit firebase-service-account.json (it's gitignored, since
+# it's a secret):
+#
+#   1. FIREBASE_CREDENTIALS_JSON - the *entire contents* of the service
+#      account JSON file, pasted as the value of a single env var.
+#   2. FIREBASE_CREDENTIALS_PATH - a filesystem path to the JSON file
+#      (e.g. Render "Secret Files" are mounted under /etc/secrets/...).
+#      Defaults to BASE_DIR / "firebase-service-account.json" for local dev.
+import json as _json
+import logging as _logging
+
+_firebase_logger = _logging.getLogger("legal_app")
+firebase_credentials_json = config("FIREBASE_CREDENTIALS_JSON", default="")
 firebase_credentials_path = config(
     "FIREBASE_CREDENTIALS_PATH", default=str(BASE_DIR / "firebase-service-account.json")
 )
-if not firebase_admin._apps and os.path.exists(firebase_credentials_path):
+
+if not firebase_admin._apps:
+    cred = None
+    cred_source = None
     try:
-        cred = credentials.Certificate(firebase_credentials_path)
-        firebase_admin.initialize_app(cred)
-    except Exception:
-        # Keep app bootable even when Firebase credentials are absent/misconfigured.
-        pass
+        if firebase_credentials_json:
+            cred = credentials.Certificate(_json.loads(firebase_credentials_json))
+            cred_source = "FIREBASE_CREDENTIALS_JSON"
+        elif os.path.exists(firebase_credentials_path):
+            cred = credentials.Certificate(firebase_credentials_path)
+            cred_source = f"file:{firebase_credentials_path}"
+    except Exception as exc:
+        _firebase_logger.warning("Failed to load Firebase credentials (%s): %s", cred_source, exc)
+        cred = None
+
+    if cred is not None:
+        try:
+            firebase_admin.initialize_app(cred)
+            _firebase_logger.info("Firebase Admin SDK initialized from %s", cred_source)
+        except Exception as exc:
+            _firebase_logger.warning("Firebase Admin SDK initialize_app failed: %s", exc)
+    else:
+        _firebase_logger.warning(
+            "Firebase Admin SDK NOT initialized: no FIREBASE_CREDENTIALS_JSON env var "
+            "and no credentials file found at %s. Firebase token verification will fail.",
+            firebase_credentials_path,
+        )
 
 PYREBASE_CONFIG = {
     "apiKey": FIREBASE_CONFIG["apiKey"],

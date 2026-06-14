@@ -31,6 +31,7 @@ def firebase_verify_token(request):
             token_result = FirebaseTokenManager.verify_token(id_token)
             
             if not token_result['success']:
+                print(f"Firebase token verification failed: {token_result.get('error')}")
                 return JsonResponse({'success': False, 'error': 'Invalid token'})
             
             firebase_uid = token_result['firebase_uid']
@@ -105,4 +106,3 @@ def firebase_password_reset(request):
             return JsonResponse({'success': False, 'error': str(e)})
     
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
