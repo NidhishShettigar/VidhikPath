@@ -161,7 +161,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 USE_STATIC_FALLBACK_STORAGE = config(
     "USE_STATIC_FALLBACK_STORAGE", default=False, cast=bool
 )
-STATICFILES_BACKEND = "whitenoise.storage.CompressedStaticFilesStorage"
+STATICFILES_BACKEND = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
