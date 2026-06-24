@@ -19,7 +19,18 @@ function toggleLawyerFields() {
     lawyerFields.style.display = isLawyer ? 'block' : 'none';
 }
 
-function firebaseRegister() {
+function clearMessages() {
+    const errorDiv = document.getElementById('errorMessage');
+    const successDiv = document.getElementById('successMessage');
+    errorDiv.textContent = '';
+    successDiv.textContent = '';
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
+}
+
+async function firebaseRegister() {
+    clearMessages();
+
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -46,11 +57,22 @@ function firebaseRegister() {
         userData.languages_spoken = languages ? languages.split(',').map(l => l.trim()) : [];
     }
 
-    auth.createUserWithEmailAndPassword(email, password)
-        .then(userCredential => userCredential.user.updateProfile({ displayName: name }))
-        .then(() => auth.currentUser.sendEmailVerification())
-        .then(() => auth.currentUser.getIdToken())
-        .then(idToken => fetch('/api/firebase/verify-token/', {
+    try {
+        console.log('signUp: starting with email', email);
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        console.log('signUp: succeeded', userCredential.user.uid);
+
+        console.log('lookup: current user', auth.currentUser ? auth.currentUser.email : 'none');
+        await userCredential.user.updateProfile({ displayName: name });
+        console.log('updateProfile: success');
+
+        await auth.currentUser.sendEmailVerification();
+        console.log('sendEmailVerification: success');
+
+        const idToken = await auth.currentUser.getIdToken();
+        console.log('verify-token: sending token to backend');
+
+        const response = await fetch('/api/firebase/verify-token/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,17 +83,30 @@ function firebaseRegister() {
                 userData,
                 refreshToken: auth.currentUser.refreshToken
             })
-        }))
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                showSuccess('Account created! Please verify email, then login.');
-                setTimeout(() => window.location.href = '/login/', 3000);
-            } else {
-                showError('Registration failed: ' + data.error);
-            }
-        })
-        .catch(err => showError('Registration failed: ' + err.message));
+        });
+
+        const data = await response.json();
+        console.log('verify-token: response', response.status, data);
+
+        if (!response.ok) {
+            return showError('Registration failed: ' + (data.error || response.statusText));
+        }
+
+        if (!data.success) {
+            return showError('Registration failed: ' + (data.error || 'Unable to verify token'));
+        }
+
+        showSuccess('Account created! Please verify email, then login.');
+        const redirectUrl = data.redirect || '/login/';
+        console.log('redirect: to', redirectUrl);
+        setTimeout(() => window.location.href = redirectUrl, 3000);
+    } catch (err) {
+        console.log('firebaseRegister: error', err);
+        if (err.code === 'auth/email-already-in-use' || (err.message && err.message.includes('EMAIL_EXISTS'))) {
+            return showError('An account with this email already exists.');
+        }
+        showError('Registration failed: ' + (err.message || 'Unexpected error'));
+    }
 }
 
 function showError(message) {
