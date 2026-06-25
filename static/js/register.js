@@ -57,19 +57,33 @@ async function firebaseRegister() {
         userData.languages_spoken = languages ? languages.split(',').map(l => l.trim()) : [];
     }
 
+    const registerButton = document.getElementById('registerButton');
+    if (registerButton) {
+        registerButton.disabled = true;
+        registerButton.textContent = 'Registering...';
+    }
+
     try {
         console.log('signUp: starting with email', email);
         const userCredential = await auth.createUserWithEmailAndPassword(email, password);
         console.log('signUp: succeeded', userCredential.user.uid);
 
-        console.log('lookup: current user', auth.currentUser ? auth.currentUser.email : 'none');
+        if (!auth.currentUser) {
+            console.log('lookup: auth.currentUser missing after sign-up');
+            return showError('Registration failed: Unable to access authenticated user.');
+        }
+
+        console.log('lookup: current user', auth.currentUser.email);
         await userCredential.user.updateProfile({ displayName: name });
         console.log('updateProfile: success');
 
         await auth.currentUser.sendEmailVerification();
         console.log('sendEmailVerification: success');
 
-        const idToken = await auth.currentUser.getIdToken();
+        await auth.currentUser.reload();
+        console.log('lookup: reloaded current user', auth.currentUser.email);
+
+        const idToken = await auth.currentUser.getIdToken(true);
         console.log('verify-token: sending token to backend');
 
         const response = await fetch('/api/firebase/verify-token/', {
@@ -85,27 +99,39 @@ async function firebaseRegister() {
             })
         });
 
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonErr) {
+            console.log('verify-token: invalid JSON response', jsonErr);
+            return showError('Registration failed: Unable to parse verification response.');
+        }
+
         console.log('verify-token: response', response.status, data);
 
         if (!response.ok) {
             return showError('Registration failed: ' + (data.error || response.statusText));
         }
 
-        if (!data.success) {
-            return showError('Registration failed: ' + (data.error || 'Unable to verify token'));
+        if (data.success !== true) {
+            return showError('Registration failed: ' + (data.error || 'Unable to verify token')); 
         }
 
         showSuccess('Account created! Please verify email, then login.');
         const redirectUrl = data.redirect || '/login/';
         console.log('redirect: to', redirectUrl);
-        setTimeout(() => window.location.href = redirectUrl, 3000);
+        setTimeout(() => window.location.href = redirectUrl, 2000);
     } catch (err) {
         console.log('firebaseRegister: error', err);
         if (err.code === 'auth/email-already-in-use' || (err.message && err.message.includes('EMAIL_EXISTS'))) {
             return showError('An account with this email already exists.');
         }
         showError('Registration failed: ' + (err.message || 'Unexpected error'));
+    } finally {
+        if (registerButton) {
+            registerButton.disabled = false;
+            registerButton.textContent = 'Create Account';
+        }
     }
 }
 
