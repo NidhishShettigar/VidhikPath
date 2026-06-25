@@ -7,6 +7,9 @@ import logging
 import os
 from ..firebase_utils import FirebaseAuth
 from ..models import UserSession, FirebaseTokenManager
+import firebase_admin
+import traceback
+from django.conf import settings
 from openai import OpenAI
 from ..models import User
 
@@ -36,14 +39,37 @@ def firebase_login_required(view_func):
         
         # Verify token and get Firebase info
         result = FirebaseTokenManager.verify_token(firebase_token)
-        
-        if not result['success']:
+
+        if not result.get('success'):
             # Clear invalid session
             request.session.pop('firebase_token', None)
             request.session.pop('firebase_uid', None)
-            
+
+            # Log token info and firebase admin status
+            try:
+                token_len = len(firebase_token) if firebase_token else 0
+            except Exception:
+                token_len = None
+            masked = (firebase_token[:30] + '...') if token_len and token_len > 30 else firebase_token
+            print(f"[firebase_login_required] token_len={token_len} masked_start={masked}")
+            try:
+                apps = list(firebase_admin._apps.keys()) if hasattr(firebase_admin, '_apps') else []
+            except Exception:
+                apps = []
+            print(f"[firebase_login_required] firebase_admin apps={apps} configured_project={settings.FIREBASE_CONFIG.get('projectId')}")
+            err = result.get('error')
+            tb = result.get('traceback')
+            print(f"[firebase_login_required] verification error: {err}")
+            if tb:
+                print(tb)
+
             if _is_ajax(request) or 'api' in request.path:
-                return JsonResponse({'error': 'Invalid token', 'redirect': '/login/'}, status=401)
+                resp = {'error': err or 'Invalid token', 'redirect': '/login/'}
+                if tb:
+                    resp['traceback'] = tb
+                if err:
+                    resp['exception_type'] = type(err).__name__
+                return JsonResponse(resp, status=401)
             return redirect('login')
         
         # Attach Firebase UID

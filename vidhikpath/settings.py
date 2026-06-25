@@ -151,6 +151,25 @@ if not firebase_admin._apps:
         try:
             firebase_admin.initialize_app(cred)
             _firebase_logger.info("Firebase Admin SDK initialized from %s", cred_source)
+            # Attempt to log project_id and client_email from provided credentials for debugging
+            try:
+                if firebase_credentials_json:
+                    cred_json = _json.loads(firebase_credentials_json)
+                elif os.path.exists(firebase_credentials_path):
+                    with open(firebase_credentials_path, 'r', encoding='utf-8') as _f:
+                        cred_json = _json.load(_f)
+                else:
+                    cred_json = None
+
+                if cred_json:
+                    proj = cred_json.get('project_id')
+                    client = cred_json.get('client_email')
+                    masked_client = None
+                    if client:
+                        masked_client = client.split('@')[0] + '@' + client.split('@')[1] if '@' in client else client
+                    _firebase_logger.info('Firebase credentials project_id=%s client_email=%s', proj, masked_client)
+            except Exception as _exc:
+                _firebase_logger.warning('Unable to parse Firebase credentials for debug: %s', _exc)
         except Exception as exc:
             _firebase_logger.warning("Firebase Admin SDK initialize_app failed: %s", exc)
     else:

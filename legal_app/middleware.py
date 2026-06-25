@@ -2,6 +2,9 @@
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from .models import FirebaseTokenManager, User
+import firebase_admin
+import traceback
+from django.conf import settings
 import json
 
 
@@ -57,17 +60,40 @@ class FirebaseAuthenticationMiddleware:
             
             # Verify token and get user
             result = FirebaseTokenManager.verify_token(firebase_token)
-            
-            if not result['success']:
+
+            if not result.get('success'):
                 # Clear invalid session
                 request.session.pop('firebase_token', None)
                 request.session.pop('firebase_uid', None)
-                
+
+                # Log token info and firebase admin status
+                try:
+                    token_len = len(firebase_token) if firebase_token else 0
+                except Exception:
+                    token_len = None
+                masked = (firebase_token[:30] + '...') if token_len and token_len > 30 else firebase_token
+                print(f"[FirebaseAuthenticationMiddleware] token_len={token_len} masked_start={masked}")
+                try:
+                    apps = list(firebase_admin._apps.keys()) if hasattr(firebase_admin, '_apps') else []
+                except Exception:
+                    apps = []
+                print(f"[FirebaseAuthenticationMiddleware] firebase_admin apps={apps} configured_project={settings.FIREBASE_CONFIG.get('projectId')}")
+                err = result.get('error')
+                tb = result.get('traceback')
+                print(f"[FirebaseAuthenticationMiddleware] verification error: {err}")
+                if tb:
+                    print(tb)
+
                 if request.path.startswith('/api/'):
-                    return JsonResponse({
-                        'error': 'Invalid or expired token',
+                    resp = {
+                        'error': err or 'Invalid or expired token',
                         'redirect': '/login/'
-                    }, status=401)
+                    }
+                    if tb:
+                        resp['traceback'] = tb
+                    if err:
+                        resp['exception_type'] = type(err).__name__
+                    return JsonResponse(resp, status=401)
                 return HttpResponseRedirect(reverse('login'))
             
             # Add user data to request

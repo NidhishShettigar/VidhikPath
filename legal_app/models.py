@@ -4,6 +4,7 @@ from datetime import datetime
 from bson import ObjectId
 import firebase_admin
 from firebase_admin import auth
+import traceback
 
 
 # === User Model (MongoDB Collection) ===
@@ -590,7 +591,21 @@ class FirebaseTokenManager:
     def verify_token(id_token):
         """Verify Firebase ID token and return user data"""
         try:
+            # Minimal token logging: length and masked snippet (do not log full token)
+            if id_token is None:
+                print('[FirebaseTokenManager] verify_token: no token provided')
+            else:
+                try:
+                    token_len = len(id_token)
+                except Exception:
+                    token_len = None
+                masked = None
+                if token_len:
+                    masked = (id_token[:10] + '...' + id_token[-10:]) if token_len > 30 else id_token
+                print(f"[FirebaseTokenManager] verify_token: token_len={token_len} masked={masked}")
+
             decoded_token = auth.verify_id_token(id_token)
+            print(f"[FirebaseTokenManager] verify_token: decoded uid={decoded_token.get('uid')}, email={decoded_token.get('email')}")
             return {
                 'success': True,
                 'firebase_uid': decoded_token['uid'],
@@ -600,7 +615,12 @@ class FirebaseTokenManager:
                 'picture': decoded_token.get('picture', '')
             }
         except Exception as e:
+            tb = traceback.format_exc()
+            print(f"[FirebaseTokenManager] verify_token: exception: {str(e)}")
+            print(tb)
             return {
                 'success': False,
-                'error': str(e)
+                'error': str(e),
+                'exception_type': type(e).__name__,
+                'traceback': tb
             }
