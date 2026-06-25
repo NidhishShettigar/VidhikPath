@@ -1,9 +1,9 @@
 // Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyDFXCASnsC1Yi_bpwDuwhkicYNNzhR-v9s",
-    authDomain: "vidhikpath-e9e56.firebaseapp.com",
-    projectId: "vidhikpath-e9e56",
-    storageBucket: "vidhikpath-e9e56.firebasestorage.app",
+    authDomain: "vidhikpath-c22cb.firebaseapp.com",
+    projectId: "vidhikpath-c22cb",
+    storageBucket: "vidhikpath-c22cb.firebasestorage.app",
     messagingSenderId: "1028848699647",
     appId: "1:1028848699647:web:f3e9567bd975a03b4064ca",
     measurementId: "G-H129B0J3HP"
