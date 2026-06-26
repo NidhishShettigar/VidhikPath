@@ -2,7 +2,7 @@ services:
   - type: web
     name: vidhikpath
     env: python
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    buildCommand: rm -rf staticfiles && pip install -r requirements.txt && python manage.py collectstatic --noinput --clear
     startCommand: gunicorn vidhikpath.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
     envVars:
       - key: PYTHON_VERSION
