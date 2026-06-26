@@ -138,6 +138,21 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 
     <!-- External JS -->
-    <script src="{% static 'js/register.js' %}"></script>
+        <!-- Rendered FIREBASE_CONFIG for debugging (masked apiKey) -->
+        {{ FIREBASE_CONFIG|json_script:"firebase-config" }}
+        <script>
+            (function(){
+                try {
+                    const cfg = JSON.parse(document.getElementById('firebase-config').textContent || '{}');
+                    const mask = (k)=> k ? (k.slice(0,6)+"..."+(k.slice(-4) || '')) : '(missing)';
+                    console.log('[FRONTEND FIREBASE CONFIG] apiKey:', mask(cfg.apiKey));
+                    console.log('[FRONTEND FIREBASE CONFIG] authDomain:', cfg.authDomain || '(missing)');
+                    console.log('[FRONTEND FIREBASE CONFIG] projectId:', cfg.projectId || '(missing)');
+                    console.log('[FRONTEND FIREBASE CONFIG] storageBucket:', cfg.storageBucket || '(missing)');
+                    console.log('[FRONTEND FIREBASE CONFIG] appId:', cfg.appId || '(missing)');
+                } catch (e) { console.log('Failed to parse firebase config in template debug:', e); }
+            })();
+        </script>
+        <script src="{% static 'js/register.js' %}"></script>
 </body>
 </html>

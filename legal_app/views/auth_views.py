@@ -11,12 +11,14 @@ from django.conf import settings
 def login_page(request):
     if request.session.get('firebase_uid'):
         return redirect('dashboard')
-    return render(request, 'login.html')
+    # Pass current FIREBASE_CONFIG to template for debugging frontend config
+    return render(request, 'login.html', {"FIREBASE_CONFIG": settings.FIREBASE_CONFIG})
 
 def register_page(request):
     if request.session.get('firebase_token'):
         return redirect('login')
-    return render(request, 'register.html')
+    # Pass current FIREBASE_CONFIG to template for debugging frontend config
+    return render(request, 'register.html', {"FIREBASE_CONFIG": settings.FIREBASE_CONFIG})
 
 @csrf_exempt
 def firebase_verify_token(request):
