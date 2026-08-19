@@ -39,6 +39,7 @@ if (window.firebase && Array.isArray(firebase.apps) && firebase.apps.length) {
 
 // Init Firebase
 firebase.initializeApp(firebaseConfig);
+console.log("Firebase project:", firebase.app().options.projectId);
 
 // Log app options after initialization
 try { console.log('Firebase App Options:', firebase.app().options); } catch(e) { console.warn('firebase.app().options error', e); }
@@ -144,10 +145,11 @@ async function firebaseRegister() {
                     return JSON.parse(json);
                 } catch(e){ console.warn('decodeJwt failed', e); return null; }
             };
-            const decoded = decodeJwt(idToken);
-            console.log('Decoded ID token payload (registration):', decoded || '(failed to decode)');
-            if (decoded) {
-                console.log('ID token aud:', decoded.aud, 'iss:', decoded.iss, 'sub:', decoded.sub);
+            const payload = decodeJwt(idToken);
+            console.log('Decoded ID token payload (registration):', payload || '(failed to decode)');
+            if (payload) {
+                console.log("Token audience:", payload.aud);
+                console.log('ID token aud:', payload.aud, 'iss:', payload.iss, 'sub:', payload.sub);
             }
         } catch(e){ console.warn('token decode failed', e); }
 

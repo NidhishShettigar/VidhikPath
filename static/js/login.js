@@ -39,6 +39,7 @@ if (window.firebase && Array.isArray(firebase.apps) && firebase.apps.length) {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+console.log("Firebase project:", firebase.app().options.projectId);
 
 // Log app options after initialization
 try { console.log('Firebase App Options:', firebase.app().options); } catch(e) { console.warn('firebase.app().options error', e); }
@@ -74,7 +75,7 @@ function firebaseLogin() {
         .then((idToken) => {
             try {
                 // Decode token without verifying to inspect claims
-                const decoded = (function decodeJwt(t){
+                const payload = (function decodeJwt(t){
                     try {
                         const parts = t.split('.');
                         if (parts.length < 2) return null;
@@ -86,9 +87,10 @@ function firebaseLogin() {
                     } catch(e){ console.warn('decodeJwt failed', e); return null; }
                 })(idToken);
 
-                console.log('Decoded ID token payload:', decoded || '(failed to decode)');
-                if (decoded) {
-                    console.log('ID token aud:', decoded.aud, 'iss:', decoded.iss, 'sub:', decoded.sub);
+                console.log('Decoded ID token payload:', payload || '(failed to decode)');
+                if (payload) {
+                    console.log("Token audience:", payload.aud);
+                    console.log('ID token aud:', payload.aud, 'iss:', payload.iss, 'sub:', payload.sub);
                 }
             } catch(e){ console.warn('token decode/log failed', e); }
 

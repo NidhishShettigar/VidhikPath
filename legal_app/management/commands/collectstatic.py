@@ -15,8 +15,10 @@ from django.contrib.staticfiles.management.commands.collectstatic import (
 class Command(DjangoCollectstaticCommand):
     """Project collectstatic override to force a clean static root on each build."""
 
-    @staticmethod
-    def _handle_remove_readonly(func, path, exc_info):
+    def _handle_remove_readonly(self, func, path, exc_info):
+        import os
+        import stat
+
         del exc_info
         os.chmod(path, stat.S_IWRITE)
         func(path)
@@ -26,7 +28,7 @@ class Command(DjangoCollectstaticCommand):
         manifest_file = static_root / "staticfiles.json"
 
         if static_root.exists():
-            shutil.rmtree(static_root, onexc=self._handle_remove_readonly)
+            shutil.rmtree(static_root, onerror=self._handle_remove_readonly)
             self.stdout.write(
                 self.style.WARNING(f"Removed existing STATIC_ROOT: {static_root}")
             )

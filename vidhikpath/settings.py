@@ -104,13 +104,13 @@ MONGO_DB_NAME = config("MONGO_DB_NAME", default="vidhikpath")
 
 # Firebase (client-side config)
 FIREBASE_CONFIG = {
-    "apiKey": config("FIREBASE_API_KEY", default=""),
-    "authDomain": config("FIREBASE_AUTH_DOMAIN", default=""),
-    "projectId": config("FIREBASE_PROJECT_ID", default=""),
-    "storageBucket": config("FIREBASE_STORAGE_BUCKET", default=""),
-    "messagingSenderId": config("FIREBASE_MESSAGING_SENDER_ID", default=""),
-    "appId": config("FIREBASE_APP_ID", default=""),
-    "measurementId": config("FIREBASE_MEASUREMENT_ID", default=""),
+    "apiKey": "AIzaSyDFXCASnsC1Yi_bpwDuwhkicYNNzhR-v9s",
+    "authDomain": "vidhikpath-c22cb.firebaseapp.com",
+    "projectId": "vidhikpath-c22cb",
+    "storageBucket": "vidhikpath-c22cb.firebasestorage.app",
+    "messagingSenderId": "1028848699647",
+    "appId": "1:1028848699647:web:f3e9567bd975a03b4064ca",
+    "measurementId": "G-H129B0J3HP",
 }
 
 # Firebase Admin init.
